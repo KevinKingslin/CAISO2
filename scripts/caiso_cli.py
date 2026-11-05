@@ -34,6 +34,10 @@ def parser():
             command.add_argument("--unoptimized", action="store_true", help="Evaluate the initial factory system")
             command.add_argument("--repeats", type=positive_int, help="Override the evaluation profile's repetition count")
             command.add_argument("--split", choices=("test", "val"), help="Default: the evaluation profile's split")
+            command.add_argument(
+                "--workers", type=positive_int,
+                help="Parallel evaluation examples; default: the evaluation profile's max_eval_workers",
+            )
         else:
             command.add_argument("--resume", "--checkpoint", type=Path, help="CAISO checkpoint directory")
             command.add_argument("--no-test", action="store_true", help="Skip post-optimization test evaluation")
@@ -98,6 +102,8 @@ def resolve(args):
             config["num_repeat"] = args.repeats
         if args.split is not None:
             config["split"] = args.split
+        if args.workers is not None:
+            config["max_eval_workers"] = args.workers
     return path, config, run
 
 

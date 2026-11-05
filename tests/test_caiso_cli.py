@@ -66,10 +66,11 @@ def test_evaluation_dispatch_loads_run_and_separates_outputs(monkeypatch, tmp_pa
     checkpoint.touch()
     calls = []
     monkeypatch.setattr(eval_system, "main", lambda argv, **kw: calls.append((argv, kw)) or {"mean": 0.5, "std": 0.0})
-    caiso_cli.main(["evaluate", str(tmp_path), "--repeats", "1"])
+    caiso_cli.main(["evaluate", str(tmp_path), "--repeats", "1", "--workers", "10"])
     argv, options = calls[-1]
     assert argv[argv.index("--system_state_dict_path") + 1] == str(checkpoint)
     assert argv[argv.index("--num_repeat") + 1] == "1"
+    assert argv[argv.index("--max_eval_workers") + 1] == "10"
     assert options["output_dir"] == tmp_path / ".internal/evaluation/optimized/test"
     caiso_cli.main(["evaluate", str(tmp_path), "--unoptimized"])
     argv, options = calls[-1]

@@ -58,7 +58,6 @@ class BaseComponent:
         self.input_fields = input_fields or []
         self.output_fields = output_fields or []
         self.variable_search_space = variable_search_space
-        self.traj = {}
 
         self.default_config = SimpleNamespace(**(config or {}))
         self.default_config = SimpleNamespace(
@@ -79,6 +78,7 @@ class BaseComponent:
             self._default_variable = variable
 
         self._thread_local = threading.local()
+        self.traj = {}
         self._lock = threading.Lock()
         self._validation_local = threading.local()
 
@@ -88,6 +88,17 @@ class BaseComponent:
     def forward(self, **inputs: Any) -> Dict[str, Any]:
         """Override this method to implement component-specific logic."""
         raise NotImplementedError("Subclasses must implement the forward() method.")
+
+    @property
+    def traj(self) -> Dict[str, Any]:
+        """Keep call results on the calling thread until its system collects them."""
+        if not hasattr(self._thread_local, "traj"):
+            self._thread_local.traj = {}
+        return self._thread_local.traj
+
+    @traj.setter
+    def traj(self, value: Dict[str, Any]) -> None:
+        self._thread_local.traj = value
 
     @property
     def optimizable(self) -> bool:

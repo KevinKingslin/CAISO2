@@ -53,6 +53,8 @@ rendering regression tests.
 9. `caiso/arch/base.py`: propagates explicit policy skips, exhausted transport
    retries and non-retryable service failures immediately instead of resampling
    them in the generic component retry loop. Ordinary response retries stay intact.
+   Keeps component trajectories on the calling thread so concurrent evaluation
+   cannot read another example's outputs when constructing its prediction.
 10. `caiso/eval.py`: calls the same per-example `system.evaluate` and task scorer,
     preserves successful scores, keeps predictions in input order, counts policy
     skips as zero, records coverage, and propagates other failures. It replaces the

@@ -107,6 +107,30 @@ Validation reports use `validation_unoptimized.json`/`validation.json` to keep t
 results separate. The launcher starts neither vLLM
 nor ColBERT: the same external services must already be available.
 
+Increase parallel examples for any of the three datasets or an optimized run with
+`--workers` (the current experiment profiles default to four):
+
+```sh
+./scripts/caiso evaluate amazon --unoptimized --workers 10
+./scripts/caiso evaluate hotpotqa --unoptimized --workers 10
+./scripts/caiso evaluate pubmedqa --unoptimized --workers 10
+./scripts/caiso evaluate results/amazon-run --workers 10
+```
+
+To persist that choice, set `evaluation.max_eval_workers` in the experiment YAML.
+Workers overlap independent examples; each example still runs its original
+components in order. The Azure transport independently caps each deployment at
+four concurrent requests and 60 requests/minute by default, so more workers alone
+cannot exceed those caps. Set `concurrency` and `requests_per_minute` in
+`configs/providers.yaml` to fit the deployment's actual RPM and TPM quota; its
+request pacing does not enforce a separate TPM limit. Amazon's local stages also
+depend on vLLM throughput. Component trajectories are isolated per worker to keep
+concurrent examples from overwriting each other's predictions.
+
+For a shorter preliminary check, add `--repeats 1`; the default three repeats
+remain useful for measuring variation. This reduces evaluation work rather than
+speeding up each repeat.
+
 ```sh
 python -m scripts.eval_system scripts/configs/eval/hotpotqa_vanilla.yaml
 python -m scripts.eval_system scripts/configs/eval/pubmed_vanilla.yaml
