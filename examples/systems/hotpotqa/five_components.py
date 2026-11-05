@@ -38,7 +38,9 @@ class WikipediaRetriever(BaseComponent):
             variable={"k": k},
             variable_search_space=variable_search_space
         )
-        colbertv2_wiki17_abstracts = dspy.ColBERTv2(url='http://20.102.90.50:2017/wiki17_abstracts')
+        load_dotenv('.env')
+        colbert_url = os.getenv('COLBERT_URL') or os.getenv('colbert_url') or 'http://20.102.90.50:2017/wiki17_abstracts'
+        colbertv2_wiki17_abstracts = dspy.ColBERTv2(url=colbert_url)
         dspy.settings.configure(rm=colbertv2_wiki17_abstracts)
 
     def forward(self, **inputs):

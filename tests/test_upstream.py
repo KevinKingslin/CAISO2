@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_all_imported_benchmark_files_match_release():
     checked, commit = verify(ROOT)
-    assert checked == 112
+    assert checked == 111
     assert commit == "71871a2dd98081231d733debd41178ba47e13528"
 
 

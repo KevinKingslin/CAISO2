@@ -46,7 +46,10 @@ Keep `.env` private; only the placeholder template is tracked.
 
 Amazon still requires the original Qwen model,
 initialized LoRA adapters, and an external vLLM server. HotpotQA retains the
-original ColBERT endpoint. BigCodeBench requires its package/execution environment;
+original ColBERT endpoint by default. Set `COLBERT_URL` in `.env` to your full
+ColBERT search URL (including the route, e.g. `/wiki17_abstracts`). The lowercase
+`colbert_url` alias is also accepted; `COLBERT_URL` takes precedence.
+BigCodeBench requires its package/execution environment;
 STaRK requires its original data/embeddings and model credentials.
 
 ## Run the same unoptimized systems
@@ -125,8 +128,8 @@ pip install -e '.[test]'
 pytest -q
 ```
 
-112 imported files are checked against the pinned source, allowing only package
-import renaming where needed. The five explicit integration exceptions are listed
+111 imported files are checked against the pinned source, allowing only package
+import renaming where needed. The six explicit integration exceptions are listed
 in [`docs/INTEGRATION.md`](docs/INTEGRATION.md). Tests compare the actual HotpotQA,
 PubMedQA, and Amazon benchmark requests and trajectories with deterministic mocked
 services, and run CAISO's full induction/optimization/checkpoint cycle offline.

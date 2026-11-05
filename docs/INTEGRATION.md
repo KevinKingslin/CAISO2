@@ -13,12 +13,12 @@
   [source record](../third_party/democratic_icai/SOURCE.json).
 
 `UPSTREAM.json` records every upstream tracked file, its source hash, destination,
-and preservation mode. `scripts/verify_upstream.py` verifies all 112 protected files.
-76 are verbatim and 36 differ only by `from/import optimas` → `from/import caiso`.
+and preservation mode. `scripts/verify_upstream.py` verifies all 111 protected files.
+76 are verbatim and 35 differ only by `from/import optimas` → `from/import caiso`.
 All bundled data artifacts, model defaults, prompt definitions, metrics, system
 factories, and experiment YAMLs are in these protected groups.
 
-## Five explicit upstream exceptions
+## Six explicit upstream exceptions
 
 1. `.gitignore`: adds local environment, cache, and build exclusions.
 2. `caiso/__init__.py`: package metadata/logging and a Python 3.12-compatible
@@ -33,6 +33,9 @@ factories, and experiment YAMLs are in these protected groups.
 5. `scripts/eval_system.py`: import renaming plus `weights_only=False` when loading
    the original checkpoint format, which contains `SimpleNamespace` and `Path`
    objects and requires explicit full loading on modern PyTorch.
+6. `examples/systems/hotpotqa/five_components.py`: reads `COLBERT_URL` (or
+   `colbert_url`) from the environment/.env, retaining the original retrieval URL
+   as the fallback. Retrieval prompts, k, and the search space are unchanged.
 
 The upstream root README is preserved at `docs/OPTIMAS_README.md`; the root README
 explains this integration. New files contain CAISO, integration tests, packaging,

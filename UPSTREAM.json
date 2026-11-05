@@ -180,9 +180,9 @@
     {
       "upstream_path": "examples/systems/hotpotqa/five_components.py",
       "path": "examples/systems/hotpotqa/five_components.py",
-      "mode": "namespace_only",
+      "mode": "integration_change",
       "upstream_sha256": "fd4d399436abba772ba69c0aed82ca7eb82bbdf7acaa4671a8b7d5ae2203b3d5",
-      "expected_sha256": "fb25b1dac115d91ef5e41b68a34e0766d80ed73d4a1baf0dee4cf6821e06afac"
+      "expected_sha256": null
     },
     {
       "upstream_path": "examples/systems/pubmed/three_components_with_model_selection.py",
