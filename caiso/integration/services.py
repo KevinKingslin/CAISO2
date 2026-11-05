@@ -7,6 +7,7 @@ import os
 import numpy as np
 
 from caiso.core.serialization import digest
+from caiso.prompts import entry as prompt_entry
 from caiso.providers.base import ProviderRegistry
 from caiso.providers.embeddings import SentenceTransformerEmbeddings
 from caiso.utils import api
@@ -22,7 +23,7 @@ class MethodProvider:
             instructions.append(
                 {
                     "role": "user",
-                    "content": "Return only a JSON object matching this schema:\n"
+                    "content": prompt_entry('method', 'services.schema_instruction')
                     + json.dumps(schema.model_json_schema()),
                 }
             )

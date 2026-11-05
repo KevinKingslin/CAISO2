@@ -1,0 +1,33 @@
+# Current CAISO settings, reorganized without changing their effective values.
+dataset: pubmed
+system: pubmed_system
+method_config: ../method/default.yaml
+dotenv_path: .env
+
+optimization:
+  output_dir: outputs/optim
+  wandb_run_name: iter100-valsize20-trainsize20
+  max_sample_workers: 4
+  num_repeat: 1
+
+evaluation:
+  run_name: unoptimized
+  num_repeat: 3
+  split: test
+  system_state_dict_path: null
+  output_dir: outputs/eval
+  max_sample_workers: 4
+  max_eval_workers: 4
+
+# Experiment settings override the shared method configuration recursively.
+method:
+  max_iterations: 100
+  training_batch_size: 20
+  validation_batch_size: 10
+  validation_sampling: first
+  attribution:
+    batch_size: 20
+  block_selection:
+    diagnostic_batch_size: 20
+  block_optimization:
+    prompt_candidates: 3

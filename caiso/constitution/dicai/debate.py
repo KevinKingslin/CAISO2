@@ -6,6 +6,7 @@ Adapted from Democratic ICAI debate.py, MIT; third_party/democratic_icai.
 import re
 
 from caiso.core.recovery import ModelResponseError
+from caiso.prompts import entry as prompt_entry
 from caiso.core.serialization import canonical
 from caiso.providers.base import messages
 
@@ -80,9 +81,9 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
         if progress:
             progress(cycle, "reconstruction before")
         result = check(cycle, "before")
-        status = (
-            f"RECONSTRUCTION: {'YES' if result['reconstructed'] else 'NO'} "
-            f"(predicted={result['predicted']}, preferred={pair.preferred})"
+        status = prompt_entry("method", "debate.reconstruction_status").format(
+            status="YES" if result["reconstructed"] else "NO",
+            predicted=result["predicted"], preferred=pair.preferred,
         )
         for i, entry in enumerate(catalog):
             if progress:
@@ -112,7 +113,7 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
                             "cycle": cycle,
                         }
                     )
-                    + "\nDefend, attack, merge, edit, add, or concede. Follow the STRICT format.",
+                    + prompt_entry('method', 'debate.guidance_1'),
                 ),
                 seed=seed + (cycle - 1) * 4 + i,
                 temperature=temperatures.get("debater", 0.7),
@@ -135,9 +136,7 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
                         "total_cycles": rounds,
                     }
                 )
-                + f"\nPublish an UPDATED WORKING LIST. Finalize only if reconstruction is YES, "
-                f"the list is stable and non-overlapping and retains at least {minimum} "
-                "distinct one-quality questions.",
+                + prompt_entry('method', 'debate.guidance_0').format(minimum=minimum),
             ),
             seed=seed + (cycle - 1) * 4 + 3,
             validate=lambda text: (parse_principles(text), text)[1],
@@ -153,13 +152,11 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
             break
         if over:
             reason = (
-                "published list does not reconstruct the preference"
+                prompt_entry("method", "debate.rejection_failed")
                 if not result["reconstructed"]
-                else f"requires at least {minimum} principles and {min_cycles} cycles"
+                else prompt_entry("method", "debate.rejection_minimum").format(minimum=minimum, min_cycles=min_cycles)
             )
-            rejection = (
-                f"DEBATE_OVER REJECTED: {reason}. Continue; keep distinct qualities separate."
-            )
+            rejection = prompt_entry("method", "debate.rejection").format(reason=reason)
             history.append({"speaker": "moderator", "content": rejection, "cycle": cycle})
     # Upstream returns best effort at the cycle cap. Never claim the gate passed.
     history.append(

@@ -11,6 +11,7 @@ from typing import Literal
 from pydantic import Field
 
 from caiso.core.content_filter import ContentFilteredError, record_skip
+from caiso.prompts import entry as prompt_entry
 from caiso.core.parallel import ordered_map
 from caiso.core.serialization import Record, canonical
 from caiso.providers.base import messages
@@ -37,7 +38,7 @@ def apply_constitution(providers, role, pair, principles, seed=0, temperature=0.
                 "response_2": second,
             }
         )
-        + '\nReturn JSON: {"choice": "1" or "2", "reason": "brief justification"}.'
+        + prompt_entry('method', 'reconstruction.json_instruction')
     )
     response = providers.complete(
         role,

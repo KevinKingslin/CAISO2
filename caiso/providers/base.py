@@ -4,6 +4,7 @@ from typing import Protocol
 from pydantic import BaseModel, ValidationError
 
 from caiso.core.recovery import ModelResponseError, Recovery
+from caiso.prompts import entry as prompt_entry
 from caiso.core.serialization import digest
 
 DICAI_ROLES = {"system_constitution", "block_constitution", "constitution_judge", "block_selection"}
@@ -65,10 +66,7 @@ class ProviderRegistry:
                     *messages,
                     {
                         "role": "user",
-                        "content": "Your previous response could not be used: "
-                        + str(previous_error)[:1500]
-                        + "\nPlease return a fresh answer that satisfies the requested schema and format. "
-                        "Preserve the original evidence and criteria; do not add unsupported principles.",
+                        "content": prompt_entry('method', 'providers.format_retry').format(value_0=str(previous_error)[:1500]),
                     },
                 ]
             retry_seed = (seed + attempt * 104729) % (2**31 - 1) if format_error else seed

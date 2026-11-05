@@ -4,20 +4,21 @@ The registry supplies transport, validation, retries and budget accounting.
 """
 
 from collections import Counter
-from importlib.resources import files
 from threading import BoundedSemaphore
 
 from pydantic import Field, field_validator
 
 from caiso.core.parallel import ordered_map
+from caiso.prompts import entry as prompt_entry
 from caiso.core.serialization import Record
 from caiso.providers.base import messages
+from caiso.prompts import text
 
 from .preferences import pair_block
 
 
 def prompt(name):
-    return files("caiso.constitution.dicai").joinpath("prompts", name + ".txt").read_text()
+    return text("dicai/" + name)
 
 
 def principle_instructions(config=None):
@@ -110,9 +111,7 @@ def assemble(pair, personas, providers, role, seed, config=None):
 
         if persona.strategy == "reasoning_cot":
             rationale = request(
-                block
-                + "\nThink step by step through the differences, then conclude. "
-                + instruction,
+                prompt_entry('method', 'reasoning.cot').format(block=block, instruction=instruction),
                 "cot",
                 0.4,
             )
@@ -120,7 +119,7 @@ def assemble(pair, personas, providers, role, seed, config=None):
             call_index = samples
             chains = ordered_map(
                 lambda number: request(
-                    block + "\nReason step by step, then conclude. " + instruction,
+                    prompt_entry('method', 'reasoning.self_consistency_sample').format(block=block, instruction=instruction),
                     "self_consistency_sample",
                     0.9,
                     number=number,
@@ -137,10 +136,7 @@ def assemble(pair, personas, providers, role, seed, config=None):
             stable = stable or [d for d, _ in counter.most_common(3)]
             joined = "\n".join("- " + c.reasoning for c in chains)
             rationale = request(
-                f"{samples} independent analyses were produced for the same preference judgement."
-                f"\nANALYSES:\n{joined}\nDIMENSIONS THAT RECUR ACROSS A MAJORITY: {stable}\n"
-                "Write one consensus rationale that relies only on the recurring dimensions "
-                "and discards idiosyncratic points. " + instruction,
+                prompt_entry('method', 'reasoning.self_consistency_consensus').format(samples=samples, joined=joined, stable=stable, instruction=instruction),
                 "self_consistency_consensus",
                 0.2,
             )
@@ -148,24 +144,18 @@ def assemble(pair, personas, providers, role, seed, config=None):
                 rationale.dimensions = stable
         else:
             rationale = request(
-                block + "\nWrite a first-draft rationale. " + instruction, "self_refine_draft", 0.6
+                prompt_entry('method', 'reasoning.self_refine_draft').format(block=block, instruction=instruction), "self_refine_draft", 0.6
             )
             for _ in range(steps):
                 critique = request(
-                    f"{block}\nDRAFT RATIONALE:\n{rationale.reasoning}\n"
-                    f"DRAFT DIMENSIONS: {rationale.dimensions}\n"
-                    "List concrete weaknesses: vague claims, points that are not discriminating "
-                    "(true of both responses), and missing high-tension differences. Be brief.",
+                    prompt_entry('method', 'reasoning.self_refine_critique').format(block=block, value_1=rationale.reasoning, value_2=rationale.dimensions),
                     "self_refine_critique",
                     0.3,
                     schema=None,
-                    system="You are a strict reviewer of preference rationales.",
+                    system=prompt_entry('method', 'reasoning.critique_system'),
                 )
                 rationale = request(
-                    f"{block}\nPREVIOUS RATIONALE:\n{rationale.reasoning}\n"
-                    f"REVIEWER CRITIQUE:\n{critique}\n"
-                    "Revise the rationale to fix every weakness. Keep only discriminating, "
-                    "specific points. " + instruction,
+                    prompt_entry('method', 'reasoning.self_refine_revision').format(block=block, value_1=rationale.reasoning, critique=critique, instruction=instruction),
                     "self_refine_revision",
                     0.4,
                 )

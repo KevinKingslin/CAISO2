@@ -4,7 +4,6 @@ import argparse
 import json
 from pathlib import Path
 
-import yaml
 from dotenv import load_dotenv
 
 from scripts.results_layout import dataset_label, optimization_output, write_evaluation
@@ -53,9 +52,8 @@ def resolve(args):
         path = args.config
     elif target in DATASETS:
         dataset = DATASETS[target]
-        filename = dataset + ("_vanilla" if args.command == "evaluate" else "") + ".yaml"
-        directory = "eval" if args.command == "evaluate" else "optimize"
-        path = ROOT / "scripts/configs" / directory / filename
+        label = "pubmedqa" if dataset == "pubmed" else dataset
+        path = ROOT / "configs/experiments" / f"{label}.yaml"
     elif target and Path(target).is_file():
         path = Path(target)
     elif target and Path(target).is_dir() and args.command == "evaluate":
@@ -68,7 +66,15 @@ def resolve(args):
         path = ROOT / "scripts/configs/eval" / f"{dataset}_vanilla.yaml"
     else:
         raise ValueError("Specify hotpotqa, amazon, pubmedqa, a YAML config, or an evaluation run directory")
-    config = yaml.safe_load(path.read_text())
+    if run and "evaluation" in experiment:
+        config = {
+            **experiment["evaluation"], "dataset": experiment["dataset"],
+            "system_name": experiment["system"], "dotenv_path": experiment.get("dotenv_path", ".env"),
+        }
+    else:
+        from caiso.integration.config import load_experiment
+
+        config = load_experiment(path, mode=args.command)
     if not isinstance(config, dict):
         raise ValueError(f"Expected a configuration mapping in {path}")
     if args.system and config.get("dataset") != DATASETS[args.system]:

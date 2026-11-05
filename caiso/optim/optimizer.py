@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from caiso.constitution.dicai.pipeline import DICAI
+from caiso.prompts import entry as prompt_entry
 from caiso.core.budget import BudgetTracker
 from caiso.core.serialization import read_json, save_json
 from caiso.integration.config import load_method
@@ -10,11 +11,7 @@ from caiso.integration.runtime import UpstreamRuntime, adapt_examples
 from caiso.integration.services import build_services
 from caiso.method.algorithm import Algorithm
 
-DEFAULT_PERSONAS = [
-    "A domain expert who checks whether the system solves its stated task accurately.",
-    "A critical reviewer who examines evidence, errors, and unsupported conclusions.",
-    "An end user who values relevant, clear, and usable final outputs.",
-]
+DEFAULT_PERSONAS = prompt_entry('method', 'default_personas')
 
 
 class CaisoOptimizer:

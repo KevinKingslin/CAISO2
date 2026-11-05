@@ -10,6 +10,7 @@ from typing import Dict, List, Any
 from dotenv import load_dotenv
 import random
 from caiso.arch.system import CompoundAISystem
+from caiso.prompts import entry as prompt_entry
 from caiso.arch.base import BaseComponent
 from caiso.utils.api import get_llm_output
 import torch
@@ -61,10 +62,10 @@ class ModelSelectorModule(BaseComponent):
         return {f"{self.task_type}_model": self.variable["model_selection"]}
 
 # Format prompt for yes/no/maybe answers
-FORMAT_PROMPT_YESNO = '''Always conclude the last line of your response should be of the following format: 'Answer: $VALUE' (without quotes) where VALUE is either 'yes' or 'no' or 'maybe'.'''
+FORMAT_PROMPT_YESNO = prompt_entry('systems/pubmed', 'FORMAT_PROMPT_YESNO')
 
 # System prompt
-SYS_SINGLE_SOL_PROMPT = '''You are a scientist.'''
+SYS_SINGLE_SOL_PROMPT = prompt_entry('systems/pubmed', 'SYS_SINGLE_SOL_PROMPT')
 
 class ContextAnalystModule(BaseComponent):
     """
@@ -81,7 +82,7 @@ class ContextAnalystModule(BaseComponent):
             max_tokens (int): Maximum tokens for generation
             temperature (float): Temperature for generation
         """
-        instruction_prompt = "You are supposed to summarize the key information from the given context to answer the provided question."
+        instruction_prompt = prompt_entry('systems/pubmed', 'ContextAnalystModule.instruction')
         super().__init__(
             description="Context Analyst extracts and summarizes key information from a given context.",
             input_fields=["context", "question", "context_analyst_model"],
@@ -116,15 +117,7 @@ class ContextAnalystModule(BaseComponent):
             raise ValueError("Question is required")
         
         # Format the prompt
-        user_prompt = f'''{self.variable}
-
-Here is the given context:
-"{context}"
-
-Problem:
-"{question}"
-
-Please summarize the relevant information from the context related to the question.'''
+        user_prompt = prompt_entry('systems/pubmed', 'ContextAnalystModule.template').format(instruction=self.variable, context=context, question=question)
         
         # Call the LLM with the selected model
         response = get_llm_output(
@@ -153,7 +146,7 @@ class ProblemSolverModule(BaseComponent):
             max_tokens (int): Maximum tokens for generation
             temperature (float): Temperature for generation
         """
-        instruction_prompt = "You are supposed to provide a solution to a given problem based on the provided summary."
+        instruction_prompt = prompt_entry('systems/pubmed', 'ProblemSolverModule.instruction')
         super().__init__(
             description="Problem Solver determines the correct yes/no/maybe answer based on the provided summary.",
             input_fields=["question", "summary", "problem_solver_model"],
@@ -188,15 +181,7 @@ class ProblemSolverModule(BaseComponent):
             raise ValueError("Summary is required")
         
         # Format the prompt
-        user_prompt = f'''{self.variable}
-
-Problem:
-"{question}"
-
-Here is a summary of relevant information:
-"{summary}"
-
-Please provide yes, no or maybe to the given problem. {FORMAT_PROMPT_YESNO}'''
+        user_prompt = prompt_entry('systems/pubmed', 'ProblemSolverModule.template').format(instruction=self.variable, question=question, summary=summary, format_prompt=FORMAT_PROMPT_YESNO)
         
         # Call the LLM with the selected model
         response = get_llm_output(

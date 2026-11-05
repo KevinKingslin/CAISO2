@@ -1,0 +1,16 @@
+{
+  "QuestionRewriter.instructions": "Rephrase the question.",
+  "QuestionRewriter.question.prefix": "Query: ",
+  "QuestionRewriter.rewritten_query.prefix": "Rewritten Query: ",
+  "InfoExtractor.instructions": "Extract keywords from the query to retrieve relevant content.",
+  "InfoExtractor.rewritten_query.prefix": "Query: ",
+  "InfoExtractor.search_keywords.prefix": "Search Keywords: ",
+  "HintGenerator.instructions": "Generate useful hints to answer the query.",
+  "HintGenerator.rewritten_query.prefix": "Query: ",
+  "HintGenerator.retrieve_content.prefix": "Retrieved Information: ",
+  "HintGenerator.hints.prefix": "Hints: ",
+  "AnswerGenerator.instructions": "Given some hints, directly answer the query with a short answer for the query.",
+  "AnswerGenerator.rewritten_query.prefix": "Query: ",
+  "AnswerGenerator.hints.prefix": "Hints: ",
+  "AnswerGenerator.answer.prefix": "Short Answer: "
+}

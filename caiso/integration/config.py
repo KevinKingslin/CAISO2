@@ -9,6 +9,30 @@ import yaml
 from caiso.method.config import validate_method
 
 
+def load_experiment(path, mode="optimize"):
+    """Read either a CAISO experiment or a preserved OPTIMAS launcher profile."""
+    path = Path(path)
+    experiment = yaml.safe_load(path.read_text())
+    if not isinstance(experiment, dict):
+        raise ValueError(f"Expected a configuration mapping in {path}")
+    if "method_config" not in experiment:
+        return experiment
+    common = {"dataset": experiment["dataset"], "dotenv_path": experiment.get("dotenv_path", ".env")}
+    if mode == "evaluate":
+        return {**common, "system_name": experiment["system"], **experiment["evaluation"]}
+    method_file = Path(experiment["method_config"])
+    if not method_file.is_absolute():
+        method_file = (path.parent / method_file).resolve()
+    options = merge(experiment.get("caiso", {}), {
+        "method_file": str(method_file),
+        "method": merge(experiment.get("method", {}), experiment.get("caiso", {}).get("method", {})),
+    })
+    return {
+        **common, "system": experiment["system"],
+        **experiment["optimization"], "evaluation": experiment["evaluation"], "caiso": options,
+    }
+
+
 def merge(base, override):
     result = deepcopy(base)
     for key, value in override.items():

@@ -18,6 +18,7 @@ from caiso.core.recovery import ModelResponseError
 from caiso.core.serialization import digest, read_json, save_json
 from caiso.method.config import validate_method
 from caiso.providers.base import check_dicai_provider
+from caiso.prompts import catalog_entries
 
 from .abstraction import abstract_clusters
 from .activity import InductionActivity
@@ -98,6 +99,7 @@ class DICAI:
                         "principle_style",
                     )
                 },
+                "prompt_fragments": catalog_entries("method"),
             }
         )
         artifacts = Path(output_dir) / provenance if output_dir else None

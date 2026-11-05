@@ -2,7 +2,6 @@ import os
 import os.path as osp
 import sys
 import json
-import yaml
 from dataclasses import dataclass, field
 from typing import List, Optional
 
@@ -15,6 +14,7 @@ from examples.datasets import registered_datasets
 from caiso.optim.args import OptimasArguments
 from caiso.utils.logger import setup_logger
 from caiso.eval import eval_system
+from caiso.integration.config import load_experiment
 
 
 @dataclass
@@ -50,8 +50,7 @@ def main(argv=None, *, output_dir=None):
     argv = sys.argv[1:] if argv is None else argv
 
     if len(argv) == 1 and argv[0].endswith(".yaml"):
-        with open(argv[0], "r") as f:
-            yaml_config = yaml.safe_load(f)
+        yaml_config = load_experiment(argv[0], mode="evaluate")
         args = parser.parse_dict(yaml_config)[0]
     else:
         args = parser.parse_args_into_dataclasses(args=argv)[0]

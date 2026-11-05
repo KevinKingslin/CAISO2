@@ -4,8 +4,9 @@ CAISO's constitution and causal block optimization, integrated with the released
 [OPTIMAS](https://github.com/snap-stanford/optimas) benchmark code at commit
 `71871a2dd98081231d733debd41178ba47e13528`.
 
-The original examples, dataset loaders, data artifacts, metrics, system factories,
-and experiment YAMLs are preserved. Python imports use `caiso` instead of
+The original dataset loaders, data artifacts, metrics, and experiment YAMLs are
+preserved. Benchmark prompts retain their original text in the shared prompt
+directory. Python imports use `caiso` instead of
 `optimas`. Optimization runs `caiso/method/algorithm.py`; it does not train or use
 OPTIMAS's learned local reward model.
 
@@ -64,7 +65,7 @@ below. Run it from the checkout; it selects this project's `.venv` and loads `.e
 ```
 
 `evaluate <dataset>` also defaults to the unoptimized system. Evaluation uses the
-existing `scripts/configs/eval/*_vanilla.yaml` profiles, including their three
+`evaluation` sections in `configs/experiments/*.yaml`, including their three
 repetitions. Use `--repeats 1` to override that, or `--split val` for validation.
 Baseline results default to `results/<dataset>-unoptimized/evaluation_unoptimized.json`
 (using `pubmedqa` as the directory label). `--output <directory>` sets the exact
@@ -91,7 +92,7 @@ STaRK and BigCodeBench evaluation configurations are also included.
 ./scripts/caiso optimize pubmedqa --output results/pubmed-run
 ```
 
-These dispatch to `scripts/optimize_system.py` with the existing optimization YAMLs.
+These dispatch to `scripts/optimize_system.py` with `configs/experiments/*.yaml`.
 `run` is an alias for `optimize`, so `./scripts/caiso run amazon` also works.
 Omitting `--output` restores `results/<dataset>-<config-hash>/`, where the hash
 reflects the current experiment and resolved method configuration. An existing
@@ -124,33 +125,50 @@ python -m scripts.optimize_system scripts/configs/optimize/pubmed.yaml
 python -m scripts.optimize_system scripts/configs/optimize/amazon.yaml
 ```
 
-The original experiment files specify the system, dataset, output location,
-training batch, validation prefix, iteration limit, and prompt candidate count.
-The CAISO launcher replaces reward-model setup and the optimization algorithm.
-The released reward-model/preference-dataset/PPO settings remain in the files for
-reference; CAISO uses its own constitution induction and DPO settings instead.
-There is no reward-model training prerequisite for CAISO.
+## Configuration and prompts
 
-Method defaults are in [`caiso/config/default.yaml`](caiso/config/default.yaml).
-To change them, copy an experiment YAML and add a `caiso` section:
+The main launcher uses the earlier CAISO configuration structure:
 
-```yaml
-caiso:
-  services:
-    model: gpt-4o
-    embeddings:
-      backend: litellm
-      model: text-embedding-3-small
-  method:
-    budget:
-      max_equivalent_full_runs: 1000
-    block_optimization:
-      max_joint_candidates: 3
-      task_scoring:
-        enabled: true
+```text
+configs/
+  method/default.yaml
+  experiments/amazon.yaml
+  experiments/hotpotqa.yaml
+  experiments/pubmedqa.yaml
+caiso/prompts/
+  dicai/*.txt
+  method.json
+  systems/{amazon,hotpotqa,pubmed}.json
 ```
 
-Experiment overrides take precedence over method defaults. Optional `caiso.personas`
+All current parameter values are retained. `method_config` is relative to the
+experiment file; the experiment's `method` mapping recursively overrides the
+shared method. `optimization` contains launch settings and `evaluation` contains
+the existing evaluation settings. For example, in a copy of an experiment:
+
+```yaml
+method:
+  budget:
+    max_equivalent_full_runs: 1000
+  block_optimization:
+    max_joint_candidates: 3
+    task_scoring:
+      enabled: true
+```
+
+This example is an optional override, not a change to the shipped values. Select
+custom profiles with `./scripts/caiso run --config YOUR_EXPERIMENT.yaml` or
+`./scripts/caiso evaluate --config YOUR_EXPERIMENT.yaml`.
+
+The original `scripts/configs/` files and `caiso/config/default.yaml` remain intact
+and supported by direct Python commands. Their reward-model/PPO parameters belong
+to the legacy OPTIMAS utilities and are unused by CAISO. CAISO weight optimization
+uses its existing `block_optimization.dpo` settings; reward-model training is not
+needed. Credentials, model deployments, backend choices and service URLs stay in
+`.env`. See [the configuration guide](configs/README.md) and
+[the prompt inventory](caiso/prompts/README.md).
+
+Optional `caiso.personas`
 and `caiso.edge_baselines` configure DICAI identities and per-edge interventions.
 Workflow search is disabled to retain the original benchmark systems. Full-system
 and component calls during CAISO optimization are serialized to avoid races in the
@@ -181,8 +199,8 @@ pip install -e '.[test]'
 pytest -q
 ```
 
-111 imported files are checked against the pinned source, allowing only package
-import renaming where needed. The six explicit integration exceptions are listed
+109 imported files are checked against the pinned source, allowing only package
+import renaming where needed. The eight explicit integration exceptions are listed
 in [`docs/INTEGRATION.md`](docs/INTEGRATION.md). Tests compare the actual HotpotQA,
 PubMedQA, and Amazon benchmark requests and trajectories with deterministic mocked
 services, and run CAISO's full induction/optimization/checkpoint cycle offline.

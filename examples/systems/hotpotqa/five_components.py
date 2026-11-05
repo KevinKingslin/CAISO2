@@ -4,28 +4,29 @@ import os.path as osp
 from dotenv import load_dotenv
 
 from caiso.arch.system import CompoundAISystem
+from caiso.prompts import entry as prompt_entry
 from caiso.arch.base import BaseComponent
 from caiso.adapt.dspy import create_component_from_dspy
 from examples.metrics.f1_score import f1_score
 
 
 class QuestionRewriter(dspy.Signature):
-    """Rephrase the question."""
+    __doc__ = prompt_entry('systems/hotpotqa', 'QuestionRewriter.instructions')
     question: str = dspy.InputField(
-        prefix="Query: "
+        prefix=prompt_entry('systems/hotpotqa', 'QuestionRewriter.question.prefix')
     )
     rewritten_query: str = dspy.OutputField(
-        prefix="Rewritten Query: "
+        prefix=prompt_entry('systems/hotpotqa', 'QuestionRewriter.rewritten_query.prefix')
     )
 
 class InfoExtractor(dspy.Signature):
-    """Extract keywords from the query to retrieve relevant content."""
+    __doc__ = prompt_entry('systems/hotpotqa', 'InfoExtractor.instructions')
 
     rewritten_query: str = dspy.InputField(
-        prefix="Query: "
+        prefix=prompt_entry('systems/hotpotqa', 'InfoExtractor.rewritten_query.prefix')
     )
     search_keywords: str = dspy.OutputField(
-        prefix="Search Keywords: "
+        prefix=prompt_entry('systems/hotpotqa', 'InfoExtractor.search_keywords.prefix')
     )
 
 
@@ -54,28 +55,28 @@ class WikipediaRetriever(BaseComponent):
 
 
 class HintGenerator(dspy.Signature):
-    """Generate useful hints to answer the query."""
+    __doc__ = prompt_entry('systems/hotpotqa', 'HintGenerator.instructions')
 
     rewritten_query: str = dspy.InputField(
-        prefix="Query: "
+        prefix=prompt_entry('systems/hotpotqa', 'HintGenerator.rewritten_query.prefix')
     )
     retrieve_content: str = dspy.InputField(
-        prefix="Retrieved Information: "
+        prefix=prompt_entry('systems/hotpotqa', 'HintGenerator.retrieve_content.prefix')
     )
     hints: str = dspy.OutputField(
-        prefix="Hints: "
+        prefix=prompt_entry('systems/hotpotqa', 'HintGenerator.hints.prefix')
     )
 
 
 class AnswerGenerator(dspy.Signature):
-    """Given some hints, directly answer the query with a short answer for the query."""
+    __doc__ = prompt_entry('systems/hotpotqa', 'AnswerGenerator.instructions')
     rewritten_query: str = dspy.InputField(
-        prefix="Query: "
+        prefix=prompt_entry('systems/hotpotqa', 'AnswerGenerator.rewritten_query.prefix')
     )
     hints: str = dspy.InputField(
-        prefix="Hints: "
+        prefix=prompt_entry('systems/hotpotqa', 'AnswerGenerator.hints.prefix')
     )
-    answer: str = dspy.OutputField(prefix="Short Answer: ")
+    answer: str = dspy.OutputField(prefix=prompt_entry('systems/hotpotqa', 'AnswerGenerator.answer.prefix'))
 
 
 def system_engine(*args, **kwargs):

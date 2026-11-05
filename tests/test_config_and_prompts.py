@@ -1,0 +1,74 @@
+"""Configuration migration and prompt extraction must preserve benchmark behavior."""
+
+import hashlib
+import json
+from pathlib import Path
+
+import pytest
+import yaml
+
+from caiso.integration.config import load_experiment, load_method
+from caiso.prompts import catalog_entries, entry
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.mark.parametrize("name,label", [("amazon", "amazon"), ("hotpotqa", "hotpotqa"), ("pubmed", "pubmedqa")])
+def test_experiment_migration_keeps_all_effective_parameters(name, label):
+    original = load_experiment(ROOT / f"scripts/configs/optimize/{name}.yaml")
+    current = load_experiment(ROOT / f"configs/experiments/{label}.yaml")
+    assert load_method(current) == load_method(original)
+    for key in ("dataset", "system", "max_sample_workers", "num_repeat", "dotenv_path", "output_dir", "wandb_run_name"):
+        assert current[key] == original[key]
+    assert load_experiment(ROOT / f"configs/experiments/{label}.yaml", "evaluate") == load_experiment(ROOT / f"scripts/configs/eval/{name}_vanilla.yaml", "evaluate")
+    assert not any(key.startswith("ppo_") for key in current)
+    assert "state_dict_path" not in current  # OPTIMAS reward checkpoint, unused by CAISO.
+
+
+def test_shared_method_copy_does_not_change_any_values():
+    assert yaml.safe_load((ROOT / "configs/method/default.yaml").read_text()) == yaml.safe_load((ROOT / "caiso/config/default.yaml").read_text())
+
+
+def test_experiment_overrides_method_recursively_and_paths_are_relative(tmp_path):
+    method = tmp_path / "method.yaml"
+    method.write_text((ROOT / "configs/method/default.yaml").read_text())
+    config = yaml.safe_load((ROOT / "configs/experiments/amazon.yaml").read_text())
+    config["method_config"] = "method.yaml"
+    config["method"]["validation_batch_size"] = "all"
+    config["method"]["dicai"] = {"debate_rounds": 1}
+    path = tmp_path / "experiment.yaml"
+    path.write_text(yaml.safe_dump(config))
+    resolved = load_method(load_experiment(path))
+    assert resolved["validation_batch_size"] == "all"
+    assert resolved["dicai"]["debate_rounds"] == 1
+    assert resolved["dicai"]["max_workers"] == 10
+
+
+def test_extracted_prompts_match_pre_extraction_text_and_rendering():
+    fixture = json.loads((ROOT / "tests/fixtures/prompt_parity.json").read_text())
+    for catalog, expected in fixture["hashes"].items():
+        actual = catalog_entries(catalog)
+        assert set(actual) == set(expected)
+        for key, sha256 in expected.items():
+            assert hashlib.sha256(actual[key].encode()).hexdigest() == sha256
+    for case in fixture["rendered"].values():
+        assert entry(case["catalog"], case["key"]).format(**case["arguments"]) == case["expected"]
+
+
+def test_dspy_signatures_keep_instructions_and_field_metadata():
+    from examples.systems.hotpotqa import five_components as hotpotqa
+    from examples.systems.amazon import local_models_for_next_item_selection as amazon
+
+    for system, module, names in [
+        ("hotpotqa", hotpotqa, ["QuestionRewriter", "InfoExtractor", "HintGenerator", "AnswerGenerator"]),
+        ("amazon", amazon, ["NextItemDecider"]),
+    ]:
+        for name in names:
+            signature = getattr(module, name)
+            assert signature.instructions == entry("systems/" + system, name + ".instructions")
+            for field_name, field in signature.fields.items():
+                for key in ("prefix", "desc"):
+                    catalog_key = name + "." + field_name + "." + key
+                    catalog = catalog_entries("systems/" + system)
+                    if catalog_key in catalog:
+                        assert field.json_schema_extra[key] == catalog[catalog_key]

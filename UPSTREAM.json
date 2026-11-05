@@ -166,9 +166,9 @@
     {
       "upstream_path": "examples/systems/amazon/local_models_for_next_item_selection.py",
       "path": "examples/systems/amazon/local_models_for_next_item_selection.py",
-      "mode": "namespace_only",
+      "mode": "integration_change",
       "upstream_sha256": "67e777d7a69faa0f0410f72e32c03a57b6ddfe931d7a441b375ac56c76196694",
-      "expected_sha256": "b458bfd760b32cbb75c2638c3ff2c2ab3e74875fc54e16199a01f103c1ee8a33"
+      "expected_sha256": null
     },
     {
       "upstream_path": "examples/systems/bigcodebench/four_components.py",
@@ -187,9 +187,9 @@
     {
       "upstream_path": "examples/systems/pubmed/three_components_with_model_selection.py",
       "path": "examples/systems/pubmed/three_components_with_model_selection.py",
-      "mode": "namespace_only",
+      "mode": "integration_change",
       "upstream_sha256": "55a7d3c6e50c8d6ce425a9d10495f61d884c727dd9f94f966049c40b9425c047",
-      "expected_sha256": "bbbb9c1807f41fe7b27838b6c329781cb413c0f87407e32cb880a6582c2b8c81"
+      "expected_sha256": null
     },
     {
       "upstream_path": "examples/systems/stark/bio_system.py",

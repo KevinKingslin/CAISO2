@@ -23,6 +23,7 @@ from peft import LoraConfig
 from pathlib import Path
 
 from caiso.arch.system import CompoundAISystem
+from caiso.prompts import entry as prompt_entry
 from caiso.arch.base import BaseComponent
 from caiso.adapt.dspy import create_component_from_dspy
 from caiso.reward_model import RewardModel
@@ -130,10 +131,7 @@ class SessionAnalyzerModule(BaseComponent):
     def forward(self, **inputs):
         sequence = inputs["sequence"]
         prompt = (
-            "You are an e-commerce behaviour analyst.\n\n"
-            "Session sequence:\n"
-            f"{sequence}\n\n"
-            "Provide a 2-3 sentence summary of the user's browsing intent."
+            prompt_entry('systems/amazon', 'SessionAnalyzerModule.template').format(sequence=sequence)
         )
         response = post_http_request(
             prompt,
@@ -189,13 +187,7 @@ class CandidateProfilerModule(BaseComponent):
         context = inputs["context"]
         choices = inputs["choices"]
         prompt = (
-            "You are an e-commerce candidate profiler.\n\n"
-            "Session summary:\n"
-            f"{context}\n\n"
-            "Candidate items:\n"
-            f"{json.dumps(choices, indent=2)}\n\n"
-            "For each item, on its own line, write a brief (1-2 sentence) "
-            "comment on why the user might or might not choose it next."
+            prompt_entry('systems/amazon', 'CandidateProfilerModule.template').format(context=context, choices_json=json.dumps(choices, indent=2))
         )
 
         # Use the current adapter_id (which might be an adapter) or the base model
@@ -214,10 +206,10 @@ class CandidateProfilerModule(BaseComponent):
 
 
 class NextItemDecider(dspy.Signature):
-    """Select the next item by considering both the summary and the provided feedback carefully."""
-    context: str = dspy.InputField(prefix="Context: ", desc="Summary of behaviour")
-    feedback: str = dspy.InputField(prefix="Feedback: ", desc="Comments per option")
-    answer: str = dspy.OutputField(prefix="Answer: ", desc="Index of item chosen")
+    __doc__ = prompt_entry('systems/amazon', 'NextItemDecider.instructions')
+    context: str = dspy.InputField(prefix=prompt_entry('systems/amazon', 'NextItemDecider.context.prefix'), desc=prompt_entry('systems/amazon', 'NextItemDecider.context.desc'))
+    feedback: str = dspy.InputField(prefix=prompt_entry('systems/amazon', 'NextItemDecider.feedback.prefix'), desc=prompt_entry('systems/amazon', 'NextItemDecider.feedback.desc'))
+    answer: str = dspy.OutputField(prefix=prompt_entry('systems/amazon', 'NextItemDecider.answer.prefix'), desc=prompt_entry('systems/amazon', 'NextItemDecider.answer.desc'))
 
 
 # --------------------------------------------------------------------------- #

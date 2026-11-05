@@ -1,6 +1,7 @@
 """Project CAISO outputs into label-free DICAI prompt/response comparisons."""
 
 from caiso.core.serialization import canonical
+from caiso.prompts import entry as prompt_entry
 
 EVALUATION_KEYS = {"reward", "target", "preferred", "gold", "global_scores", "metadata"}
 
@@ -50,7 +51,6 @@ def candidate_views(pair):
 def pair_block(pair, labeled=False):
     a, b = candidate_views(pair)
     result = (
-        f"PROMPT:\n{canonical(task_view(pair.context))}\n\n"
-        f"RESPONSE A:\n{canonical(a)}\n\nRESPONSE B:\n{canonical(b)}"
+        prompt_entry('method', 'preferences.pair').format(value_0=canonical(task_view(pair.context)), value_1=canonical(a), value_2=canonical(b))
     )
-    return result + (f"\nPREFERRED: {pair.preferred}" if labeled else "")
+    return result + (prompt_entry('method', 'preferences.label').format(value_0=pair.preferred) if labeled else "")

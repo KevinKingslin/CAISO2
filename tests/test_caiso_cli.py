@@ -15,7 +15,8 @@ def test_dataset_alias_uses_existing_profiles(dataset):
     args = caiso_cli.parser().parse_args(["evaluate", dataset, "--unoptimized"])
     path, config, run = caiso_cli.resolve(args)
     canonical = caiso_cli.DATASETS[dataset]
-    assert path == caiso_cli.ROOT / f"scripts/configs/eval/{canonical}_vanilla.yaml"
+    label = "pubmedqa" if canonical == "pubmed" else canonical
+    assert path == caiso_cli.ROOT / f"configs/experiments/{label}.yaml"
     assert config["dataset"] == canonical
     assert config["system_state_dict_path"] is None
     assert config["num_repeat"] == 3
@@ -33,7 +34,7 @@ def test_optimization_dispatch_uses_original_config(monkeypatch, tmp_path, comma
         "--checkpoint", "checkpoint-dir", "--no-test",
     ])
     assert calls == [[
-        str(caiso_cli.ROOT / "scripts/configs/optimize/amazon.yaml"),
+        str(caiso_cli.ROOT / "configs/experiments/amazon.yaml"),
         "--output", str(tmp_path), "--resume", "checkpoint-dir", "--no-test",
     ]]
 
@@ -159,7 +160,7 @@ def test_validation_report_does_not_overwrite_test(tmp_path):
 def test_legacy_system_flag_and_yaml_configs():
     args = caiso_cli.parser().parse_args(["optimize", "--system", "pubmedqa"])
     path, config, _ = caiso_cli.resolve(args)
-    assert path.name == "pubmed.yaml"
+    assert path.name == "pubmedqa.yaml"
     assert config["system"] == "pubmed_system"
     args = caiso_cli.parser().parse_args(["optimize", "--config", str(path)])
     assert caiso_cli.resolve(args)[1] == config

@@ -1,0 +1,79 @@
+{
+  "hashes": {
+    "systems/hotpotqa": {
+      "QuestionRewriter.instructions": "21d40427bc7d934851070e8127d6da43b3ff323fb702885819e44364c15839aa",
+      "QuestionRewriter.question.prefix": "597369d1d7df4789f241858dc8c20e3df895694815d4901a6cf6307563b1b5bd",
+      "QuestionRewriter.rewritten_query.prefix": "7a0d123a9cb35a67efc745961e3a8a6e01bf3ea49b7169c4476b95b1a10a3511",
+      "InfoExtractor.instructions": "afc406f0c7e5bc550eaf219843c6cffcabe0f4a5dd39ab42e7748ad8df26fa73",
+      "InfoExtractor.rewritten_query.prefix": "597369d1d7df4789f241858dc8c20e3df895694815d4901a6cf6307563b1b5bd",
+      "InfoExtractor.search_keywords.prefix": "ed174691bf49f3d3073b20ba2ced433d0e7bb79fc2d043310b8412ba5feec116",
+      "HintGenerator.instructions": "2066802652746a931fb812dcda90eb944e469b856638ee466145efed4c6b099e",
+      "HintGenerator.rewritten_query.prefix": "597369d1d7df4789f241858dc8c20e3df895694815d4901a6cf6307563b1b5bd",
+      "HintGenerator.retrieve_content.prefix": "59432ccfec234f18955e186430e6d6ae98ddab2d26e1718f08db1ed9c5c64068",
+      "HintGenerator.hints.prefix": "1194071d1d70717bf2fbbd12842ddbf5e106c8e0aa4241b1595fd362f408e980",
+      "AnswerGenerator.instructions": "438f2492fc37a0afecc6a4c6238f5257281f670828c0febb26ceab78c29f8298",
+      "AnswerGenerator.rewritten_query.prefix": "597369d1d7df4789f241858dc8c20e3df895694815d4901a6cf6307563b1b5bd",
+      "AnswerGenerator.hints.prefix": "1194071d1d70717bf2fbbd12842ddbf5e106c8e0aa4241b1595fd362f408e980",
+      "AnswerGenerator.answer.prefix": "fd8c79847dfbc51e70682480e121c53dcf24e4bf0fef039b67fff673ac3bbb3d"
+    },
+    "systems/amazon": {
+      "SessionAnalyzerModule.template": "4e275130f27dd11fa648bf5a7830d8ac369b55bf388e0a67151b8a979fb880fb",
+      "CandidateProfilerModule.template": "be4216dee6abe8ac63637fb129a124d422330245f04df2436ac22252d0a36447",
+      "NextItemDecider.instructions": "09924d0f1f6394a6456edd5a49560d8312e255c4e2f7526196ad44c3107edfef",
+      "NextItemDecider.context.prefix": "eada78d2ec26344fccdc2822e658cfdc8086aa37e8dfb4b546a238e95a5e22da",
+      "NextItemDecider.context.desc": "8ea9f9d8f12e9ef40bc33c3b9ef3b905b8a26bb586bb30138aac21918f2cd3c3",
+      "NextItemDecider.feedback.prefix": "82ad655ccb5ccca87910f619e1fe6c3e6696322286f5718cdd4eb1626ce693d6",
+      "NextItemDecider.feedback.desc": "ff21546ba118882806540f8411d8690d32a0af20d388bec4d61c576a06a9808d",
+      "NextItemDecider.answer.prefix": "e4d71b54d159712d54972cc46d3155adb735cf8e74cc31fe78885d75194ebd50",
+      "NextItemDecider.answer.desc": "b6464fde566b06089fabb4e89d16f0ca5be30711427822253e084e9e68e9024d"
+    },
+    "systems/pubmed": {
+      "ContextAnalystModule.instruction": "0fe753cff18dd59452c2a610ea8e00b6823b2c88cc97bfb54998a73532c7266e",
+      "ContextAnalystModule.template": "4a0bbcd5a4d76567bef2afa37efd8f004bfcd454463089dc9338ff00ce996ce3",
+      "ProblemSolverModule.instruction": "3941e6490aedf3c3ee7b3f56a09655e1e8460c342dbb0987a66476f6230a6c9a",
+      "ProblemSolverModule.template": "2292fcfd58e647aa5f7c657bccd0e5d8ef2ff8dde24cff8787352a2051059963",
+      "FORMAT_PROMPT_YESNO": "00414d3bd8237cbd473eb70aab3ea294aaa11807c458479356d198914d4e74a1",
+      "SYS_SINGLE_SOL_PROMPT": "934511a1b0eb2ac9f508b90cd2c2bbfefea9c0bbf560821d4b6f9d47e5c09d84"
+    }
+  },
+  "rendered": {
+    "systems/amazon/SessionAnalyzerModule.template": {
+      "catalog": "systems/amazon",
+      "key": "SessionAnalyzerModule.template",
+      "arguments": {
+        "sequence": "Viewed a pen\nthen a cup"
+      },
+      "expected": "You are an e-commerce behaviour analyst.\n\nSession sequence:\nViewed a pen\nthen a cup\n\nProvide a 2-3 sentence summary of the user's browsing intent."
+    },
+    "systems/amazon/CandidateProfilerModule.template": {
+      "catalog": "systems/amazon",
+      "key": "CandidateProfilerModule.template",
+      "arguments": {
+        "context": "Context {with braces}\n",
+        "choices_json": "[\n  \"Pen\",\n  \"Caf\\u00e9 {A}\"\n]"
+      },
+      "expected": "You are an e-commerce candidate profiler.\n\nSession summary:\nContext {with braces}\n\n\nCandidate items:\n[\n  \"Pen\",\n  \"Caf\\u00e9 {A}\"\n]\n\nFor each item, on its own line, write a brief (1-2 sentence) comment on why the user might or might not choose it next."
+    },
+    "systems/pubmed/ContextAnalystModule.template": {
+      "catalog": "systems/pubmed",
+      "key": "ContextAnalystModule.template",
+      "arguments": {
+        "instruction": "Original instruction {x}",
+        "context": "Context {with braces}\n",
+        "question": "Does it work?"
+      },
+      "expected": "Original instruction {x}\n\nHere is the given context:\n\"Context {with braces}\n\"\n\nProblem:\n\"Does it work?\"\n\nPlease summarize the relevant information from the context related to the question."
+    },
+    "systems/pubmed/ProblemSolverModule.template": {
+      "catalog": "systems/pubmed",
+      "key": "ProblemSolverModule.template",
+      "arguments": {
+        "instruction": "Original instruction {x}",
+        "question": "Does it work?",
+        "summary": "  Evidence.\n",
+        "format_prompt": "Always conclude the last line of your response should be of the following format: 'Answer: $VALUE' (without quotes) where VALUE is either 'yes' or 'no' or 'maybe'."
+      },
+      "expected": "Original instruction {x}\n\nProblem:\n\"Does it work?\"\n\nHere is a summary of relevant information:\n\"  Evidence.\n\"\n\nPlease provide yes, no or maybe to the given problem. Always conclude the last line of your response should be of the following format: 'Answer: $VALUE' (without quotes) where VALUE is either 'yes' or 'no' or 'maybe'."
+    }
+  }
+}

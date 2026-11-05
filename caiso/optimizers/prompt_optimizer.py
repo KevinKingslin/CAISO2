@@ -5,6 +5,7 @@ import random
 from pydantic import Field
 
 from caiso.core.serialization import Record, canonical
+from caiso.prompts import entry as prompt_entry
 from caiso.providers.base import messages
 
 from .base import ConfigurationOptimizer
@@ -20,12 +21,7 @@ class PromptOptimizer(ConfigurationOptimizer):
         candidates, history = [current.model_copy(deep=True)], []
         tips = context.config.get(
             "prompt_tips",
-            [
-                "Keep the instruction clear and concise.",
-                "Make the instruction informative and descriptive.",
-                "Include specific conditions when useful.",
-                "Consider a different formulation of the instruction.",
-            ],
+            prompt_entry('method', 'prompt_optimizer.default_tips'),
         )
         if not tips:
             raise ValueError("prompt_tips must contain at least one instruction")
@@ -35,11 +31,7 @@ class PromptOptimizer(ConfigurationOptimizer):
             result = context.runtime.providers.complete(
                 "prompt_optimizer",
                 messages(
-                    "You are an AI specialized in improving prompts for a certain component. "
-                    "Use the complete block constitution. Previous prompts and scores are ordered "
-                    "from lowest to highest. Propose an improved instruction. "
-                    + rng.choice(tips)
-                    + " Return JSON with a prompt field.",
+                    prompt_entry('method', 'prompt_optimizer.system').format(value_0=rng.choice(tips)),
                     canonical(
                         {
                             "component": component,

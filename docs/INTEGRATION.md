@@ -13,12 +13,13 @@
   [source record](../third_party/democratic_icai/SOURCE.json).
 
 `UPSTREAM.json` records every upstream tracked file, its source hash, destination,
-and preservation mode. `scripts/verify_upstream.py` verifies all 111 protected files.
-76 are verbatim and 35 differ only by `from/import optimas` → `from/import caiso`.
-All bundled data artifacts, model defaults, prompt definitions, metrics, system
-factories, and experiment YAMLs are in these protected groups.
+and preservation mode. `scripts/verify_upstream.py` verifies all 109 protected files.
+76 are verbatim and 33 differ only by `from/import optimas` → `from/import caiso`.
+All bundled data artifacts, dataset loaders, metrics and original experiment YAMLs
+remain protected. Prompt extraction is recorded below and has separate text and
+rendering regression tests.
 
-## Six explicit upstream exceptions
+## Eight explicit upstream exceptions
 
 1. `.gitignore`: adds local environment, cache, and build exclusions.
 2. `caiso/__init__.py`: package metadata/logging and a Python 3.12-compatible
@@ -41,7 +42,21 @@ factories, and experiment YAMLs are in these protected groups.
    convenience launcher can reuse this evaluator without duplicating it.
 6. `examples/systems/hotpotqa/five_components.py`: reads `COLBERT_URL` (or
    `colbert_url`) from the environment/.env, retaining the original retrieval URL
-   as the fallback. Retrieval prompts, k, and the search space are unchanged.
+   as the fallback. Loads signature text from `caiso/prompts/systems/hotpotqa.json`.
+   Prompt text, k, and the search space are unchanged.
+7. `examples/systems/amazon/local_models_for_next_item_selection.py`: loads the same
+   completion templates and DSPy instruction/field metadata from
+   `caiso/prompts/systems/amazon.json`.
+8. `examples/systems/pubmed/three_components_with_model_selection.py`: loads the
+   same system message, initial instructions, answer format and user templates from
+   `caiso/prompts/systems/pubmed.json`.
+
+The new active `configs/experiments/*.yaml` profiles use shared settings in
+`configs/method/default.yaml` with recursive experiment overrides. They resolve to
+exactly the same effective method and evaluation settings as the preserved profiles.
+No existing YAML values were edited. Legacy reward/PPO parameters remain in the
+original files but are absent from active CAISO profiles because CAISO does not use
+those OPTIMAS algorithms.
 
 The upstream root README is preserved at `docs/OPTIMAS_README.md`; the root README
 explains this integration. New files contain CAISO, integration tests, packaging,

@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 import yaml
 
 from caiso.core.serialization import save_json
-from caiso.integration.config import load_method
+from caiso.integration.config import load_experiment, load_method
 from caiso.integration.provenance import benchmark_manifest
 from scripts.results_layout import write_evaluation
 
@@ -26,7 +26,7 @@ def main(argv=None):
         "--no-test", action="store_true", help="Optimize without evaluating the test split"
     )
     args = parser.parse_args(argv)
-    config = yaml.safe_load(Path(args.config).read_text())
+    config = load_experiment(args.config)
     method = load_method(config)  # Fail invalid settings before loading models/data.
     load_dotenv(config.get("dotenv_path", ".env"))
 
