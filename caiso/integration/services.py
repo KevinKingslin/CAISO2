@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 import json
+import os
 
 import numpy as np
 
@@ -67,7 +68,7 @@ class LocalModelReference:
 
 
 def build_services(system, config, budget):
-    model = config.get("model", "gpt-4o")
+    model = os.getenv("CAISO_METHOD_MODEL") or config.get("model", "gpt-4o")
     providers = {"method": MethodProvider(model, budget, config.get("max_tokens", 4096))}
     for cid, component in system.components.items():
         if hasattr(component.config, "base_model_path"):
@@ -92,7 +93,9 @@ def build_services(system, config, budget):
             device=embeddings.get("device", "cpu"),
         )
     elif embeddings.get("backend", "litellm") == "litellm":
-        embedder = MethodEmbeddings(embeddings.get("model", "text-embedding-3-small"), budget)
+        embedder = MethodEmbeddings(
+            os.getenv("CAISO_EMBEDDING_MODEL") or embeddings.get("model", "text-embedding-3-small"), budget
+        )
     else:
         raise ValueError("Unknown CAISO embedding backend")
     return registry, embedder

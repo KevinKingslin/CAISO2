@@ -24,10 +24,27 @@ adds CAISO's dependencies. Additional benchmark dependencies and external servic
 are still required where they were required upstream; see
 [the original setup instructions](docs/OPTIMAS_README.md).
 
-Configure `.env` using the credentials expected by the original benchmark
-(OpenAI/Anthropic/Gemini as applicable). CAISO's method services default to
-`gpt-4o` and `text-embedding-3-small`, via LiteLLM. These are separate from the
-unchanged benchmark models. Amazon still requires the original Qwen model,
+Copy [`.env.example`](.env.example) to `.env` and fill in your Azure key,
+resource endpoint, API version, and deployment names. With `LLM_BACKEND=azure`,
+existing GPT task calls (including DSPy) and method/embedding calls use those
+deployments. No YAML edits or OpenAI API key are required for these calls.
+`CAISO_METHOD_MODEL` and `CAISO_EMBEDDING_MODEL` override method service models.
+Both launchers load `.env`; already-exported environment variables take precedence.
+To use the original providers, omit `LLM_BACKEND` or set it to `openai`.
+
+Deployment variables follow `AZURE_<MODEL>_DEPLOYMENT`, replacing punctuation
+with underscores, e.g. `gpt-4o-mini` uses `AZURE_GPT_4O_MINI_DEPLOYMENT`.
+Explicit `azure/<deployment>` model identifiers also work. Routing applies to
+sync/async LiteLLM completion and embedding calls and retains prompt/generation
+settings. Missing mappings fail explicitly. PubMed's original search space also
+contains Claude candidates: an Azure OpenAI resource alone cannot run that full
+search space. Those require provider support or an explicitly changed search space.
+Do not map a Claude candidate to a GPT deployment for a benchmark comparison.
+The Azure OpenAI key/endpoint aliases `AZURE_OPENAI_API_KEY`,
+`AZURE_OPENAI_ENDPOINT`, and `AZURE_OPENAI_API_VERSION` are also accepted.
+Keep `.env` private; only the placeholder template is tracked.
+
+Amazon still requires the original Qwen model,
 initialized LoRA adapters, and an external vLLM server. HotpotQA retains the
 original ColBERT endpoint. BigCodeBench requires its package/execution environment;
 STaRK requires its original data/embeddings and model credentials.

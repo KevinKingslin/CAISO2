@@ -71,6 +71,9 @@ else:
 # LiteLLM                                                                     #
 # --------------------------------------------------------------------------- #
 import litellm
+from caiso.azure_env import install_azure_routing
+
+install_azure_routing()
 
 # Diable the cache by default, as it is not needed in most cases.
 litellm.disable_cache()
