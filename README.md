@@ -66,8 +66,12 @@ below. Run it from the checkout; it selects this project's `.venv` and loads `.e
 `evaluate <dataset>` also defaults to the unoptimized system. Evaluation uses the
 existing `scripts/configs/eval/*_vanilla.yaml` profiles, including their three
 repetitions. Use `--repeats 1` to override that, or `--split val` for validation.
-`--output <directory>` sets the exact output directory; metrics retain the existing
-`test_metrics.json`/`val_metrics.json` filenames. The launcher starts neither vLLM
+Baseline results default to `results/<dataset>-unoptimized/evaluation_unoptimized.json`
+(using `pubmedqa` as the directory label). `--output <directory>` sets the exact
+result directory. The evaluator's raw `test_metrics.json`/`val_metrics.json`, logs,
+and initial-state snapshot are kept under `.internal/evaluation/<variant>/<split>/`.
+Validation reports use `validation_unoptimized.json`/`validation.json` to keep test
+results separate. The launcher starts neither vLLM
 nor ColBERT: the same external services must already be available.
 
 ```sh
@@ -89,7 +93,9 @@ STaRK and BigCodeBench evaluation configurations are also included.
 
 These dispatch to `scripts/optimize_system.py` with the existing optimization YAMLs.
 `run` is an alias for `optimize`, so `./scripts/caiso run amazon` also works.
-Omitting `--output` keeps the YAML's output path. `--no-test` skips the automatic
+Omitting `--output` restores `results/<dataset>-<config-hash>/`, where the hash
+reflects the current experiment and resolved method configuration. An existing
+checkpoint requires `--resume` or a new `--output`. `--no-test` skips the automatic
 test evaluation after optimization; `--resume <checkpoint-directory>` (also
 `--checkpoint`) forwards to the optimizer's existing resume support.
 
@@ -102,7 +108,11 @@ To evaluate a completed optimization run, pass the actual run directory:
 
 The first command reads `experiment.json` and loads `final_optimized_system.pth`;
 it fails if that checkpoint is missing. The second constructs the initial system.
-Their metrics go in `eval_optimized/` and `eval_unoptimized/` within the run directory.
+Their reports are `evaluation.json` and `evaluation_unoptimized.json` at the run
+root. Automatic post-optimization evaluation also writes `evaluation.json`.
+The run contains `config.yaml`, `README.md`, `setup.json`, `run.json`, `history.csv`,
+`iterations/`, `checkpoint/`, and `.internal/`, plus the current checkpoint exports.
+Explicit `--output` paths are still respected; existing results are not moved.
 Both use the current evaluation profile for that dataset. An existing YAML can be
 passed as the target or via `--config`; `--system amazon` is also accepted in place
 of a dataset target. `pubmed` and `pubmedqa` refer to the same current PubMed files.

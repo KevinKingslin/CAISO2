@@ -7,6 +7,8 @@ from pathlib import Path
 import yaml
 from dotenv import load_dotenv
 
+from scripts.results_layout import dataset_label, optimization_output, write_evaluation
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DATASETS = {"hotpotqa": "hotpotqa", "amazon": "amazon", "pubmed": "pubmed", "pubmedqa": "pubmed"}
@@ -104,10 +106,20 @@ def main(argv=None):
     load_dotenv(config.get("dotenv_path", ".env"))
     if args.command == "optimize":
         from scripts.optimize_system import main as optimize
+        from caiso.integration.config import load_method
 
         arguments = [str(path)]
-        if args.output:
-            arguments.extend(("--output", str(args.output)))
+        output = args.output
+        if output is None and args.resume:
+            checkpoint = args.resume
+            if checkpoint.name == "checkpoint.json":
+                checkpoint = checkpoint.parent
+            if not (checkpoint / "checkpoint.json").is_file():
+                command_parser.error(f"No checkpoint.json in {checkpoint}")
+            output = checkpoint.parent
+        if output is None:
+            output = optimization_output(config, load_method(config))
+        arguments.extend(("--output", str(output)))
         if args.resume:
             arguments.extend(("--resume", str(args.resume)))
         if args.no_test:
@@ -121,9 +133,17 @@ def main(argv=None):
         if value is not None:
             arguments.extend((f"--{key}", str(value)))
     output = args.output
-    if output is None and run:
-        output = run / ("eval_unoptimized" if args.unoptimized else "eval_optimized")
-    return evaluate(arguments, output_dir=output)
+    variant = "optimized" if config.get("system_state_dict_path") else "unoptimized"
+    if output is None:
+        output = run if run else Path("results") / f"{dataset_label(config)}-{variant}"
+    split = config.get("split", "test")
+    raw_output = output / ".internal" / "evaluation" / variant / split
+    metrics = evaluate(arguments, output_dir=raw_output)
+    write_evaluation(
+        output, metrics, variant=variant, split=split,
+        state_source=config.get("system_state_dict_path"),
+    )
+    return metrics
 
 
 if __name__ == "__main__":

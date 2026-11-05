@@ -101,6 +101,7 @@ def main(argv=None, *, output_dir=None):
         json.dump(metrics, f, indent=2, sort_keys=True)
     logger.info(f"Metrics written to {metrics_path}")
     logger.info(f"Final metrics:\n{json.dumps(metrics, indent=2)}")
+    return metrics
 
 
 if __name__ == "__main__":

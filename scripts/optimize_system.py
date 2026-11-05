@@ -14,6 +14,7 @@ import yaml
 from caiso.core.serialization import save_json
 from caiso.integration.config import load_method
 from caiso.integration.provenance import benchmark_manifest
+from scripts.results_layout import write_evaluation
 
 
 def main(argv=None):
@@ -43,7 +44,12 @@ def main(argv=None):
     )
     if args.output is not None:
         output = args.output
+    if (output / "checkpoint/checkpoint.json").exists() and not args.resume:
+        parser.error(f"Run already exists in {output}; use --resume or a new --output")
     output.mkdir(parents=True, exist_ok=True)
+    (output / "config.yaml").write_text(
+        yaml.safe_dump({"experiment": config, "method": method}, sort_keys=False)
+    )
     system_factory = registered_systems[config["system"]]
     dataset_factory = registered_datasets[config["dataset"]]
     if system_factory is None or dataset_factory is None:
@@ -75,6 +81,10 @@ def main(argv=None):
     if not args.no_test and testset:
         evaluation, _ = eval_system(optimized, testset, num_repeat=config.get("num_repeat", 1))
         save_json(output / "eval_metrics.json", evaluation)
+        write_evaluation(
+            output, evaluation, variant="optimized", split="test",
+            state_source=output / "final_optimized_system.pth",
+        )
         print(json.dumps(evaluation, indent=2))
     print(f"CAISO results: {output}")
 
