@@ -54,6 +54,22 @@ STaRK requires its original data/embeddings and model credentials.
 
 ## Run the same unoptimized systems
 
+The convenience launcher uses the same files and defaults as the Python commands
+below. Run it from the checkout; it selects this project's `.venv` and loads `.env`:
+
+```sh
+./scripts/caiso evaluate amazon --unoptimized
+./scripts/caiso evaluate hotpotqa --unoptimized
+./scripts/caiso evaluate pubmedqa --unoptimized
+```
+
+`evaluate <dataset>` also defaults to the unoptimized system. Evaluation uses the
+existing `scripts/configs/eval/*_vanilla.yaml` profiles, including their three
+repetitions. Use `--repeats 1` to override that, or `--split val` for validation.
+`--output <directory>` sets the exact output directory; metrics retain the existing
+`test_metrics.json`/`val_metrics.json` filenames. The launcher starts neither vLLM
+nor ColBERT: the same external services must already be available.
+
 ```sh
 python -m scripts.eval_system scripts/configs/eval/hotpotqa_vanilla.yaml
 python -m scripts.eval_system scripts/configs/eval/pubmed_vanilla.yaml
@@ -64,6 +80,33 @@ These use the original evaluator, factories, metrics, and test sets. The release
 STaRK and BigCodeBench evaluation configurations are also included.
 
 ## Optimize with CAISO
+
+```sh
+./scripts/caiso optimize amazon --output results/amazon-run
+./scripts/caiso optimize hotpotqa --output results/hotpotqa-run
+./scripts/caiso optimize pubmedqa --output results/pubmed-run
+```
+
+These dispatch to `scripts/optimize_system.py` with the existing optimization YAMLs.
+`run` is an alias for `optimize`, so `./scripts/caiso run amazon` also works.
+Omitting `--output` keeps the YAML's output path. `--no-test` skips the automatic
+test evaluation after optimization; `--resume <checkpoint-directory>` (also
+`--checkpoint`) forwards to the optimizer's existing resume support.
+
+To evaluate a completed optimization run, pass the actual run directory:
+
+```sh
+./scripts/caiso evaluate results/amazon-run
+./scripts/caiso evaluate results/amazon-run --unoptimized
+```
+
+The first command reads `experiment.json` and loads `final_optimized_system.pth`;
+it fails if that checkpoint is missing. The second constructs the initial system.
+Their metrics go in `eval_optimized/` and `eval_unoptimized/` within the run directory.
+Both use the current evaluation profile for that dataset. An existing YAML can be
+passed as the target or via `--config`; `--system amazon` is also accepted in place
+of a dataset target. `pubmed` and `pubmedqa` refer to the same current PubMed files.
+`python -m scripts.caiso_cli ...` is equivalent when using an activated environment.
 
 ```sh
 python -m scripts.optimize_system scripts/configs/optimize/hotpotqa.yaml

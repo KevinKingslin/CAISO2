@@ -45,21 +45,25 @@ class ScriptArgs:
                 setattr(self, field_name, None)
 
 
-def main():
+def main(argv=None, *, output_dir=None):
     parser = HfArgumentParser(ScriptArgs)
+    argv = sys.argv[1:] if argv is None else argv
 
-    if len(sys.argv) == 2 and sys.argv[1].endswith(".yaml"):
-        with open(sys.argv[1], "r") as f:
+    if len(argv) == 1 and argv[0].endswith(".yaml"):
+        with open(argv[0], "r") as f:
             yaml_config = yaml.safe_load(f)
         args = parser.parse_dict(yaml_config)[0]
     else:
-        args = parser.parse_args_into_dataclasses()[0]
+        args = parser.parse_args_into_dataclasses(args=argv)[0]
 
     # Load environment variables
     load_dotenv(args.dotenv_path)
 
     # Setup output directory
-    args.output_dir = osp.join(args.output_dir, args.dataset, args.system_name, args.run_name)
+    args.output_dir = (
+        str(output_dir) if output_dir is not None
+        else osp.join(args.output_dir, args.dataset, args.system_name, args.run_name)
+    )
     os.makedirs(args.output_dir, exist_ok=True)
 
     logger = setup_logger(__name__, log_file=osp.join(args.output_dir, "output.log"))

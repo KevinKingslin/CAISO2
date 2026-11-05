@@ -19,6 +19,7 @@ from caiso.integration.provenance import benchmark_manifest
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("config", help="Released experiment YAML, optionally with a caiso section")
+    parser.add_argument("--output", type=Path, help="Exact output directory (otherwise use the experiment paths)")
     parser.add_argument("--resume", help="CAISO checkpoint directory")
     parser.add_argument(
         "--no-test", action="store_true", help="Optimize without evaluating the test split"
@@ -40,6 +41,8 @@ def main(argv=None):
         / config["system"]
         / config.get("wandb_run_name", "caiso")
     )
+    if args.output is not None:
+        output = args.output
     output.mkdir(parents=True, exist_ok=True)
     system_factory = registered_systems[config["system"]]
     dataset_factory = registered_datasets[config["dataset"]]

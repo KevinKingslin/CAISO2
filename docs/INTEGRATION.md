@@ -30,9 +30,12 @@ factories, and experiment YAMLs are in these protected groups.
 4. `scripts/optimize_system.py`: constructs the same system/dataset factories and
    replaces reward-model loading/training with CAISO setup. It saves the original
    system state format and uses the original evaluator for final test evaluation.
+   Accepts an optional exact output-directory override for `scripts/caiso`.
 5. `scripts/eval_system.py`: import renaming plus `weights_only=False` when loading
    the original checkpoint format, which contains `SimpleNamespace` and `Path`
    objects and requires explicit full loading on modern PyTorch.
+   Accepts programmatic argv and an exact output-directory override so the
+   convenience launcher can reuse this evaluator without duplicating it.
 6. `examples/systems/hotpotqa/five_components.py`: reads `COLBERT_URL` (or
    `colbert_url`) from the environment/.env, retaining the original retrieval URL
    as the fallback. Retrieval prompts, k, and the search space are unchanged.
