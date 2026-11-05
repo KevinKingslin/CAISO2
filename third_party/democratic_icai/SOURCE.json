@@ -1,0 +1,15 @@
+{
+  "source": "User-supplied Democratic-ICAI-C8D5 snapshot",
+  "commit": null,
+  "license": "MIT, Copyright (c) 2026 Dexxter606",
+  "files": {
+    "LICENSE": "3d331042f00be9d95cad48374f360286847a46d968fb5da864f024df9580c3c9",
+    "README.md": "255b23f7fed3b7a1d931ef3dac2f0c8a1ffa26da6702029691c1908c41733392",
+    "audit_principles.py": "f78be25cc7ff55d77d80451c83ac1e5427bfcf82452344a5e2cf094c28156e9a",
+    "clustering.py": "bdc9658b240d6b0e5cd0b5d526dc8a3028decfefdd2449b9321a9b582bf4ca4a",
+    "common.py": "96fce72f6936c444dc75132f0039068516bac0d157049053b86a87b94fd481fe",
+    "debate.py": "0803c7f025f6a011bc6869dbd5ba015bfcc80eec380bc5aeac8d08590b7a31a7",
+    "reasoning.py": "5c46b03ee7eded7da0de3562d3e3f3fa667098c502d95a3f106a3a2686676163",
+    "run_pipeline.py": "d1acf4600580422d8234f566a09ccaa1d590510f42947ef006d167e6992212f2"
+  }
+}

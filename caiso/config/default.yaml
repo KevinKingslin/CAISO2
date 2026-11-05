@@ -1,0 +1,115 @@
+# Dataset/question batch sizes live in configs/experiments/*.yaml under method.
+seed: 42
+max_iterations: null  # Continue until a run, time, or model-call budget is exhausted.
+execution:
+  max_workers: 10  # Independent system runs; provider concurrency/RPM limits still apply.
+initial_preference_pairs: 50  # One pair per distinct selected training question in -1 mode.
+initial_preference_attempts: -1  # Two runs per question; seeded random tie-break, no tie retries.
+dicai:
+  personas: 3
+  max_workers: 10  # Concurrent independent debates for both system and block induction.
+  reasoning_workers: 10  # Independent reasoning requests per pair; provider concurrency still applies.
+  debate_rounds: 3  # Reconstruction gate can finish earlier.
+  min_debate_rounds: 1
+  self_consistency_samples: 5
+  self_refine_steps: 2
+  min_principles: 3
+  reconstruction_votes: 1
+  history_turns: 8
+  temperatures:  # Ignored by deployments configured without temperature support.
+    cot: 0.4
+    self_consistency_sample: 0.9
+    self_consistency_consensus: 0.2
+    self_refine_draft: 0.6
+    self_refine_critique: 0.3
+    self_refine_revision: 0.4
+    debater: 0.7
+    chairperson: 0.2
+    reconstruction: 0.0
+    abstraction: 0.2
+  clustering:
+    min_clusters: 10
+    max_clusters: 100  # Also bounded by number of settled principles minus one.
+    cluster_step: 10  # Test 10, 20, 30, ...; choose the highest silhouette score.
+    selection: silhouette
+    fixed_clusters: null  # Optional fixed k; otherwise silhouette search.
+  minimization:
+    enabled: false  # Official optional greedy reconstruction-preserving reduction.
+    strict: false
+    sample_size: 0  # 0 uses all training preference pairs.
+attribution:
+  stochastic_repeats: 1  # One paired normal/intervention seed per question.
+  baseline_policy: per_edge
+  bootstrap_samples: 200
+  confidence_level: 0.95
+leiden:
+  resolution_gamma: 0.05
+  weight_transform: raw_if_supported
+  n_iterations: -1  # -1 runs Leiden until convergence; positive values cap passes.
+block_selection:
+  model_role: block_selection
+block_constitution:
+  reuse_trajectories: true  # Reuse identical state/example/seed executions within this stage.
+  preference_pairs: 2
+  score_tie_epsilon: 0.000001
+block_optimization:
+  max_joint_candidates: 16
+  task_scoring:
+    enabled: false  # true: run each complete candidate end to end on the training batch.
+    constitution_weight: 1.0  # Combined score is the weighted average of both scores.
+    task_weight: 1.0  # Both weights must be positive when enabled; validation stays separate.
+  acceptance_epsilon: 0.000001
+  prompt_candidates: 3
+  prompt_tips:
+    - Keep the instruction clear and concise.
+    - Make the instruction informative and descriptive.
+    - Include specific conditions when useful.
+    - Consider a different formulation of the instruction.
+  softmax_temperature: 0.5
+  sample_discrete: true
+  dpo:
+    lora_rank: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    learning_rate: 0.000005
+    epochs: 1
+    batch_size: 1
+    gradient_accumulation_steps: 4
+    dtype: bfloat16
+    quantization: null
+    max_steps: 20
+    max_total_training_steps: 10000
+    max_length: 2048
+    beta: 0.1
+    target_modules: [q_proj, k_proj, v_proj, o_proj]
+    device_map: null
+    use_cpu: false
+    disable_tqdm: true  # Keep the current-iteration CLI panel clean.
+workflow:
+  enabled: false
+  trigger_every_k_accepted_blocks: 3
+  plateau_patience: 3
+  candidates: 1
+  compatibility_budget: 30
+  compatibility_search:
+    prompt_candidates: 1
+    max_joint_candidates: 4
+  reinduce_system_constitution_on_accept: true
+budget:
+  max_equivalent_full_runs: 2000
+  max_wallclock_hours: 24
+  max_llm_calls: 100000
+  overhead_call_cost: 0.0
+error_handling:
+  response_retries: 2  # Up to 3 attempts for malformed model answers, with format feedback.
+  operation_retries: 2  # Transient retrieval/embedding errors; Azure also has transport retries.
+  backoff_seconds: 1
+  max_backoff_seconds: 8
+  continue_after_errors: true  # Keep validated updates and skip the failed iteration.
+  max_consecutive_errors: 3  # Then stop cleanly with a checkpoint.
+reporting:
+  cli: true  # One live panel; redirected output contains only the final panel.
+  refresh_per_second: 2
+  plots: true  # Non-blocking PNG saved after each iteration, works without a display.
+  plot_dpi: 150
+  capture_model_output: true  # Python model/training messages go to iteration model.log.

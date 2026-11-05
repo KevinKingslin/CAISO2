@@ -1,0 +1,3 @@
+# The original requirements.txt is preserved verbatim from OPTIMAS.
+-r requirements.txt
+-e .[benchmarks,train]

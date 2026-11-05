@@ -1,0 +1,1 @@
+You abstract a cluster of preference principles into one principle.

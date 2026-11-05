@@ -1,0 +1,825 @@
+{
+  "repository": "https://github.com/snap-stanford/optimas",
+  "commit": "71871a2dd98081231d733debd41178ba47e13528",
+  "files": [
+    {
+      "upstream_path": ".gitignore",
+      "path": ".gitignore",
+      "mode": "integration_change",
+      "upstream_sha256": "b8f654021af4965fae516fdd8069054502aa68cb864c82378455f0ecd73742c9",
+      "expected_sha256": null
+    },
+    {
+      "upstream_path": "ATTRIBUTION.md",
+      "path": "ATTRIBUTION.md",
+      "mode": "verbatim",
+      "upstream_sha256": "7e47c5c676c40791804c9d69fdf4d1b00789df971145a524eb2c9eee97443da5",
+      "expected_sha256": "7e47c5c676c40791804c9d69fdf4d1b00789df971145a524eb2c9eee97443da5"
+    },
+    {
+      "upstream_path": "LICENSE",
+      "path": "LICENSE",
+      "mode": "verbatim",
+      "upstream_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "expected_sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "upstream_path": "README.md",
+      "path": "docs/OPTIMAS_README.md",
+      "mode": "verbatim",
+      "upstream_sha256": "aec28e79878a67545348ac0ddf396b30c6bc6dadf402e12445856379b70a12a5",
+      "expected_sha256": "aec28e79878a67545348ac0ddf396b30c6bc6dadf402e12445856379b70a12a5"
+    },
+    {
+      "upstream_path": "examples/__init__.py",
+      "path": "examples/__init__.py",
+      "mode": "verbatim",
+      "upstream_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "upstream_path": "examples/data/README.md",
+      "path": "examples/data/README.md",
+      "mode": "verbatim",
+      "upstream_sha256": "7f2e64a0a05e27c9ccb1004273dd24a0610b01b45d5921541ce22790daea990e",
+      "expected_sha256": "7f2e64a0a05e27c9ccb1004273dd24a0610b01b45d5921541ce22790daea990e"
+    },
+    {
+      "upstream_path": "examples/data/combined_PubMedQA_test.jsonl",
+      "path": "examples/data/combined_PubMedQA_test.jsonl",
+      "mode": "verbatim",
+      "upstream_sha256": "7d831b2e464e01d76dcae4bfc1e8f6fbb23e89d7d5ca60917187649f1bf6a185",
+      "expected_sha256": "7d831b2e464e01d76dcae4bfc1e8f6fbb23e89d7d5ca60917187649f1bf6a185"
+    },
+    {
+      "upstream_path": "examples/data/combined_PubMedQA_train.jsonl",
+      "path": "examples/data/combined_PubMedQA_train.jsonl",
+      "mode": "verbatim",
+      "upstream_sha256": "1204dc537ca7c78c3ca49faa53fb005655bca6cf97a6901f2054db9a70921eaa",
+      "expected_sha256": "1204dc537ca7c78c3ca49faa53fb005655bca6cf97a6901f2054db9a70921eaa"
+    },
+    {
+      "upstream_path": "examples/data/hotpot-qa-distractor-sample.joblib",
+      "path": "examples/data/hotpot-qa-distractor-sample.joblib",
+      "mode": "verbatim",
+      "upstream_sha256": "b3e49c0aea1f8151fe307b3af2e7d8fa13271e2401a4c74b1e053137c37b9790",
+      "expected_sha256": "b3e49c0aea1f8151fe307b3af2e7d8fa13271e2401a4c74b1e053137c37b9790"
+    },
+    {
+      "upstream_path": "examples/data/multilingual_session_based_recommendation_dataset.csv",
+      "path": "examples/data/multilingual_session_based_recommendation_dataset.csv",
+      "mode": "verbatim",
+      "upstream_sha256": "b2396e3b3ff4851ceaa402a85ce271982520dd22a19637c56148be479711a4a4",
+      "expected_sha256": "b2396e3b3ff4851ceaa402a85ce271982520dd22a19637c56148be479711a4a4"
+    },
+    {
+      "upstream_path": "examples/data/session_based_next_item_selection_dataset.csv",
+      "path": "examples/data/session_based_next_item_selection_dataset.csv",
+      "mode": "verbatim",
+      "upstream_sha256": "b36ac7c89c8d01663da8f1f0ea747aa09866a2e6a2ea807b18bfeef74d97d472",
+      "expected_sha256": "b36ac7c89c8d01663da8f1f0ea747aa09866a2e6a2ea807b18bfeef74d97d472"
+    },
+    {
+      "upstream_path": "examples/datasets/__init__.py",
+      "path": "examples/datasets/__init__.py",
+      "mode": "verbatim",
+      "upstream_sha256": "a4455981aeca66a9278b6a6d4985c386d5c1f9787d46cd9e6e31485b559e808f",
+      "expected_sha256": "a4455981aeca66a9278b6a6d4985c386d5c1f9787d46cd9e6e31485b559e808f"
+    },
+    {
+      "upstream_path": "examples/datasets/amazon.py",
+      "path": "examples/datasets/amazon.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "dcb4f448225f7650c00b228ae4ac2e5f308dad3a11f670f2c8bff8cf2c2b9f76",
+      "expected_sha256": "93371545b17e3b97df6ca382b409b80d55a056cd6582b3096a71540118a4e0fc"
+    },
+    {
+      "upstream_path": "examples/datasets/bigcodebench.py",
+      "path": "examples/datasets/bigcodebench.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "96dcf45b64e803abfded24835e3ed391a99c8952a852931db3d544c52df57144",
+      "expected_sha256": "ab1ccda6dd86e2e8e386cd09cebbbeaf993d7ab2c7d46ddb944eff31ea884cbe"
+    },
+    {
+      "upstream_path": "examples/datasets/hotpotqa.py",
+      "path": "examples/datasets/hotpotqa.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "812a4255bd69980962c5eb90f58203ad0f4c7bcd5aa76480d0fb15286aefd758",
+      "expected_sha256": "18fc6fd51a910ad53420609904804fac3c79e34bfc50b666028bedf8b7c166e7"
+    },
+    {
+      "upstream_path": "examples/datasets/pubmed.py",
+      "path": "examples/datasets/pubmed.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "8e0923ebead927344e7c98eaaa33fdd6657630cfdae3161410d8091010dc8a88",
+      "expected_sha256": "64bfe088becf66ca7656d145843d32ea78c6d88eab7489a54149d5140e5191d2"
+    },
+    {
+      "upstream_path": "examples/datasets/stark_prime.py",
+      "path": "examples/datasets/stark_prime.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "1cb2274a5b6924e6e7df0e7e7365b20cc6a2bd3a9d9054d71625cf7c8e4f8175",
+      "expected_sha256": "af148b90069c81bacb3f9ba7a1b530376e7f0ca32daf1c62621b21f922469327"
+    },
+    {
+      "upstream_path": "examples/metrics/__init__.py",
+      "path": "examples/metrics/__init__.py",
+      "mode": "verbatim",
+      "upstream_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "upstream_path": "examples/metrics/exact_match.py",
+      "path": "examples/metrics/exact_match.py",
+      "mode": "verbatim",
+      "upstream_sha256": "6591962eac9ef093c68eff75a4c05a46ed2ede9b0d002f7e0c3a35b4c7b4ce95",
+      "expected_sha256": "6591962eac9ef093c68eff75a4c05a46ed2ede9b0d002f7e0c3a35b4c7b4ce95"
+    },
+    {
+      "upstream_path": "examples/metrics/f1_score.py",
+      "path": "examples/metrics/f1_score.py",
+      "mode": "verbatim",
+      "upstream_sha256": "431e9051a2768c8e561c5496525eec0ea22cfc0c2cc43ce5441a5b501f3b2484",
+      "expected_sha256": "431e9051a2768c8e561c5496525eec0ea22cfc0c2cc43ce5441a5b501f3b2484"
+    },
+    {
+      "upstream_path": "examples/metrics/mrr.py",
+      "path": "examples/metrics/mrr.py",
+      "mode": "verbatim",
+      "upstream_sha256": "aeda077b57e15c28c22c6c1fdfcb6e34cec0378681338796e6d772d7868f2632",
+      "expected_sha256": "aeda077b57e15c28c22c6c1fdfcb6e34cec0378681338796e6d772d7868f2632"
+    },
+    {
+      "upstream_path": "examples/metrics/pass_rate.py",
+      "path": "examples/metrics/pass_rate.py",
+      "mode": "verbatim",
+      "upstream_sha256": "c1e97ab89633391d5675a9da8b6610caa016beee310f85398c54da0d4d301d62",
+      "expected_sha256": "c1e97ab89633391d5675a9da8b6610caa016beee310f85398c54da0d4d301d62"
+    },
+    {
+      "upstream_path": "examples/systems/__init__.py",
+      "path": "examples/systems/__init__.py",
+      "mode": "verbatim",
+      "upstream_sha256": "61396cec460d6730972a27a7a64411356350c74b0d0a004878263708621b163e",
+      "expected_sha256": "61396cec460d6730972a27a7a64411356350c74b0d0a004878263708621b163e"
+    },
+    {
+      "upstream_path": "examples/systems/amazon/local_models_for_next_item_selection.py",
+      "path": "examples/systems/amazon/local_models_for_next_item_selection.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "67e777d7a69faa0f0410f72e32c03a57b6ddfe931d7a441b375ac56c76196694",
+      "expected_sha256": "b458bfd760b32cbb75c2638c3ff2c2ab3e74875fc54e16199a01f103c1ee8a33"
+    },
+    {
+      "upstream_path": "examples/systems/bigcodebench/four_components.py",
+      "path": "examples/systems/bigcodebench/four_components.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "fc15cb5ec86aa5883f9b9378c82b1808ba5c5c0db5d68ba61c5a92947283d1c9",
+      "expected_sha256": "2775980c768c21b393d748c594be7fb6fe7f32d6134e1ff4f7889f862f2cfcce"
+    },
+    {
+      "upstream_path": "examples/systems/hotpotqa/five_components.py",
+      "path": "examples/systems/hotpotqa/five_components.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "fd4d399436abba772ba69c0aed82ca7eb82bbdf7acaa4671a8b7d5ae2203b3d5",
+      "expected_sha256": "fb25b1dac115d91ef5e41b68a34e0766d80ed73d4a1baf0dee4cf6821e06afac"
+    },
+    {
+      "upstream_path": "examples/systems/pubmed/three_components_with_model_selection.py",
+      "path": "examples/systems/pubmed/three_components_with_model_selection.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "55a7d3c6e50c8d6ce425a9d10495f61d884c727dd9f94f966049c40b9425c047",
+      "expected_sha256": "bbbb9c1807f41fe7b27838b6c329781cb413c0f87407e32cb880a6582c2b8c81"
+    },
+    {
+      "upstream_path": "examples/systems/stark/bio_system.py",
+      "path": "examples/systems/stark/bio_system.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "97d4ffb88abe385f6a2810949304d9b18c6886ec53c711e421dfcd2b7fb879fc",
+      "expected_sha256": "d0b53d81a92a4b69c7284e78ab69cadf4e762bd45860a8a8739b773f8ef0ed47"
+    },
+    {
+      "upstream_path": "examples/systems/stark/functional/emb_download.py",
+      "path": "examples/systems/stark/functional/emb_download.py",
+      "mode": "verbatim",
+      "upstream_sha256": "1d40637e0ebffeb2e8c0b20161a7c5b70b6bff25be6f187827ed2fa6cd47177c",
+      "expected_sha256": "1d40637e0ebffeb2e8c0b20161a7c5b70b6bff25be6f187827ed2fa6cd47177c"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/__init__.py",
+      "path": "examples/systems/stark/tools/__init__.py",
+      "mode": "verbatim",
+      "upstream_sha256": "e060dc316480d0fe0fbdb7c86e54a5fcbe6d12490137abec3ac1e8e1fdcc0308",
+      "expected_sha256": "e060dc316480d0fe0fbdb7c86e54a5fcbe6d12490137abec3ac1e8e1fdcc0308"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/clip.py",
+      "path": "examples/systems/stark/tools/clip.py",
+      "mode": "verbatim",
+      "upstream_sha256": "80a3dc5bc1d9e5a61faa27d107ca738da38090e44777f72a973cb9fcc1b59bcc",
+      "expected_sha256": "80a3dc5bc1d9e5a61faa27d107ca738da38090e44777f72a973cb9fcc1b59bcc"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/compute_metrics.py",
+      "path": "examples/systems/stark/tools/compute_metrics.py",
+      "mode": "verbatim",
+      "upstream_sha256": "7c1a137fe8382c9265a1ec9e550f5823e218c9d2a30a5893d0e87ef9cc090d4a",
+      "expected_sha256": "7c1a137fe8382c9265a1ec9e550f5823e218c9d2a30a5893d0e87ef9cc090d4a"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/debug_print.py",
+      "path": "examples/systems/stark/tools/debug_print.py",
+      "mode": "verbatim",
+      "upstream_sha256": "b7203ca4abb429018469306fcd683402e5e4493a05647dafe9bd2c0ccf811a72",
+      "expected_sha256": "b7203ca4abb429018469306fcd683402e5e4493a05647dafe9bd2c0ccf811a72"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/embedding.py",
+      "path": "examples/systems/stark/tools/embedding.py",
+      "mode": "verbatim",
+      "upstream_sha256": "c215f8781e3fc0b0589a20bc25ea2fe30c2688ed713123d7060211d395ae386a",
+      "expected_sha256": "c215f8781e3fc0b0589a20bc25ea2fe30c2688ed713123d7060211d395ae386a"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/flickr30k_entities.py",
+      "path": "examples/systems/stark/tools/flickr30k_entities.py",
+      "mode": "verbatim",
+      "upstream_sha256": "27c211147d0d8cd903db30e036f80a396ca2845d5108eaeff730fe8f15d4e128",
+      "expected_sha256": "27c211147d0d8cd903db30e036f80a396ca2845d5108eaeff730fe8f15d4e128"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/llm_funcs.py",
+      "path": "examples/systems/stark/tools/llm_funcs.py",
+      "mode": "verbatim",
+      "upstream_sha256": "4b9593173c23030a86b145dbab4fc9c8179e5816233c49706609914a3685aed1",
+      "expected_sha256": "4b9593173c23030a86b145dbab4fc9c8179e5816233c49706609914a3685aed1"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/nodes.py",
+      "path": "examples/systems/stark/tools/nodes.py",
+      "mode": "verbatim",
+      "upstream_sha256": "7ded21fba0d43849e0bf894fc80ced87e2fe27211a444a3a4d89871c4d3af538",
+      "expected_sha256": "7ded21fba0d43849e0bf894fc80ced87e2fe27211a444a3a4d89871c4d3af538"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/parser.py",
+      "path": "examples/systems/stark/tools/parser.py",
+      "mode": "verbatim",
+      "upstream_sha256": "17002935be638c2576ff6442c8576468aa27c5855ef71794b801d33e8f6e3c3c",
+      "expected_sha256": "17002935be638c2576ff6442c8576468aa27c5855ef71794b801d33e8f6e3c3c"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/react/api.py",
+      "path": "examples/systems/stark/tools/react/api.py",
+      "mode": "verbatim",
+      "upstream_sha256": "18866cbb4d4c7753efcc3bc5b4ea2faf7dbe222bbfaf96f73f893d5217cba9f4",
+      "expected_sha256": "18866cbb4d4c7753efcc3bc5b4ea2faf7dbe222bbfaf96f73f893d5217cba9f4"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/react/tool_lists.json",
+      "path": "examples/systems/stark/tools/react/tool_lists.json",
+      "mode": "verbatim",
+      "upstream_sha256": "c947f65ad4f9acabed79402b20f501d9c14e4c7094388950c158d079a5b42ec4",
+      "expected_sha256": "c947f65ad4f9acabed79402b20f501d9c14e4c7094388950c158d079a5b42ec4"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/react/tool_lists_vision.json",
+      "path": "examples/systems/stark/tools/react/tool_lists_vision.json",
+      "mode": "verbatim",
+      "upstream_sha256": "fce8df74e31cea5b5b272885275f12d6400f2cd15a1e2c0ec605bb3aa1721e60",
+      "expected_sha256": "fce8df74e31cea5b5b272885275f12d6400f2cd15a1e2c0ec605bb3aa1721e60"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/relational_extraction.py",
+      "path": "examples/systems/stark/tools/relational_extraction.py",
+      "mode": "verbatim",
+      "upstream_sha256": "e0f9ea92b7f2a6fbf59ac000168a6e934a8b4689c03ee3edf19f295a9732a281",
+      "expected_sha256": "e0f9ea92b7f2a6fbf59ac000168a6e934a8b4689c03ee3edf19f295a9732a281"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/text_extraction.py",
+      "path": "examples/systems/stark/tools/text_extraction.py",
+      "mode": "verbatim",
+      "upstream_sha256": "dd03e7c4e7778bb2f3ca4dad2ece9875db1c413dc4e6622817e4b23e2e51495f",
+      "expected_sha256": "dd03e7c4e7778bb2f3ca4dad2ece9875db1c413dc4e6622817e4b23e2e51495f"
+    },
+    {
+      "upstream_path": "examples/systems/stark/tools/tool.py",
+      "path": "examples/systems/stark/tools/tool.py",
+      "mode": "verbatim",
+      "upstream_sha256": "81f5dddfb836774fafb91e3444776385bbdf9f54fc60611ebfbc3746949f5eb1",
+      "expected_sha256": "81f5dddfb836774fafb91e3444776385bbdf9f54fc60611ebfbc3746949f5eb1"
+    },
+    {
+      "upstream_path": "examples/systems/stark/utils/__init__.py",
+      "path": "examples/systems/stark/utils/__init__.py",
+      "mode": "verbatim",
+      "upstream_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "upstream_path": "examples/systems/stark/utils/api_vision.py",
+      "path": "examples/systems/stark/utils/api_vision.py",
+      "mode": "verbatim",
+      "upstream_sha256": "cc53c6dcdac8f2f31e165877e56ec9ec7f2b8e0e7edb93255b044a3a855fa683",
+      "expected_sha256": "cc53c6dcdac8f2f31e165877e56ec9ec7f2b8e0e7edb93255b044a3a855fa683"
+    },
+    {
+      "upstream_path": "examples/systems/stark/utils/device.py",
+      "path": "examples/systems/stark/utils/device.py",
+      "mode": "verbatim",
+      "upstream_sha256": "4ac42de5f585efdd1ab308e0fb8978c751455d8c2fb459e5a4e040632835f1fd",
+      "expected_sha256": "4ac42de5f585efdd1ab308e0fb8978c751455d8c2fb459e5a4e040632835f1fd"
+    },
+    {
+      "upstream_path": "examples/systems/stark/utils/error_handler.py",
+      "path": "examples/systems/stark/utils/error_handler.py",
+      "mode": "verbatim",
+      "upstream_sha256": "84d58beb662c807b691a0fa0ea981bea20455900bf5c1d13cb1141a0e5eb7efe",
+      "expected_sha256": "84d58beb662c807b691a0fa0ea981bea20455900bf5c1d13cb1141a0e5eb7efe"
+    },
+    {
+      "upstream_path": "examples/systems/stark/utils/flickr30k_entities_utils.py",
+      "path": "examples/systems/stark/utils/flickr30k_entities_utils.py",
+      "mode": "verbatim",
+      "upstream_sha256": "12d571e1df8a797ef65ec661ba486a18db08fc9719446df6dd68cfe04fad7835",
+      "expected_sha256": "12d571e1df8a797ef65ec661ba486a18db08fc9719446df6dd68cfe04fad7835"
+    },
+    {
+      "upstream_path": "examples/systems/stark/utils/format.py",
+      "path": "examples/systems/stark/utils/format.py",
+      "mode": "verbatim",
+      "upstream_sha256": "4e630aba157aa8618c3c0aea3e345d1b3d9c5071b0dd10195b3fb76b9db27602",
+      "expected_sha256": "4e630aba157aa8618c3c0aea3e345d1b3d9c5071b0dd10195b3fb76b9db27602"
+    },
+    {
+      "upstream_path": "examples/systems/stark/utils/image.py",
+      "path": "examples/systems/stark/utils/image.py",
+      "mode": "verbatim",
+      "upstream_sha256": "5a8e7c1d0c87ff3ac4a83600ee6fb5ed8dec2b24517d6b30ab9c0ae1783a9809",
+      "expected_sha256": "5a8e7c1d0c87ff3ac4a83600ee6fb5ed8dec2b24517d6b30ab9c0ae1783a9809"
+    },
+    {
+      "upstream_path": "examples/systems/stark/utils/process_image.py",
+      "path": "examples/systems/stark/utils/process_image.py",
+      "mode": "verbatim",
+      "upstream_sha256": "d185833eabc7f87e1e322812e93a41c839823178396ed0f5c3fba3d2b393b3ad",
+      "expected_sha256": "d185833eabc7f87e1e322812e93a41c839823178396ed0f5c3fba3d2b393b3ad"
+    },
+    {
+      "upstream_path": "examples/systems/stark/utils/timer.py",
+      "path": "examples/systems/stark/utils/timer.py",
+      "mode": "verbatim",
+      "upstream_sha256": "15e83a93f2fc3ea2d9e072325ac1e55b1001407b680e9844c61b9f28fb981cea",
+      "expected_sha256": "15e83a93f2fc3ea2d9e072325ac1e55b1001407b680e9844c61b9f28fb981cea"
+    },
+    {
+      "upstream_path": "examples/systems/stark/utils/topk.py",
+      "path": "examples/systems/stark/utils/topk.py",
+      "mode": "verbatim",
+      "upstream_sha256": "29b68a9a0aafdefec597e3f2876ac385221e411b10c3a1b67427dbc8e0bc7394",
+      "expected_sha256": "29b68a9a0aafdefec597e3f2876ac385221e411b10c3a1b67427dbc8e0bc7394"
+    },
+    {
+      "upstream_path": "media/compound-ai-system.jpg",
+      "path": "media/compound-ai-system.jpg",
+      "mode": "verbatim",
+      "upstream_sha256": "c3c09660645c8d9890e7c6196556139c3749996b67027ec970f4507db86b80a6",
+      "expected_sha256": "c3c09660645c8d9890e7c6196556139c3749996b67027ec970f4507db86b80a6"
+    },
+    {
+      "upstream_path": "optimas/__init__.py",
+      "path": "caiso/__init__.py",
+      "mode": "integration_change",
+      "upstream_sha256": "7fd9afbb04a7f45d4cfa79879b320cd5f67a501e32255f9996ac62b8ef146109",
+      "expected_sha256": null
+    },
+    {
+      "upstream_path": "optimas/adapt/autogen.py",
+      "path": "caiso/adapt/autogen.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "457e5559eb148b05d133498b2004724c8362fd59850d39271b6489834ade1d36",
+      "expected_sha256": "59d8a4bcf02d3e7d7881208e859e5ad9a126178acf3cae420e0042f06dfb25cf"
+    },
+    {
+      "upstream_path": "optimas/adapt/crewai.py",
+      "path": "caiso/adapt/crewai.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "22766d5f1c1469d7a50d95b09a4c4a36eeb442b8d3e66603ec54e8c1687bbcdc",
+      "expected_sha256": "b973f830ac8cf6d1f66eb5d162489accad057451f2c629e258c5011233ce5dd7"
+    },
+    {
+      "upstream_path": "optimas/adapt/dspy.py",
+      "path": "caiso/adapt/dspy.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "dc6b265e118d8f04ee461b4a53168b140bf2d71ebca1b7150f5c3a8e2f58ca05",
+      "expected_sha256": "db0be716578b603163cc1518d82351489796bf3b2c04e23bad928e5dd2141869"
+    },
+    {
+      "upstream_path": "optimas/adapt/openai.py",
+      "path": "caiso/adapt/openai.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "3f7420286a8979b5186386353ce572dba282c6278b41bfcba2e1ea5a2e1708dd",
+      "expected_sha256": "b422c1d5451587cbeeca7d8f1901169680d03938c798ad70fbad918a6832634a"
+    },
+    {
+      "upstream_path": "optimas/adapt/textgrad.py",
+      "path": "caiso/adapt/textgrad.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "1d211634c4c051a40949e006d590ccb29c8672d07444f6c65e421cc5247a2a27",
+      "expected_sha256": "5a35915afac81f9054806ac22df89fd89c4df531f9975ab6932211d8f6c84a86"
+    },
+    {
+      "upstream_path": "optimas/adapt/utils.py",
+      "path": "caiso/adapt/utils.py",
+      "mode": "verbatim",
+      "upstream_sha256": "a40dd881951dfbef94c562c0678070fb18d3494ddd9f6e1e8d7b78a869675609",
+      "expected_sha256": "a40dd881951dfbef94c562c0678070fb18d3494ddd9f6e1e8d7b78a869675609"
+    },
+    {
+      "upstream_path": "optimas/arch/__init__.py",
+      "path": "caiso/arch/__init__.py",
+      "mode": "verbatim",
+      "upstream_sha256": "3656dd59878cab91f5efb39f439730ff887071e89d08a91d08b5b91e6651518f",
+      "expected_sha256": "3656dd59878cab91f5efb39f439730ff887071e89d08a91d08b5b91e6651518f"
+    },
+    {
+      "upstream_path": "optimas/arch/base.py",
+      "path": "caiso/arch/base.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "0ab2eddcde4873125dc2212f577a75a0184314cafd661b499e9e03a6572c0281",
+      "expected_sha256": "8740d4618334e6ffad735dbe82e0ff92137eb9170b29f33d192a6ec4a75e8a62"
+    },
+    {
+      "upstream_path": "optimas/arch/system.py",
+      "path": "caiso/arch/system.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "729f2c6324c99f5570945bb2c7535cc53b938fc286fac58c8732a7d6d9115305",
+      "expected_sha256": "ed6b9646d6908b7c8f247fd3b6e5f148bab592e89a84cc9cf5c5d23796f3f2bf"
+    },
+    {
+      "upstream_path": "optimas/collect/__init__.py",
+      "path": "caiso/collect/__init__.py",
+      "mode": "verbatim",
+      "upstream_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "upstream_path": "optimas/collect/process.py",
+      "path": "caiso/collect/process.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "222c98042ddd92ca26542a5718fb9b314fe94e27b9e2ca9d2c4ee5df8e6cbbf1",
+      "expected_sha256": "e94f396d166de61da703d488a3968687909600d2b3eb83a170e81c82baea569d"
+    },
+    {
+      "upstream_path": "optimas/collect/rollouts.py",
+      "path": "caiso/collect/rollouts.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "126a2c2f25cb94a7c813728b8b1c954890beef0e94f08a753ef6a21182781efb",
+      "expected_sha256": "a6d10def0bf0e2ecefbe3c5447db736b3bead1a4da0ab2f42a14d35ab710b0c2"
+    },
+    {
+      "upstream_path": "optimas/eval.py",
+      "path": "caiso/eval.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "555bd2fa2f30303e7ed6f3dc1df5732b436340a48475d1757ac357a02d7cbdec",
+      "expected_sha256": "9a11f97745f5f70e4e856fbc4b8787f03c725de6b9ccf2de6d166975285252ce"
+    },
+    {
+      "upstream_path": "optimas/optim/__init__.py",
+      "path": "caiso/optim/__init__.py",
+      "mode": "verbatim",
+      "upstream_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "upstream_path": "optimas/optim/args.py",
+      "path": "caiso/optim/args.py",
+      "mode": "verbatim",
+      "upstream_sha256": "902e9a2d5d98b8b86aff0001d315637a67c808af460a263b0b90145500b537f6",
+      "expected_sha256": "902e9a2d5d98b8b86aff0001d315637a67c808af460a263b0b90145500b537f6"
+    },
+    {
+      "upstream_path": "optimas/optim/cp_optimizer.py",
+      "path": "caiso/optim/cp_optimizer.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "3b59fc4e5a7565e395e6e278cfc1178ecc3fdb6eff0efb480a22200a29df3ec1",
+      "expected_sha256": "53807f1132e226502957ce118d5b37e896d2e93779c86d91e75f834106aaa5f5"
+    },
+    {
+      "upstream_path": "optimas/optim/opro.py",
+      "path": "caiso/optim/opro.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "9be849bd16f3038bc123d5a76835d7a0c24be840d65048cc77fe66987d80d303",
+      "expected_sha256": "af4515fb19467e677967cabb34a4111bdb780e9046456e07808ed7ab4685b86a"
+    },
+    {
+      "upstream_path": "optimas/optim/optimizer.py",
+      "path": "caiso/optim/optimizer.py",
+      "mode": "integration_change",
+      "upstream_sha256": "d5cf281ed85179457e2eb6172fe131b2d7fac83e21cb50744ff2a379727753f8",
+      "expected_sha256": null
+    },
+    {
+      "upstream_path": "optimas/optim/ppo.py",
+      "path": "caiso/optim/ppo.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "4eaaaa29641dca2782815e348ae7d1ff2f51204ad04581b4aa00387e18b64435",
+      "expected_sha256": "a1485add8fdd482cc7914fe826b41354f5c85fd5e2a620dd7da70ffd9e88d998"
+    },
+    {
+      "upstream_path": "optimas/reward_dataset.py",
+      "path": "caiso/reward_dataset.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "2ad6a200456432adcdc189f82dde005a54bbc1541fea05326b3dfbfb4d5ac056",
+      "expected_sha256": "6518632e2b34d52ce544e8f52aa4185e9934336c8e7d517d27d9e594392d1765"
+    },
+    {
+      "upstream_path": "optimas/reward_model.py",
+      "path": "caiso/reward_model.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "81d5a9249c9e1966243083636ec483d09c50e064e836f29f320da6072dea18a1",
+      "expected_sha256": "7c9c82945cdc43b5305474dfa473c37333d2d3934cbac4e60b2dcac32538f749"
+    },
+    {
+      "upstream_path": "optimas/train/__init__.py",
+      "path": "caiso/train/__init__.py",
+      "mode": "verbatim",
+      "upstream_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "upstream_path": "optimas/train/callback.py",
+      "path": "caiso/train/callback.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "910d5529dcd15ba3f45c2750a6c52b3c815d4856f675fc3bf93aa12a591871d3",
+      "expected_sha256": "36b73e91863cb957cb79bb79c6a6f50f508a62f564e4f99f77163306ddc4238c"
+    },
+    {
+      "upstream_path": "optimas/train/finetune.py",
+      "path": "caiso/train/finetune.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "792b793c3b5182361c117df18f5e2c7a37900ed97659179b96ed68dafce8ea14",
+      "expected_sha256": "f63e6f3c675c9ddd228d2c31ac9604bccee4d969fa60e804bbe002e04051727c"
+    },
+    {
+      "upstream_path": "optimas/train/metrics.py",
+      "path": "caiso/train/metrics.py",
+      "mode": "verbatim",
+      "upstream_sha256": "04ddec7a5149887754131197f9ed7f43626ab1dd19cc6f21b520ed82a7fe8ba6",
+      "expected_sha256": "04ddec7a5149887754131197f9ed7f43626ab1dd19cc6f21b520ed82a7fe8ba6"
+    },
+    {
+      "upstream_path": "optimas/train/reward_config.py",
+      "path": "caiso/train/reward_config.py",
+      "mode": "verbatim",
+      "upstream_sha256": "e0358fcd6c5633d6a9e6ca81f395ab6e0b1a019037bb586ebb3b36e0825b5215",
+      "expected_sha256": "e0358fcd6c5633d6a9e6ca81f395ab6e0b1a019037bb586ebb3b36e0825b5215"
+    },
+    {
+      "upstream_path": "optimas/train/reward_data_utils.py",
+      "path": "caiso/train/reward_data_utils.py",
+      "mode": "verbatim",
+      "upstream_sha256": "ccfc7c0b3d38b909687ef61683337089895770a78c56c5e6aafa4fce7b206de9",
+      "expected_sha256": "ccfc7c0b3d38b909687ef61683337089895770a78c56c5e6aafa4fce7b206de9"
+    },
+    {
+      "upstream_path": "optimas/train/reward_trainer.py",
+      "path": "caiso/train/reward_trainer.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "7c582aa6917c17ec9be51c81240ace1ed80d378e5ca083a1d51aac40a02ab1b5",
+      "expected_sha256": "822befe71bda7d938036c4b335c14e052f8d43e558814cab1f374dd048f746a5"
+    },
+    {
+      "upstream_path": "optimas/train/reward_trainer_utils.py",
+      "path": "caiso/train/reward_trainer_utils.py",
+      "mode": "verbatim",
+      "upstream_sha256": "82199acac31473c48733b4d3ae75586f5074aaabc9dc7d211ce465ffdee3e386",
+      "expected_sha256": "82199acac31473c48733b4d3ae75586f5074aaabc9dc7d211ce465ffdee3e386"
+    },
+    {
+      "upstream_path": "optimas/utils/api.py",
+      "path": "caiso/utils/api.py",
+      "mode": "verbatim",
+      "upstream_sha256": "a4eabd586d2e6560347a17b4c3415ac641652d77035fa40e2e4194ee518439c6",
+      "expected_sha256": "a4eabd586d2e6560347a17b4c3415ac641652d77035fa40e2e4194ee518439c6"
+    },
+    {
+      "upstream_path": "optimas/utils/context.py",
+      "path": "caiso/utils/context.py",
+      "mode": "verbatim",
+      "upstream_sha256": "1281927204f4d577df5fb8817491124f038f1d2fd8cbd09da9d88dd0b236f834",
+      "expected_sha256": "1281927204f4d577df5fb8817491124f038f1d2fd8cbd09da9d88dd0b236f834"
+    },
+    {
+      "upstream_path": "optimas/utils/display.py",
+      "path": "caiso/utils/display.py",
+      "mode": "verbatim",
+      "upstream_sha256": "20bef309e77ef3229ed47b288a99bb720bb63aaba70ec504ec43c5303ca7d62a",
+      "expected_sha256": "20bef309e77ef3229ed47b288a99bb720bb63aaba70ec504ec43c5303ca7d62a"
+    },
+    {
+      "upstream_path": "optimas/utils/load.py",
+      "path": "caiso/utils/load.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "50d3e91acc93495094c1f1718caea5f4cc0793cb2ff9c8fa9d16a7917e5c27c0",
+      "expected_sha256": "fd33e5dd2b7018b1c3bc97429fae8eedbd9c60fcb14664b9a7d7bbc48d4cf28e"
+    },
+    {
+      "upstream_path": "optimas/utils/logger.py",
+      "path": "caiso/utils/logger.py",
+      "mode": "verbatim",
+      "upstream_sha256": "daa1ba16559210317307b23a286fa851dca7cdfbcd1ddab9b5d3087ce656ccd6",
+      "expected_sha256": "daa1ba16559210317307b23a286fa851dca7cdfbcd1ddab9b5d3087ce656ccd6"
+    },
+    {
+      "upstream_path": "optimas/utils/lora.py",
+      "path": "caiso/utils/lora.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "b677803a8bfaa8eded82cdc5cb8d1b033603ee1947615c30ab482557d6b9d06e",
+      "expected_sha256": "59ae3e407d125df910ddd4b8f39393f4be51bb84a3b14a372fb33f9055dc4dd2"
+    },
+    {
+      "upstream_path": "optimas/utils/operation.py",
+      "path": "caiso/utils/operation.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "f714a68d1258d89d02f1f74a8440ef58c5717ff6ff58882cf43ce59c501f3088",
+      "expected_sha256": "252e2fa6dd1f0c517d5b78058a6e0fa68742d2f6d41cc3ffb3a549a7a3d6a172"
+    },
+    {
+      "upstream_path": "optimas/utils/parallel.py",
+      "path": "caiso/utils/parallel.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "cfd3079383ec8f48fc5870ad7f9c5c24fa6dbda30cc9c026ebc9c4f92f70df51",
+      "expected_sha256": "f6a84b8f23475f9c2e0025cee2ac77c96700722cf7517c660a14c2c51b26bb53"
+    },
+    {
+      "upstream_path": "optimas/utils/save.py",
+      "path": "caiso/utils/save.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "2508fb5f27594857bd94a6b53dd1c0740ced97beba9126b50a2cea89114cf141",
+      "expected_sha256": "296de3e8f79796119cd216f5b23facb817fb54953beee19a1a169cce38de08d6"
+    },
+    {
+      "upstream_path": "optimas/utils/template.py",
+      "path": "caiso/utils/template.py",
+      "mode": "verbatim",
+      "upstream_sha256": "b52b0fcd2715b3b06478f1781c1a0b637e9351b8a3789805d18f03e8269ae17a",
+      "expected_sha256": "b52b0fcd2715b3b06478f1781c1a0b637e9351b8a3789805d18f03e8269ae17a"
+    },
+    {
+      "upstream_path": "optimas/wrappers/example.py",
+      "path": "caiso/wrappers/example.py",
+      "mode": "verbatim",
+      "upstream_sha256": "d508412ee2bd0edd346df8c29879f6d0bd9d91c33383af357758493a20fed9b4",
+      "expected_sha256": "d508412ee2bd0edd346df8c29879f6d0bd9d91c33383af357758493a20fed9b4"
+    },
+    {
+      "upstream_path": "optimas/wrappers/prediction.py",
+      "path": "caiso/wrappers/prediction.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "06e792487d7b4632e0c5102babb579851a6681f0b9c33b6f6e91e6ac64455f02",
+      "expected_sha256": "308997d03ead29075c915f68f3c7e97ca7c55f7f3d9a33e33a38e2bd9b31d225"
+    },
+    {
+      "upstream_path": "requirements.txt",
+      "path": "requirements.txt",
+      "mode": "verbatim",
+      "upstream_sha256": "f0d726d73e908d9fa935fe7cab98c3871213d1b4a6947f314dd64aea648a41ba",
+      "expected_sha256": "f0d726d73e908d9fa935fe7cab98c3871213d1b4a6947f314dd64aea648a41ba"
+    },
+    {
+      "upstream_path": "scripts/__init__.py",
+      "path": "scripts/__init__.py",
+      "mode": "verbatim",
+      "upstream_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "upstream_path": "scripts/configs/eval/amazon_vanilla.yaml",
+      "path": "scripts/configs/eval/amazon_vanilla.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "c59fae21ee37426083ff16fe0f997cd40734b23d082fa6c53401656e7d8b4116",
+      "expected_sha256": "c59fae21ee37426083ff16fe0f997cd40734b23d082fa6c53401656e7d8b4116"
+    },
+    {
+      "upstream_path": "scripts/configs/eval/bigcodebench_vanilla.yaml",
+      "path": "scripts/configs/eval/bigcodebench_vanilla.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "cdb1cf8c343303efed931909ca25128d4a4109dc6395ff8500ba638ccc4ab0ce",
+      "expected_sha256": "cdb1cf8c343303efed931909ca25128d4a4109dc6395ff8500ba638ccc4ab0ce"
+    },
+    {
+      "upstream_path": "scripts/configs/eval/hotpotqa_vanilla.yaml",
+      "path": "scripts/configs/eval/hotpotqa_vanilla.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "d0d509746fd1b1687f9127f7806d45818e33fe712e54ca30ff24f45738cca7ca",
+      "expected_sha256": "d0d509746fd1b1687f9127f7806d45818e33fe712e54ca30ff24f45738cca7ca"
+    },
+    {
+      "upstream_path": "scripts/configs/eval/pubmed_vanilla.yaml",
+      "path": "scripts/configs/eval/pubmed_vanilla.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "15a10826de8aaf3501cb103fe0e4ebf56c90819007e44780bfcb4ddd34eb21ff",
+      "expected_sha256": "15a10826de8aaf3501cb103fe0e4ebf56c90819007e44780bfcb4ddd34eb21ff"
+    },
+    {
+      "upstream_path": "scripts/configs/eval/stark_vanilla.yaml",
+      "path": "scripts/configs/eval/stark_vanilla.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "66f674485a1d9e5bd2d491d0725f8eafe8f7b34a88cd761b6fc09fb9faed80aa",
+      "expected_sha256": "66f674485a1d9e5bd2d491d0725f8eafe8f7b34a88cd761b6fc09fb9faed80aa"
+    },
+    {
+      "upstream_path": "scripts/configs/generate/amazon.yaml",
+      "path": "scripts/configs/generate/amazon.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "14b69dc7316e8d9640eaa8bb86e00bbef77cac8acc8b7b5c707581db357acf0b",
+      "expected_sha256": "14b69dc7316e8d9640eaa8bb86e00bbef77cac8acc8b7b5c707581db357acf0b"
+    },
+    {
+      "upstream_path": "scripts/configs/generate/hotpotqa.yaml",
+      "path": "scripts/configs/generate/hotpotqa.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "26d4c7644e438646c7ce9c0ec0a11b727e2870a0ceb6a1c0229f3c16464f3fd0",
+      "expected_sha256": "26d4c7644e438646c7ce9c0ec0a11b727e2870a0ceb6a1c0229f3c16464f3fd0"
+    },
+    {
+      "upstream_path": "scripts/configs/generate/pubmed.yaml",
+      "path": "scripts/configs/generate/pubmed.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "7e3f927881c34f943f695eb39826167e29897adeab346f11538596ac629ce575",
+      "expected_sha256": "7e3f927881c34f943f695eb39826167e29897adeab346f11538596ac629ce575"
+    },
+    {
+      "upstream_path": "scripts/configs/optimize/amazon.yaml",
+      "path": "scripts/configs/optimize/amazon.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "52c637407ae08480387e3de055c4f049633e1ea3eb016e9b56c1b803678b016a",
+      "expected_sha256": "52c637407ae08480387e3de055c4f049633e1ea3eb016e9b56c1b803678b016a"
+    },
+    {
+      "upstream_path": "scripts/configs/optimize/hotpotqa.yaml",
+      "path": "scripts/configs/optimize/hotpotqa.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "3dabfb0388fd98b6a93bcbc085d6816c25956218b4069ddfd91f84e90eee720c",
+      "expected_sha256": "3dabfb0388fd98b6a93bcbc085d6816c25956218b4069ddfd91f84e90eee720c"
+    },
+    {
+      "upstream_path": "scripts/configs/optimize/pubmed.yaml",
+      "path": "scripts/configs/optimize/pubmed.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "4d4517f62494c0f6163b19809e695717de4ccc42e700201dc3a0baadee0b27d7",
+      "expected_sha256": "4d4517f62494c0f6163b19809e695717de4ccc42e700201dc3a0baadee0b27d7"
+    },
+    {
+      "upstream_path": "scripts/configs/train/amazon.yaml",
+      "path": "scripts/configs/train/amazon.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "75ad0e4a4fd3bb3c217f8e44536da2c46f1b0349074852d2bde565d3ced17e79",
+      "expected_sha256": "75ad0e4a4fd3bb3c217f8e44536da2c46f1b0349074852d2bde565d3ced17e79"
+    },
+    {
+      "upstream_path": "scripts/configs/train/hotpotqa.yaml",
+      "path": "scripts/configs/train/hotpotqa.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "3859a429a37ccf60adc4c1cb9e2dd609061b9e9c5f1b7b0f17b2ada88b8e4bf9",
+      "expected_sha256": "3859a429a37ccf60adc4c1cb9e2dd609061b9e9c5f1b7b0f17b2ada88b8e4bf9"
+    },
+    {
+      "upstream_path": "scripts/configs/train/pubmed.yaml",
+      "path": "scripts/configs/train/pubmed.yaml",
+      "mode": "verbatim",
+      "upstream_sha256": "6327f992d93dda73c630fd4fd97fe9669ed8aecd967f42bb86350c4612f110a2",
+      "expected_sha256": "6327f992d93dda73c630fd4fd97fe9669ed8aecd967f42bb86350c4612f110a2"
+    },
+    {
+      "upstream_path": "scripts/eval_system.py",
+      "path": "scripts/eval_system.py",
+      "mode": "integration_change",
+      "upstream_sha256": "f157fe471c80752c9637656b9a17b23cfffa44f50fccdbc53ccc86457eb4bc0d",
+      "expected_sha256": null
+    },
+    {
+      "upstream_path": "scripts/generate_dataset.py",
+      "path": "scripts/generate_dataset.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "ee40b43409376004af07977fb37b66f9825e68c30f0f462408b9a3bcd0699d1e",
+      "expected_sha256": "d8ca38ac4e2e3fac658408ff549933e994a904aba2949ec6652c45d3f97c57f4"
+    },
+    {
+      "upstream_path": "scripts/optimize_system.py",
+      "path": "scripts/optimize_system.py",
+      "mode": "integration_change",
+      "upstream_sha256": "ce1f795e57c5676eebf3cc7c8c26df415ce3771a00e6bebd3ff93dce30545718",
+      "expected_sha256": null
+    },
+    {
+      "upstream_path": "scripts/train_reward_model.py",
+      "path": "scripts/train_reward_model.py",
+      "mode": "namespace_only",
+      "upstream_sha256": "9c878265ef4a3356400e3595c0b6862f5afdeb35dad231f1bca9119002f82f8b",
+      "expected_sha256": "09cdf5d2721075d09689eaebef70436149e255de270e29e36ab42832e9f51fcd"
+    }
+  ]
+}
