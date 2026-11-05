@@ -1,5 +1,6 @@
 """Original task scorers with explicit failures and content-filter coverage."""
 
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -17,7 +18,8 @@ def eval_system(system, testset, num_repeat=1, *, show_progress=True):
     evaluation instead of disappearing from the average. Predictions correspond
     to input order on the last repeat, with None for filtered examples.
     Progress counts finished examples (including skips) as parallel jobs complete.
-    Set show_progress=False to suppress terminal output for programmatic calls.
+    Each completed repeat prints its score and coverage before the next starts.
+    Set show_progress=False to suppress progress bars and repeat summaries.
     """
     if not testset or num_repeat < 1:
         raise ValueError("Evaluation requires examples and a positive repetition count")
@@ -80,6 +82,14 @@ def eval_system(system, testset, num_repeat=1, *, show_progress=True):
             }
         )
         preds = [row[1] for row in results]
+        if show_progress:
+            print(
+                f"Evaluation {split} repeat {repeat + 1}/{num_repeat}: score={score:.6f} "
+                f"(completed={len(testset) - skipped}/{len(testset)}, "
+                f"content-policy skips={skipped})",
+                file=sys.stderr,
+                flush=True,
+            )
     metrics.update(
         mean=float(np.mean([row["score"] for row in per_repeat])),
         std=float(np.std([row["score"] for row in per_repeat])),

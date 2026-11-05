@@ -97,6 +97,8 @@ below. Run it from the checkout; it selects this project's `.venv` and loads `.e
 repetitions. Use `--repeats 1` to override that, or `--split val` for validation.
 Each repeat displays a progress bar with finished examples, elapsed time, and ETA.
 Content-policy skips advance the bar and remain included in the reported coverage.
+As each repeat finishes, its score and coverage are printed immediately, before
+the next repeat starts (for example, `Evaluation test repeat 1/3: score=0.350000`).
 Baseline results default to `results/<dataset>-unoptimized/evaluation_unoptimized.json`
 (using `pubmedqa` as the directory label). `--output <directory>` sets the exact
 result directory. The evaluator's raw `test_metrics.json`/`val_metrics.json`, logs,
