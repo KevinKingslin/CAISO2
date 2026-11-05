@@ -125,7 +125,7 @@ def test_pubmed_real_pipeline_preserves_whitespace_models_and_metric(monkeypatch
     )
 
 
-def test_amazon_real_pipeline_and_training_prompt_use_original_code(monkeypatch, fake_completion):
+def test_amazon_real_pipeline_and_training_prompt_use_original_code(monkeypatch, fake_completion, caplog):
     from examples.systems.amazon import local_models_for_next_item_selection as amazon
 
     monkeypatch.setattr(amazon, "initialize_adapter", lambda *args, **kwargs: None)
@@ -145,6 +145,7 @@ def test_amazon_real_pipeline_and_training_prompt_use_original_code(monkeypatch,
     )
     assert len(calls) == 2
     assert all(item[1]["max_new_tokens"] == 512 for item in calls)
+    assert "self.variable is defined but was not accessed" not in caplog.text
     inputs = {"sequence": "Viewed a pen"}
     config = runtime.initial_state.configurations["session_analyzer"]
     before = len(calls)

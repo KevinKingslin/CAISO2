@@ -27,6 +27,10 @@ class BaseComponent:
     and trajectory logging. Designed to integrate into end-to-end optimization pipelines.
     """
 
+    # Adapter components can apply their variable in the update callback instead
+    # of reading it during each inference request.
+    variable_applied_on_update = False
+
     def __init__(
         self,
         description: str,
@@ -235,7 +239,8 @@ class BaseComponent:
                 warnings = []
                 
                 # Check if variable should have been accessed
-                if (self._default_variable is not None and 
+                if (self._default_variable is not None and
+                    not self.variable_applied_on_update and
                     not tracking.get('variable_accessed', False)):
                     warnings.append("self.variable is defined but was not accessed in forward()")
                 

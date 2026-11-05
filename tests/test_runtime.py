@@ -52,6 +52,16 @@ def make_system():
     )
 
 
+def test_unused_variable_warning_still_applies_to_other_components(caplog):
+    class Unused(BaseComponent):
+        def forward(self, **inputs):
+            return {"answer": "test"}
+
+    component = Unused("test", ["question"], ["answer"], variable="unused", num_retry=1, retry_after=0)
+    component(question="test")
+    assert "self.variable is defined but was not accessed" in caplog.text
+
+
 def make_runtime(system=None):
     return UpstreamRuntime(
         system or make_system(),

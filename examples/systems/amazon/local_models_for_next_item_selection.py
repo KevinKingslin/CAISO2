@@ -93,6 +93,8 @@ def get_response(response: requests.Response) -> str:
 class SessionAnalyzerModule(BaseComponent):
     """Summarise a user's session into a compact context string (local LLM)."""
 
+    variable_applied_on_update = True
+
     def __init__(
         self,
         base_model_path,
@@ -148,6 +150,8 @@ class SessionAnalyzerModule(BaseComponent):
 
 class CandidateProfilerModule(BaseComponent):
     """Give line-by-line feedback on each candidate item (local LLM)."""
+
+    variable_applied_on_update = True
 
     def __init__(
         self,
