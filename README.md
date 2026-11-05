@@ -45,6 +45,34 @@ The Azure OpenAI key/endpoint aliases `AZURE_OPENAI_API_KEY`,
 `AZURE_OPENAI_ENDPOINT`, and `AZURE_OPENAI_API_VERSION` are also accepted.
 Keep `.env` private; only the placeholder template is tracked.
 
+Azure request limits are in [`configs/providers.yaml`](configs/providers.yaml),
+separate from model credentials. Defaults match the earlier transport: 60 requests
+per minute and four concurrent requests per deployment, eight rate-limit retries,
+and four transient-error retries. Limits are shared by DSPy task calls, method roles
+and embeddings that use the same endpoint/deployment. Per-deployment overrides can
+be added under `deployments` using the Azure deployment name as the key.
+
+The launcher validates these limits before constructing models and prints the
+effective defaults. These are local caps, not an Azure quota-discovery API; configure
+them to match your deployments. HTTP 429 retries honor Azure's `Retry-After` and
+millisecond headers, including waits longer than the local backoff cap. A shared
+cooldown also holds concurrent callers. Built-in SDK retries are disabled on these
+routes to avoid multiplying retry counts.
+
+Explicit policy rejections and responses marked `content_filter` skip without
+resampling. Optimization records affected examples/pairs through its existing skip
+handlers. Evaluation counts those examples as zero in the full requested denominator
+and reports coverage per repetition. Other evaluation failures, including credentials,
+missing deployments, exhausted retries or invalid scores, stop evaluation instead of
+silently dropping examples. Model, prompt, dataset and generation settings stay the same.
+
+Diagnostics are under `.internal/logs/`: `transport_config.json` records limits,
+`transport.jsonl` records retries/recovery, and `skipped_examples.jsonl` records policy
+skips. Evaluation JSON includes `coverage` counts for `requested`, `completed` and
+`skipped_content_filter`. Transport logs omit request bodies and API keys.
+All-filtered evaluation batches score zero; initialization still requires enough
+usable evidence to induce a constitution.
+
 Amazon still requires the original Qwen model,
 initialized LoRA adapters, and an external vLLM server. HotpotQA retains the
 original ColBERT endpoint by default. Set `COLBERT_URL` in `.env` to your full
@@ -199,8 +227,8 @@ pip install -e '.[test]'
 pytest -q
 ```
 
-109 imported files are checked against the pinned source, allowing only package
-import renaming where needed. The eight explicit integration exceptions are listed
+107 imported files are checked against the pinned source, allowing only package
+import renaming where needed. The ten explicit integration exceptions are listed
 in [`docs/INTEGRATION.md`](docs/INTEGRATION.md). Tests compare the actual HotpotQA,
 PubMedQA, and Amazon benchmark requests and trajectories with deterministic mocked
 services, and run CAISO's full induction/optimization/checkpoint cycle offline.

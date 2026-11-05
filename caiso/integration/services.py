@@ -11,11 +11,13 @@ from caiso.prompts import entry as prompt_entry
 from caiso.providers.base import ProviderRegistry
 from caiso.providers.embeddings import SentenceTransformerEmbeddings
 from caiso.utils import api
+from caiso.providers.transport import observe_transport
 
 
 class MethodProvider:
     def __init__(self, model, budget, max_tokens=4096):
         self.model, self.budget, self.max_tokens = model, budget, max_tokens
+        self.on_error = None
 
     def complete(self, messages, *, seed, schema=None, temperature=0.2, max_tokens=None, **kwargs):
         instructions = list(messages)
@@ -27,14 +29,14 @@ class MethodProvider:
                     + json.dumps(schema.model_json_schema()),
                 }
             )
-        self.budget.call()
-        result = api.get_llm_output(
-            instructions,
-            model=self.model,
-            temperature=temperature,
-            max_new_tokens=max_tokens or self.max_tokens,
-            json_object=schema is not None,
-        )
+        with observe_transport(self.budget, self.on_error):
+            result = api.get_llm_output(
+                instructions,
+                model=self.model,
+                temperature=temperature,
+                max_new_tokens=max_tokens or self.max_tokens,
+                json_object=schema is not None,
+            )
         return json.dumps(result) if schema is not None else result
 
     def fingerprint(self):
@@ -44,12 +46,14 @@ class MethodProvider:
 class MethodEmbeddings:
     def __init__(self, model, budget):
         self.model, self.budget = model, budget
+        self.on_error = None
+        self.provider = self
 
     def embed(self, texts):
         import litellm
 
-        self.budget.call(embedding=True)
-        result = litellm.embedding(model=self.model, input=list(texts))
+        with observe_transport(self.budget, self.on_error):
+            result = litellm.embedding(model=self.model, input=list(texts))
         return np.asarray(
             [row["embedding"] for row in sorted(result.data, key=lambda row: row["index"])]
         )

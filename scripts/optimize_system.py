@@ -15,6 +15,7 @@ from caiso.core.serialization import save_json
 from caiso.integration.config import load_experiment, load_method
 from caiso.integration.provenance import benchmark_manifest
 from scripts.results_layout import write_evaluation
+from caiso.providers.transport import configure_transport
 
 
 def main(argv=None):
@@ -47,6 +48,8 @@ def main(argv=None):
     if (output / "checkpoint/checkpoint.json").exists() and not args.resume:
         parser.error(f"Run already exists in {output}; use --resume or a new --output")
     output.mkdir(parents=True, exist_ok=True)
+    limits = configure_transport(output)
+    print(f"Azure transport: {limits['requests_per_minute']} requests/minute, {limits['concurrency']} concurrent per deployment")
     (output / "config.yaml").write_text(
         yaml.safe_dump({"experiment": config, "method": method}, sort_keys=False)
     )
@@ -79,6 +82,7 @@ def main(argv=None):
     torch.save(optimized.state_dict(), output / "final_optimized_system.pth")
     save_json(output / "final_adapter_state.json", optimizer._get_current_adapter_state())
     if not args.no_test and testset:
+        optimized._caiso_eval_variant = "optimized"
         evaluation, _ = eval_system(optimized, testset, num_repeat=config.get("num_repeat", 1))
         save_json(output / "eval_metrics.json", evaluation)
         write_evaluation(

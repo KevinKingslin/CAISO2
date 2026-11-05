@@ -13,6 +13,28 @@ class ContentFilteredError(RuntimeError):
     """The service explicitly rejected this content; retrying it is inappropriate."""
 
 
+def filter_exception(error):
+    """Recognize explicit SDK/service policy codes, never arbitrary error text."""
+    seen = set()
+    while error is not None and id(error) not in seen:
+        seen.add(id(error))
+        if isinstance(error, ContentFilteredError) or type(error).__name__ == "ContentPolicyViolationError":
+            return True
+        if is_content_filter(getattr(error, "body", None)):
+            return True
+        if is_content_filter({"code": getattr(error, "code", "")}):
+            return True
+        response = getattr(error, "response", None)
+        if response is not None:
+            try:
+                if is_content_filter(response.json()):
+                    return True
+            except (ValueError, AttributeError):
+                pass
+        error = error.__cause__ or error.__context__
+    return False
+
+
 def is_content_filter(body):
     if isinstance(body, dict):
         code = str(body.get("code", "")).replace("_", "").lower()

@@ -446,9 +446,9 @@
     {
       "upstream_path": "optimas/arch/base.py",
       "path": "caiso/arch/base.py",
-      "mode": "namespace_only",
+      "mode": "integration_change",
       "upstream_sha256": "0ab2eddcde4873125dc2212f577a75a0184314cafd661b499e9e03a6572c0281",
-      "expected_sha256": "8740d4618334e6ffad735dbe82e0ff92137eb9170b29f33d192a6ec4a75e8a62"
+      "expected_sha256": null
     },
     {
       "upstream_path": "optimas/arch/system.py",
@@ -481,9 +481,9 @@
     {
       "upstream_path": "optimas/eval.py",
       "path": "caiso/eval.py",
-      "mode": "namespace_only",
+      "mode": "integration_change",
       "upstream_sha256": "555bd2fa2f30303e7ed6f3dc1df5732b436340a48475d1757ac357a02d7cbdec",
-      "expected_sha256": "9a11f97745f5f70e4e856fbc4b8787f03c725de6b9ccf2de6d166975285252ce"
+      "expected_sha256": null
     },
     {
       "upstream_path": "optimas/optim/__init__.py",

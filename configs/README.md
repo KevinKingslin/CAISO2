@@ -7,6 +7,9 @@
   optimization, DPO, budget, error-handling and reporting settings.
 - `experiments/*.yaml`: benchmark identity, launch/evaluation settings, and
   dataset-specific batches and method overrides.
+- `providers.yaml`: validated Azure request/concurrency caps, retry limits,
+  backoff and timeout, with optional per-deployment overrides. Defaults match the
+  previous CAISO transport; credentials remain in `.env`.
 - `method_config`: path relative to the experiment YAML.
 - `method`: recursively overrides the shared method; unspecified nested fields keep
   their shared values.

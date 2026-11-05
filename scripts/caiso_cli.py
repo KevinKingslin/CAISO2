@@ -144,7 +144,7 @@ def main(argv=None):
         output = run if run else Path("results") / f"{dataset_label(config)}-{variant}"
     split = config.get("split", "test")
     raw_output = output / ".internal" / "evaluation" / variant / split
-    metrics = evaluate(arguments, output_dir=raw_output)
+    metrics = evaluate(arguments, output_dir=raw_output, results_dir=output)
     write_evaluation(
         output, metrics, variant=variant, split=split,
         state_source=config.get("system_state_dict_path"),

@@ -12,6 +12,9 @@ import functools
 
 from caiso.utils.logger import setup_logger
 from caiso.wrappers.prediction import Prediction
+from caiso.core.content_filter import ContentFilteredError
+from caiso.core.recovery import TransportExhausted, TransportRequestError
+from caiso.providers.transport import request_scope
 
 logger = setup_logger(__name__)
 
@@ -287,9 +290,12 @@ class BaseComponent:
         try:
             for retry_count in range(self.num_retry):
                 try:
-                    outputs = self._validated_forward(**inputs)
+                    with request_scope():
+                        outputs = self._validated_forward(**inputs)
                     break
                 except Exception as e:
+                    if isinstance(e, (ContentFilteredError, TransportExhausted, TransportRequestError)):
+                        raise
                     time.sleep(self.retry_after)
                     logger.error(f"[Retry={retry_count}] Error executing component: {e}\n{traceback.format_exc()}")
                     exception = e
@@ -315,4 +321,3 @@ class BaseComponent:
             }
 
         return outputs
-    

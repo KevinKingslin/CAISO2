@@ -1,64 +1,78 @@
+"""Original task scorers with explicit failures and content-filter coverage."""
+
+from pathlib import Path
+from types import SimpleNamespace
+
 import numpy as np
-import json
-import os
-from tqdm import tqdm
-from typing import Dict, List
-from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from caiso.arch.system import CompoundAISystem
-from caiso.reward_model import RewardModel
-from caiso.utils.logger import setup_logger
-from caiso.wrappers.example import Example
+from caiso.core.content_filter import ContentFilteredError, record_skip
+from caiso.core.parallel import ordered_map
 
 
-logger = setup_logger(__name__)
+def eval_system(system, testset, num_repeat=1):
+    """Evaluate unchanged examples/scorers; only explicit policy rejections skip.
 
-
-def eval_system(
-    system: CompoundAISystem,
-    testset: List[Example],
-    num_repeat: int = 1
-) -> List:
+    Skips count as zero in the requested denominator. Other failures stop the
+    evaluation instead of disappearing from the average. Predictions correspond
+    to input order on the last repeat, with None for filtered examples.
     """
-    Evaluate a compound agent system on a test set.
+    if not testset or num_repeat < 1:
+        raise ValueError("Evaluation requires examples and a positive repetition count")
+    log = getattr(system, "_caiso_skip_log", None)
+    if log is None and getattr(system, "log_dir", None):
+        log = Path(system.log_dir) / ".internal/logs/skipped_examples.jsonl"
+    recorder = SimpleNamespace(content_filter_log=log)
+    workers = getattr(system, "max_eval_workers", 4)
+    if getattr(system, "rm", None) is not None:
+        workers = 1
+    split = getattr(system, "_caiso_eval_split", "test")
+    metrics, per_repeat = {}, []
+    for repeat in range(num_repeat):
 
-    Args:
-        system: The compound agent system to evaluate
-        testset: List of test examples
-        num_repeat: Number of times to repeat evaluation
+        def evaluate(item):
+            index, example = item
+            try:
+                result = system.evaluate(example, return_pred=True)
+            except ContentFilteredError as error:
+                record_skip(
+                    recorder,
+                    error,
+                    "benchmark_evaluation",
+                    example_id=f"{split}-{index}",
+                    split=split,
+                    repeat=repeat,
+                    system_variant=getattr(system, "_caiso_eval_variant", "benchmark"),
+                )
+                return 0.0, None, True
+            if result is None:
+                raise RuntimeError(f"Evaluation returned no result for {split}-{index}")
+            score, prediction = result if isinstance(result, tuple) else (result, None)
+            if not np.isfinite(score):
+                raise ValueError(f"Non-finite task score for {split}-{index}: {score}")
+            return float(score), prediction, False
 
-    Returns:
-        Tuple of (predictions, metrics)
-    """
-    metrics = {}
-    for i in range(num_repeat):
-        results = system.evaluate_multiple(testset, return_pred=True)
-        original_results_num = len(results)
-        results = [result for result in results if result is not None]
-        filtered_results_num = len(results)
-        if original_results_num != filtered_results_num:
-            logger.info(f"Original results num: {original_results_num}")
-            logger.info(f"Filtered results num: {filtered_results_num}")
-            logger.info(f"Filtered {original_results_num - filtered_results_num} NONE results")
-            none_idx = [i for i, result in enumerate(results) if result is None]
-        scores = []
-        preds = []
-        for result in results:
-            if isinstance(result, tuple):
-                scores.append(result[0])
-                preds.append(result[1])
-            else:
-                scores.append(result)
-                preds.append(None)
-        
-        metrics.update({
-            f"trial_{i}": np.mean(scores)
-        })
-
-    metrics.update({
-        "mean": np.mean([metrics[f"trial_{i}"] for i in range(num_repeat)]),
-        "std": np.std([metrics[f"trial_{i}"] for i in range(num_repeat)])
-    })
-
+        results = ordered_map(evaluate, enumerate(testset), workers)
+        score = sum(row[0] for row in results) / len(testset)
+        skipped = sum(row[2] for row in results)
+        metrics[f"trial_{repeat}"] = score
+        per_repeat.append(
+            {
+                "repeat": repeat,
+                "score": score,
+                "requested": len(testset),
+                "completed": len(testset) - skipped,
+                "skipped_content_filter": skipped,
+            }
+        )
+        preds = [row[1] for row in results]
+    metrics.update(
+        mean=float(np.mean([row["score"] for row in per_repeat])),
+        std=float(np.std([row["score"] for row in per_repeat])),
+        per_repeat=per_repeat,
+        coverage={
+            key: sum(row[key] for row in per_repeat)
+            for key in ("requested", "completed", "skipped_content_filter")
+        },
+        failure_policy="Content-filtered examples count as zero; all other errors stop evaluation.",
+    )
     return metrics, preds

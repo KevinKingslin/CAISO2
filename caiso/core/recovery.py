@@ -17,6 +17,14 @@ class RetryExhausted(RuntimeError):
     """A recoverable operation still failed after its configured retries."""
 
 
+class TransportExhausted(RetryExhausted):
+    """Transport retries are exhausted; outer response loops must not repeat them."""
+
+
+class TransportRequestError(ValueError):
+    """A non-retryable service error, such as invalid credentials or deployment."""
+
+
 def recoverable(exc):
     if isinstance(
         exc,
@@ -83,6 +91,8 @@ class Recovery:
             try:
                 result = operation(attempt, previous)
             except Exception as exc:
+                if isinstance(exc, TransportExhausted):
+                    raise
                 if not recoverable(exc):
                     raise  # Budget caps, auth/configuration errors and code bugs are not retried.
                 retry = attempt < retries

@@ -31,7 +31,7 @@ def write_evaluation(directory, metrics, *, variant, split, state_source=None):
         "score": metrics["mean"],
         "score_mean": metrics["mean"],
         "score_std": metrics["std"],
-        "per_repeat": [
+        "per_repeat": metrics.get("per_repeat") or [
             {"repeat": int(key.removeprefix("trial_")), "score": metrics[key]}
             for key in sorted(
                 (key for key in metrics if key.startswith("trial_")),

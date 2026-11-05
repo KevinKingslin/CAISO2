@@ -1,0 +1,14 @@
+# Shared Azure transport limits across task models, CAISO roles and embeddings.
+# Defaults restored from the previous CAISO Azure transport. No model credentials here.
+azure_defaults:
+  requests_per_minute: 60
+  concurrency: 4
+  retries: 4
+  rate_limit_retries: 8
+  retry_backoff_seconds: 2
+  max_retry_backoff_seconds: 60
+  retry_jitter_seconds: 1
+  timeout: 120
+
+# Optional per-deployment overrides (keys are Azure deployment names):
+deployments: {}

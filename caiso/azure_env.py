@@ -2,6 +2,7 @@
 
 import os
 from functools import wraps
+from caiso.core.recovery import TransportRequestError
 
 
 def azure_kwargs(model, kwargs):
@@ -15,13 +16,13 @@ def azure_kwargs(model, kwargs):
         legacy = {"gpt-4o": "AZURE_GPT4O_DEPLOYMENT", "gpt-4o-mini": "AZURE_GPT4O_MINI_DEPLOYMENT"}
         deployment = (os.getenv(variable) or os.getenv(legacy.get(name, variable), "")).strip()
         if not deployment:
-            raise ValueError(f"Azure routing requires {variable} for model {model!r}")
+            raise TransportRequestError(f"Azure routing requires {variable} for model {model!r}")
         routed = "azure/" + deployment
     key = os.getenv("AZURE_API_KEY") or os.getenv("AZURE_OPENAI_API_KEY")
     endpoint = os.getenv("AZURE_API_BASE") or os.getenv("AZURE_OPENAI_ENDPOINT")
     version = os.getenv("AZURE_API_VERSION") or os.getenv("AZURE_OPENAI_API_VERSION")
     if not all((key, endpoint, version)):
-        raise ValueError("Set AZURE_API_KEY, AZURE_API_BASE and AZURE_API_VERSION in .env")
+        raise TransportRequestError("Set AZURE_API_KEY, AZURE_API_BASE and AZURE_API_VERSION in .env")
     # DSPy may pass an explicit OpenAI key/base. Replace those on Azure routes.
     kwargs = {k: v for k, v in kwargs.items() if k not in {"api_key", "api_base", "base_url", "api_version"}}
     kwargs.update(api_key=key, api_base=endpoint, api_version=version)
@@ -37,9 +38,11 @@ def install_azure_routing():
         if getattr(original, "_caiso_azure", False):
             continue
 
-        def wrap(function):
+        def wrap(function, operation):
             @wraps(function)
             def routed(*args, **kwargs):
+                from caiso.providers.transport import request, arequest
+
                 if args:
                     model, kwargs = azure_kwargs(args[0], kwargs)
                     args = (model, *args[1:])
@@ -47,9 +50,12 @@ def install_azure_routing():
                     model = kwargs.pop("model")
                     model, kwargs = azure_kwargs(model, kwargs)
                     kwargs["model"] = model
-                return function(*args, **kwargs)
+                else:
+                    return function(*args, **kwargs)
+                call = arequest if operation.startswith("a") else request
+                return call(function, model, args, kwargs, embedding="embedding" in operation)
 
             routed._caiso_azure = True
             return routed
 
-        setattr(litellm, name, wrap(original))
+        setattr(litellm, name, wrap(original, name))

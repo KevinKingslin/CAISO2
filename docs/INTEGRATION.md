@@ -13,13 +13,13 @@
   [source record](../third_party/democratic_icai/SOURCE.json).
 
 `UPSTREAM.json` records every upstream tracked file, its source hash, destination,
-and preservation mode. `scripts/verify_upstream.py` verifies all 109 protected files.
-76 are verbatim and 33 differ only by `from/import optimas` → `from/import caiso`.
+and preservation mode. `scripts/verify_upstream.py` verifies all 107 protected files.
+76 are verbatim and 31 differ only by `from/import optimas` → `from/import caiso`.
 All bundled data artifacts, dataset loaders, metrics and original experiment YAMLs
 remain protected. Prompt extraction is recorded below and has separate text and
 rendering regression tests.
 
-## Eight explicit upstream exceptions
+## Ten explicit upstream exceptions
 
 1. `.gitignore`: adds local environment, cache, and build exclusions.
 2. `caiso/__init__.py`: package metadata/logging and a Python 3.12-compatible
@@ -50,6 +50,13 @@ rendering regression tests.
 8. `examples/systems/pubmed/three_components_with_model_selection.py`: loads the
    same system message, initial instructions, answer format and user templates from
    `caiso/prompts/systems/pubmed.json`.
+9. `caiso/arch/base.py`: propagates explicit policy skips, exhausted transport
+   retries and non-retryable service failures immediately instead of resampling
+   them in the generic component retry loop. Ordinary response retries stay intact.
+10. `caiso/eval.py`: calls the same per-example `system.evaluate` and task scorer,
+    preserves successful scores, keeps predictions in input order, counts policy
+    skips as zero, records coverage, and propagates other failures. It replaces the
+    upstream helper that swallowed errors and excluded failed examples from means.
 
 The new active `configs/experiments/*.yaml` profiles use shared settings in
 `configs/method/default.yaml` with recursive experiment overrides. They resolve to

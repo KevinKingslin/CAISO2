@@ -15,6 +15,8 @@ from caiso.optim.args import OptimasArguments
 from caiso.utils.logger import setup_logger
 from caiso.eval import eval_system
 from caiso.integration.config import load_experiment
+from caiso.providers.transport import configure_transport
+from pathlib import Path
 
 
 @dataclass
@@ -45,7 +47,7 @@ class ScriptArgs:
                 setattr(self, field_name, None)
 
 
-def main(argv=None, *, output_dir=None):
+def main(argv=None, *, output_dir=None, results_dir=None):
     parser = HfArgumentParser(ScriptArgs)
     argv = sys.argv[1:] if argv is None else argv
 
@@ -64,9 +66,12 @@ def main(argv=None, *, output_dir=None):
         else osp.join(args.output_dir, args.dataset, args.system_name, args.run_name)
     )
     os.makedirs(args.output_dir, exist_ok=True)
+    results_dir = Path(results_dir or args.output_dir)
+    limits = configure_transport(results_dir)
 
     logger = setup_logger(__name__, log_file=osp.join(args.output_dir, "output.log"))
     logger.info("Starting evaluation script.")
+    logger.info(f"Azure transport: {limits['requests_per_minute']} requests/minute, {limits['concurrency']} concurrent per deployment")
     logger.info(f"Parsed arguments:\n{json.dumps(vars(args), indent=2)}")
 
     # Construct system
@@ -77,6 +82,9 @@ def main(argv=None, *, output_dir=None):
         "max_eval_workers": args.max_eval_workers,
     }
     system = registered_systems[args.system_name](**system_kwargs)
+    system._caiso_skip_log = results_dir / ".internal/logs/skipped_examples.jsonl"
+    system._caiso_eval_split = args.split
+    system._caiso_eval_variant = "optimized" if args.system_state_dict_path else "unoptimized"
 
     cur_system_state_dict = system.state_dict()
     logger.info(f"Saving current system state.")
