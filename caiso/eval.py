@@ -4,17 +4,20 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
+from tqdm import tqdm
 
 from caiso.core.content_filter import ContentFilteredError, record_skip
 from caiso.core.parallel import ordered_map
 
 
-def eval_system(system, testset, num_repeat=1):
+def eval_system(system, testset, num_repeat=1, *, show_progress=True):
     """Evaluate unchanged examples/scorers; only explicit policy rejections skip.
 
     Skips count as zero in the requested denominator. Other failures stop the
     evaluation instead of disappearing from the average. Predictions correspond
     to input order on the last repeat, with None for filtered examples.
+    Progress counts finished examples (including skips) as parallel jobs complete.
+    Set show_progress=False to suppress terminal output for programmatic calls.
     """
     if not testset or num_repeat < 1:
         raise ValueError("Evaluation requires examples and a positive repetition count")
@@ -51,7 +54,19 @@ def eval_system(system, testset, num_repeat=1):
                 raise ValueError(f"Non-finite task score for {split}-{index}: {score}")
             return float(score), prediction, False
 
-        results = ordered_map(evaluate, enumerate(testset), workers)
+        with tqdm(
+            total=len(testset),
+            desc=f"Evaluating {split} (repeat {repeat + 1}/{num_repeat})",
+            unit="example",
+            dynamic_ncols=True,
+            disable=not show_progress,
+        ) as bar:
+            results = ordered_map(
+                evaluate,
+                enumerate(testset),
+                workers,
+                progress=lambda completed, total: bar.update(completed - bar.n),
+            )
         score = sum(row[0] for row in results) / len(testset)
         skipped = sum(row[2] for row in results)
         metrics[f"trial_{repeat}"] = score
