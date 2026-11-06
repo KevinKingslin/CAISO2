@@ -29,11 +29,9 @@
     },
     "systems/pubmed": {
       "ContextAnalystModule.instruction": "0fe753cff18dd59452c2a610ea8e00b6823b2c88cc97bfb54998a73532c7266e",
-      "ContextAnalystModule.template": "4a0bbcd5a4d76567bef2afa37efd8f004bfcd454463089dc9338ff00ce996ce3",
+      "ContextAnalystModule.request": "79cc9010a67605d78553e36d1995102f914de157e26077443a87142e46f821b6",
       "ProblemSolverModule.instruction": "3941e6490aedf3c3ee7b3f56a09655e1e8460c342dbb0987a66476f6230a6c9a",
-      "ProblemSolverModule.template": "2292fcfd58e647aa5f7c657bccd0e5d8ef2ff8dde24cff8787352a2051059963",
-      "FORMAT_PROMPT_YESNO": "00414d3bd8237cbd473eb70aab3ea294aaa11807c458479356d198914d4e74a1",
-      "SYS_SINGLE_SOL_PROMPT": "934511a1b0eb2ac9f508b90cd2c2bbfefea9c0bbf560821d4b6f9d47e5c09d84"
+      "ProblemSolverModule.request": "e73a3044285182b58c8765257bc8ecb0474086d6c3df98f87102957919dda702"
     },
     "method": {
       "prompt_optimizer.default_tips": [
@@ -42,32 +40,18 @@
         "11cab8edab48f2578c2e8400ea43b4c7e3c546ae984cd31a27a2c9438235d4be",
         "e1f6b957885b0ee8eb83fdb7778e96c91abf686d8489bde16a909dbe45d663d9"
       ],
-      "prompt_optimizer.system": "8a37e8af3609036ba5cd45c680a081a900808bcbd20f1b00a908ba5fe9853bde",
-      "generator.system": "70cedd6a952efca15acf77b512146d8396de1fdf10beaa4333733ef3b218ef74",
-      "block_selection.system": "00b0908cf051465a8baf1036ec0761673a14f7f449a972526237b8731fa21c07",
-      "reasoning.cot": "44885502fa44430ca070908882f171ebea4dc53a080c1f003547b91f338059c2",
-      "reasoning.self_consistency_consensus": "d303303ffc4e75fa7128b4d42edfd9945ac69acacc1de294a57f9fa5bbf26e18",
-      "reasoning.self_refine_draft": "fb78e07413e427d16671e450c8120545177df7c75907973db22ca01525b15900",
-      "reasoning.self_refine_critique": "1da7e30f5ec4a2950fae7982f34620ace86da96f837015379ec8bc68a1316d1c",
-      "reasoning.critique_system": "3d274825937e3085eca355dfea1a0700edfe8ceb2bd2de5670542d2c587b06dc",
-      "reasoning.self_refine_revision": "3d59f55fb175c0b467052e728ad30fdd0bfb7b77f876d6858a887f0104a97a50",
-      "reasoning.self_consistency_sample": "e1109b39e8574429fa9f0da545ca46b440983155e7e88043f8658c03ba5541cf",
-      "debate.guidance_0": "e53d77fcc7a21bd903089cb53f5f7d930bfb46e4626ff72e7ca93497609eb8b5",
-      "debate.guidance_1": "4ae3d3f083132f87dfd8cb9acbed3a2bf3c4972ceed97d5d0ab41ac3bc13aa6e",
-      "preferences.pair": "96a4becd1955c7e5071b7246659675db5b26377b2499492f2b3fd3253d4e728b",
-      "preferences.label": "a78087b704e5d52cbae428dcef382637373838760959c1eba0e784be6112ed2f",
-      "reconstruction.json_instruction": "d0320d33219cfeb8458e68ae84d3e8dd06a53ea80d39927a5a197f60405dd068",
-      "services.schema_instruction": "4a318b4505a15e461fe81cdce130ff57dae5ed4efffc9b31de27d26165fe9b67",
-      "providers.format_retry": "83859bf8d5542b4f706b8f5fa1e6972f3709b00f7e90ef51f02271c1dd0dc390",
-      "debate.reconstruction_status": "9ccdb66f5211e1c9237652c08685e72ea3630922d101f970be6d02fe1da0bc2a",
-      "debate.rejection_failed": "d1d5292b292473266c5d20a38551d592f9591747d092c42770f95aa4ad6e2bf8",
-      "debate.rejection_minimum": "a7cf85e1f844470da1c2aab4d569852caf173db5ce3173e11059331f17d5933e",
-      "debate.rejection": "95747baf6030e9d439b20bc028136951acff2fe2f864aa2879c70e2e6700c004",
       "default_personas": [
         "fbf1393620e20af3c2d0b264b06bbba864f33e6d7b2bfe2bd41cf19c290f6c8e",
         "c3a37f1ec12294ce43310567242c1c809d1308b64eb18c0555f59fcddabf56ff",
         "ea8c39cd7ca12c3122dc4bf4c46ac68175183372d400e294910b5093e177e5bb"
-      ]
+      ],
+      "prompt_optimizer.request": "a41959f507c65ad01268288ab33ea951f78a65438bb9f73814d0c46b3aeb469a",
+      "block_selection.request": "9ff7f8c70e519bf18e06f1adaa87d47eed4d073ae0b9dfc3e52535af48efb78a",
+      "generator.request": "c4e3902836bb8943ae34155313b59204ec23b140c1045666c74142e0fb7c6b52",
+      "services.schema_message": "e91912731fd7e938b887159d0d1716324e81069250ea3a7e6ffac101f013617d",
+      "providers.format_retry": "f31ca989daafe99d9415d32d240359a497e98c570ba5f1796b9312bcebaa4831",
+      "preferences.labeled_pair": "b6459234e1d12a23343bdf59c9d65bcdf9830c60113a2d6d3ae8e480e89ae96a",
+      "preferences.unlabeled_pair": "5da4ad9176d55db8b335e5fdc498701b6edda220f23e0201bbb64de9e1651e78"
     },
     "personas/amazon": {
       "E-commerce behavior analyst": "f6f2a15e4a40a69caa621c1ad6aa8fbc1396779334b12bdc21ae806826dc01e3",
@@ -83,6 +67,20 @@
       "Biomedical evidence analyst": "f2184cb7dc02fc9ec81989e4e229dc056801815d32c14656b5432abf249d8f98",
       "Clinical research methodologist": "bb85d2803ac0174c2e351ec513c48158e5cd35ec8c0aed516f5cd7f8c8703fb2",
       "Scientific question answering evaluator": "34e571e408f00e0863b8ade72fbd199e49f8474d16abc62cd088d0df7d9fa8fc"
+    },
+    "dicai": {
+      "reasoning.cot": "ad03b0f90ff0de048b4ad57aa2056e746b2b3a8d9905650b8966decffffe1cd1",
+      "reasoning.self_consistency_sample": "4650bf95f41a1734ec4ab01bdc8df03c58bc6ef5f5d99e5eb8d59d02ced8207f",
+      "reasoning.self_consistency_consensus": "9da62ac8c7703ce8fef919c526276ccd83007aab54e73daf5d38d55f83963acc",
+      "reasoning.self_refine_draft": "2a5b6875a0668f0c754b760868c74975df87baa25ade425545c56b733230f616",
+      "reasoning.self_refine_critique": "3252f1fa6b6a603b2493f9d131a8caa95c9d8e9eb3f2d4cc59b0e552eaffe11f",
+      "reasoning.self_refine_revision": "4784cbb4f784dfcfdd79808b99b62e6aa376972a84614485baa9e3e3c2597834",
+      "debate.debater": "02be6a3cc3338a70fc8bc4da3b67c3b7f7914e19ae6efab82f036065f570ec4f",
+      "debate.chairperson": "158b6b870a897a77298fe2dacdfdc730efd232a6ab1ee47fa3c351e538d8fd0b",
+      "feedback.reconstruction_failed": "825bb6c0dfd52c6b9e294436cb6a6715bd114bf32db88d3fbaa72221ee02b48f",
+      "feedback.minimum_not_met": "708ab89bcec4ffe24c5a9e371d4b1fc9c2d672569a22c024df2fba888f098a8e",
+      "reconstruction": "524035c1f610a81b9a70a3da69a35a736c4c1fb790e3fcd7d1b09a2a4684f982",
+      "abstraction": "ef25db4f7621a09a5315e472743b2213cadcea8e66f097284b21816563d7d954"
     }
   },
   "rendered": {
@@ -123,6 +121,43 @@
         "format_prompt": "Always conclude the last line of your response should be of the following format: 'Answer: $VALUE' (without quotes) where VALUE is either 'yes' or 'no' or 'maybe'."
       },
       "expected": "Original instruction {x}\n\nProblem:\n\"Does it work?\"\n\nHere is a summary of relevant information:\n\"  Evidence.\n\"\n\nPlease provide yes, no or maybe to the given problem. Always conclude the last line of your response should be of the following format: 'Answer: $VALUE' (without quotes) where VALUE is either 'yes' or 'no' or 'maybe'."
+    }
+  },
+  "original_system_hashes": {
+    "systems/hotpotqa": {
+      "QuestionRewriter.instructions": "21d40427bc7d934851070e8127d6da43b3ff323fb702885819e44364c15839aa",
+      "QuestionRewriter.question.prefix": "597369d1d7df4789f241858dc8c20e3df895694815d4901a6cf6307563b1b5bd",
+      "QuestionRewriter.rewritten_query.prefix": "7a0d123a9cb35a67efc745961e3a8a6e01bf3ea49b7169c4476b95b1a10a3511",
+      "InfoExtractor.instructions": "afc406f0c7e5bc550eaf219843c6cffcabe0f4a5dd39ab42e7748ad8df26fa73",
+      "InfoExtractor.rewritten_query.prefix": "597369d1d7df4789f241858dc8c20e3df895694815d4901a6cf6307563b1b5bd",
+      "InfoExtractor.search_keywords.prefix": "ed174691bf49f3d3073b20ba2ced433d0e7bb79fc2d043310b8412ba5feec116",
+      "HintGenerator.instructions": "2066802652746a931fb812dcda90eb944e469b856638ee466145efed4c6b099e",
+      "HintGenerator.rewritten_query.prefix": "597369d1d7df4789f241858dc8c20e3df895694815d4901a6cf6307563b1b5bd",
+      "HintGenerator.retrieve_content.prefix": "59432ccfec234f18955e186430e6d6ae98ddab2d26e1718f08db1ed9c5c64068",
+      "HintGenerator.hints.prefix": "1194071d1d70717bf2fbbd12842ddbf5e106c8e0aa4241b1595fd362f408e980",
+      "AnswerGenerator.instructions": "438f2492fc37a0afecc6a4c6238f5257281f670828c0febb26ceab78c29f8298",
+      "AnswerGenerator.rewritten_query.prefix": "597369d1d7df4789f241858dc8c20e3df895694815d4901a6cf6307563b1b5bd",
+      "AnswerGenerator.hints.prefix": "1194071d1d70717bf2fbbd12842ddbf5e106c8e0aa4241b1595fd362f408e980",
+      "AnswerGenerator.answer.prefix": "fd8c79847dfbc51e70682480e121c53dcf24e4bf0fef039b67fff673ac3bbb3d"
+    },
+    "systems/amazon": {
+      "SessionAnalyzerModule.template": "4e275130f27dd11fa648bf5a7830d8ac369b55bf388e0a67151b8a979fb880fb",
+      "CandidateProfilerModule.template": "be4216dee6abe8ac63637fb129a124d422330245f04df2436ac22252d0a36447",
+      "NextItemDecider.instructions": "09924d0f1f6394a6456edd5a49560d8312e255c4e2f7526196ad44c3107edfef",
+      "NextItemDecider.context.prefix": "eada78d2ec26344fccdc2822e658cfdc8086aa37e8dfb4b546a238e95a5e22da",
+      "NextItemDecider.context.desc": "8ea9f9d8f12e9ef40bc33c3b9ef3b905b8a26bb586bb30138aac21918f2cd3c3",
+      "NextItemDecider.feedback.prefix": "82ad655ccb5ccca87910f619e1fe6c3e6696322286f5718cdd4eb1626ce693d6",
+      "NextItemDecider.feedback.desc": "ff21546ba118882806540f8411d8690d32a0af20d388bec4d61c576a06a9808d",
+      "NextItemDecider.answer.prefix": "e4d71b54d159712d54972cc46d3155adb735cf8e74cc31fe78885d75194ebd50",
+      "NextItemDecider.answer.desc": "b6464fde566b06089fabb4e89d16f0ca5be30711427822253e084e9e68e9024d"
+    },
+    "systems/pubmed": {
+      "ContextAnalystModule.instruction": "0fe753cff18dd59452c2a610ea8e00b6823b2c88cc97bfb54998a73532c7266e",
+      "ContextAnalystModule.template": "4a0bbcd5a4d76567bef2afa37efd8f004bfcd454463089dc9338ff00ce996ce3",
+      "ProblemSolverModule.instruction": "3941e6490aedf3c3ee7b3f56a09655e1e8460c342dbb0987a66476f6230a6c9a",
+      "ProblemSolverModule.template": "2292fcfd58e647aa5f7c657bccd0e5d8ef2ff8dde24cff8787352a2051059963",
+      "FORMAT_PROMPT_YESNO": "00414d3bd8237cbd473eb70aab3ea294aaa11807c458479356d198914d4e74a1",
+      "SYS_SINGLE_SOL_PROMPT": "934511a1b0eb2ac9f508b90cd2c2bbfefea9c0bbf560821d4b6f9d47e5c09d84"
     }
   }
 }

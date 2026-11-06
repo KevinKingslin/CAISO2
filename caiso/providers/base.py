@@ -4,7 +4,7 @@ from typing import Protocol
 from pydantic import BaseModel, ValidationError
 
 from caiso.core.recovery import ModelResponseError, Recovery
-from caiso.prompts import entry as prompt_entry
+from caiso.prompts import render_messages
 from caiso.core.serialization import digest
 
 DICAI_ROLES = {"system_constitution", "block_constitution", "constitution_judge", "block_selection"}
@@ -64,10 +64,7 @@ class ProviderRegistry:
             if format_error and kwargs.get("prompt_format") != "completion":
                 instructions = [
                     *messages,
-                    {
-                        "role": "user",
-                        "content": prompt_entry('method', 'providers.format_retry').format(value_0=str(previous_error)[:1500]),
-                    },
+                    *render_messages("method", "providers.format_retry", error=str(previous_error)[:1500]),
                 ]
             retry_seed = (seed + attempt * 104729) % (2**31 - 1) if format_error else seed
             text = provider.complete(instructions, seed=retry_seed, schema=schema, **kwargs)

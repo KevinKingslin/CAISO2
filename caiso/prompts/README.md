@@ -3,22 +3,51 @@
 These files are read by CAISO and the three configured benchmark systems. Text,
 whitespace and configuration/generation values were preserved during extraction.
 
-- `dicai/*.txt`: the eight DICAI reasoning, style, debate, blind judging and
-  abstraction templates, moved from `constitution/dicai/prompts`.
-- `method/`: reasoning-stage and debate guidance, preference formatting, block
-  selection, prompt optimization, workflow proposal, default personas, schema
-  instructions and response repair.
+- `dicai/reasoning/*.txt`: complete requests for CoT, self-consistency samples and
+  consensus, and self-refinement draft, critique and revision.
+- `dicai/debate/debater.txt` and `chairperson.txt`: complete system/user requests,
+  including principle style and the turn-specific instructions.
+- `dicai/reconstruction.txt` and `abstraction.txt`: complete requests for blind
+  judging and cluster abstraction.
+- `dicai/debate/*_feedback.txt`: complete moderator feedback for rejected stops.
+- `method/<stage>/prompt.txt`: complete block-selection, prompt-optimization and
+  workflow-proposal requests. `method/services/schema_message.txt` and
+  `method/providers/format_retry.txt` are complete supplemental user messages.
+- `method/preferences/*_pair.txt`: complete labeled/unlabeled evidence layouts.
 - `systems/hotpotqa/<component>/`: DSPy instructions and field prefixes.
 - `systems/amazon/<component>/`: both Qwen completion templates and the DSPy next-item
   instruction, prefixes and field descriptions.
 - `systems/pubmedqa/`: scientist system message, component instructions,
   yes/no/maybe format and context-analysis/problem-solving user templates.
 
-Every active prompt is a `.txt` resource with ordinary, editable newlines. Component
-instructions live in `instructions.txt`; complete Qwen prompts in `prompt.txt`;
-PubMedQA user templates in `user.txt`; DSPy field prefixes and descriptions in each
-component's `fields/` folder. PubMedQA's shared scientist message is `system.txt`, and
-its final-answer format is `problem_solver/answer_format.txt`.
+Each request template contains the complete instructions for its stage. Shared
+style, output-format instructions, and debate guidance are written directly into
+the corresponding request, rather than loaded as fragments from other files.
+For example, open `dicai/debate/chairperson.txt` to see its system instructions,
+evidence fields, and instruction to publish the updated working list together.
+
+Chat request files use role sections:
+
+```text
+[SYSTEM]
+Complete system instructions for this stage.
+[USER]
+Dynamic evidence: {evidence:json}
+Complete instructions for this turn.
+```
+
+The headers are file delimiters, not text sent to the model. Placeholders such as
+`{identity}`, `{preferred}` and `{history:json}` hold dynamic values. The `:json`
+specifier serializes evidence canonically; literal JSON braces in a template are
+escaped as `{{` and `}}`. Inputs are substituted after role parsing, so role-like
+text inside evidence stays data. Message whitespace is preserved exactly.
+
+Amazon Qwen `prompt.txt` files are complete raw-completion prompts and have no
+role delimiters. PubMedQA component `prompt.txt` files contain both the scientist
+system message and the complete user template, including the solver's final-answer
+format. `instructions.txt` holds each component's initial optimizable instruction.
+For DSPy components, field prefixes/descriptions in `fields/` are metadata; DSPy's
+runtime generates its chat-format wrappers around the component instruction.
 
 Each system also has `personas/` with three numbered `.txt` profiles restored from
 the previous CAISO configuration. These are fictional task adaptations with the
@@ -46,9 +75,8 @@ systems/
     answer_generator/{instructions.txt,fields/}
     personas/*.txt
   pubmedqa/
-    system.txt
-    context_analyst/{instructions.txt,user.txt}
-    problem_solver/{instructions.txt,user.txt,answer_format.txt}
+    context_analyst/{instructions.txt,prompt.txt}
+    problem_solver/{instructions.txt,prompt.txt}
     personas/*.txt
 ```
 
@@ -57,6 +85,8 @@ Ordered default tips and personas use one numbered `.txt` file per entry under
 `_catalogs.py` maps existing caller keys to these resources and keeps list order;
 it contains paths, not prompt content. The loaders read only the requested text
 files and preserve all whitespace, including trailing spaces in field prefixes.
+Tips, personas and initial instructions are variable inputs to complete requests,
+not hidden instruction suffixes.
 
 Placeholders are filled by the caller; input containing braces is not interpreted
 as another template. DSPy generates its own chat-format wrappers. Schemas,
@@ -71,6 +101,9 @@ systems outside the three configured datasets. Optional preserved
 STaRK/BigCodeBench examples and legacy OPTIMAS utilities retain their original prompt
 code; they are not part of the three active experiment profiles.
 
-DICAI includes method fragments and its text templates in cache provenance, so
+DICAI includes the complete method and DICAI templates in cache provenance, so
 editing them invalidates induction caches. Prompt changes can affect benchmark
 scores; this extraction retains the previous content.
+
+See [the original-source audit](../../docs/PROMPT_AUDIT.md): benchmark system
+prompts match pinned OPTIMAS, while DICAI contains documented CAISO adaptations.

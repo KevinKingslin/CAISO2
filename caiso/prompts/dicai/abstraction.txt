@@ -1,1 +1,31 @@
+[SYSTEM]
 You abstract a cluster of preference principles into one principle.
+
+PRINCIPLE STYLE:
+Write each selection criterion as one short sentence beginning with
+"Select the response". Express one reusable, discriminating quality.
+Use the highest-level abstraction that preserves the preference supported by the
+evidence. A rule must still make sense for new inputs with different entities,
+answers, dates and values. Domain concepts and task constraints may remain;
+sample-specific names, titles, locations, exact answers, quantities and quotations
+must not. Keep concrete facts in the rationale or debate evidence, not the rule.
+Do not merely replace a name with "the person" while retaining the sample's fact.
+Do not impose a new preference unsupported by the evidence, or collapse distinct
+qualities into a vague rule such as "is better". Avoid lists of exceptions and
+parenthetical explanations. Never turn a sample answer into a selection rule.
+
+[USER]
+You are given a cluster of preference principles that all express the same
+underlying rule. Each has the form "Select the response that <condition>".
+
+Write ONE principle that captures the shared evaluative preference. Use the
+highest-level abstraction faithful to every member, without adding unsupported
+preferences. Remove sample-specific details even if ALL members repeat them.
+A cluster containing one member must also be generalized; never copy its answer
+facts directly. Preserve one discriminating quality, not a bundle of independent
+qualities. Use the exact format: "Select the response that <condition>."
+
+CLUSTER:
+{principles}
+
+Reply with only the principle.

@@ -1,0 +1,82 @@
+{
+  "verified_date": "2026-11-06",
+  "optimas_commit": "71871a2dd98081231d733debd41178ba47e13528",
+  "system_prompts": {
+    "amazon": {
+      "original_prompt_entries_checked": 9,
+      "result": "exact match",
+      "source_sha256": "67e777d7a69faa0f0410f72e32c03a57b6ddfe931d7a441b375ac56c76196694"
+    },
+    "hotpotqa": {
+      "original_prompt_entries_checked": 14,
+      "result": "exact match",
+      "source_sha256": "fd4d399436abba772ba69c0aed82ca7eb82bbdf7acaa4671a8b7d5ae2203b3d5"
+    },
+    "pubmed": {
+      "original_prompt_entries_checked": 6,
+      "result": "exact match",
+      "source_sha256": "55a7d3c6e50c8d6ce425a9d10495f61d884c727dd9f94f966049c40b9425c047"
+    }
+  },
+  "system_checks_including_rendered_cases": 41,
+  "dicai_source_url": "https://anonymous.4open.science/r/Democratic-ICAI-C8D5/",
+  "dicai_source_files_hash_verified": 8,
+  "dicai_pre_consolidation_components": {
+    "reasoning_base": {
+      "source": "reasoning.py:_BASE_TASK",
+      "verbatim": false,
+      "same_except_final_newline": true,
+      "source_sha256": "b06916575af46a73ddf00134de842da635c2a47eff55559d01f1fdc4c5393f55",
+      "port_sha256": "a2506dd7d3f28bdfa14b99766aa732120c9d2acae9aabdc0afda28f4c949093c"
+    },
+    "reasoning_json": {
+      "source": "reasoning.py:_JSON_INSTRUCTION",
+      "verbatim": false,
+      "same_except_final_newline": true,
+      "source_sha256": "7cce8066cd63db343ef6792da351f5f37af519a4092c6961f4bfcdd54dc3ba61",
+      "port_sha256": "1ed5b6806c3728cfb3d01303c4c3972fd1af782a1496b5c48c7876902c508c8d"
+    },
+    "debater": {
+      "source": "debate.py:_DEBATER_SYS",
+      "verbatim": false,
+      "same_except_final_newline": false,
+      "source_sha256": "77b09a93b5e27b66d5284eba35612833b8ebc83c49c0d287857953f5b21ceedb",
+      "port_sha256": "6dd9b64faddd0a58685280d9862703b4da7f4aef2d874acfc8ddec37d999a700"
+    },
+    "chairperson": {
+      "source": "debate.py:_JUDGE_SYS",
+      "verbatim": false,
+      "same_except_final_newline": false,
+      "source_sha256": "e2a2d380eb7e091fc46731843ab3ee1adddb727e4fd65782f89709a8804ffc4f",
+      "port_sha256": "b717f1185b96b2ff95754c0f2a20f0367dd8dcbb6a96b02362088e34fb49c390"
+    },
+    "reconstruction": {
+      "source": "common.py:_RECON_SYS",
+      "verbatim": false,
+      "same_except_final_newline": true,
+      "source_sha256": "8c8db618c7e6e94a7118fc1e817da459e9efb21aa176a3ad474d700629e2b2fc",
+      "port_sha256": "6d3f6056b19079c8b4eabb6a0978f963071d0a4f260a206e0b3c56201bcd8b8c"
+    },
+    "abstraction": {
+      "source": "clustering.py:_ABSTRACT_SYS",
+      "verbatim": false,
+      "same_except_final_newline": true,
+      "source_sha256": "615e35e657f64e92358a10afe55475724c042244235253df30183f2700a74318",
+      "port_sha256": "54c1c856a635533904500c1ec8fb78f65d2215ecfcd223cccb2a0e1ed0a4fac6"
+    },
+    "abstraction_user": {
+      "source": "clustering.py:_ABSTRACT_USER",
+      "verbatim": false,
+      "same_except_final_newline": false,
+      "source_sha256": "ea502e9e390a43aca51357c33227f2d5acac84824b7cfcf8f5137860faf848a2",
+      "port_sha256": "134e1570fe30956cc72cbb2a29966d7f00c8ab3528b94a0040846d6b00e3cbeb"
+    }
+  },
+  "dicai_addition": "Reusable-principle style instructions are a CAISO addition; whole requests also use structured task data and additional schema guidance.",
+  "audited_baseline_commit": "ce3ece658203441f7f797695d92951429ae7e7b5",
+  "consolidation_request_parity": {
+    "requests": 51,
+    "message_bodies": 104,
+    "result": "exact UTF-8 and role match"
+  }
+}

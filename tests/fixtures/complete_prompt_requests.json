@@ -1,0 +1,775 @@
+[
+  {
+    "role": "audit",
+    "seed": 42,
+    "schema": "Reasoning",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "82cd14c0e9ed27d452e00cdaaf8b5cd670639a05e3c03f2cb7840fc1f83f366b"
+      },
+      {
+        "role": "user",
+        "sha256": "e1fb27b1820bbf5db4dc685bba88ac0ac2ec774c2145ab1e277bd35f297b3b65"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 142,
+    "schema": "Reasoning",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "82cd14c0e9ed27d452e00cdaaf8b5cd670639a05e3c03f2cb7840fc1f83f366b"
+      },
+      {
+        "role": "user",
+        "sha256": "c59a2e5157c157f71e6d12ea116586afdd81d546fb8d7fc9de413a0fcf5de122"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 143,
+    "schema": "Reasoning",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "82cd14c0e9ed27d452e00cdaaf8b5cd670639a05e3c03f2cb7840fc1f83f366b"
+      },
+      {
+        "role": "user",
+        "sha256": "c59a2e5157c157f71e6d12ea116586afdd81d546fb8d7fc9de413a0fcf5de122"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 144,
+    "schema": "Reasoning",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "82cd14c0e9ed27d452e00cdaaf8b5cd670639a05e3c03f2cb7840fc1f83f366b"
+      },
+      {
+        "role": "user",
+        "sha256": "740cdba25a6a96e0c7ea965ae6196cdf59b4a7ffaa4766f69b3bd59e8906cb47"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 242,
+    "schema": "Reasoning",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "82cd14c0e9ed27d452e00cdaaf8b5cd670639a05e3c03f2cb7840fc1f83f366b"
+      },
+      {
+        "role": "user",
+        "sha256": "d2dcaedb3fc1f534eddd7db813297f2dbad9baba6917009d0e05f673e1542a54"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 243,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "3d274825937e3085eca355dfea1a0700edfe8ceb2bd2de5670542d2c587b06dc"
+      },
+      {
+        "role": "user",
+        "sha256": "01d4b762e824184d14e766a652ab246603a5b46ea3d30ee7dda2d49cdf396985"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 244,
+    "schema": "Reasoning",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "82cd14c0e9ed27d452e00cdaaf8b5cd670639a05e3c03f2cb7840fc1f83f366b"
+      },
+      {
+        "role": "user",
+        "sha256": "46ac46030062c6838a683fb853896c069bc9f916569d40ba72fbb08abc96cb24"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 0,
+    "schema": "PreferenceChoice",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "6d3f6056b19079c8b4eabb6a0978f963071d0a4f260a206e0b3c56201bcd8b8c"
+      },
+      {
+        "role": "user",
+        "sha256": "3570b62143a1cba7c73832a36c8059a5eb0f851cdb36e27747485cc866987d51"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 42,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "0ee22f49cbf94338362194778c03c1d854a91c706552cfdac31a75aeec1b8f76"
+      },
+      {
+        "role": "user",
+        "sha256": "e8402d1d24d7e14f312d3a0dfcae098011864cac4e7ea7c4816e65e7557c423b"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 43,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "a1da8c5c90f5354625f20baba97a7fc1c969df9b10877f2ac3895758e53d78c5"
+      },
+      {
+        "role": "user",
+        "sha256": "6349961801bfa3db7de421db68c9c1393ae603f1a90e53f7a259ff66217c6f44"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 44,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "949565fcc51717b23d23151caf1fa0f256922b3d2ef8c6feaf2ff3ac2ee2dc0d"
+      },
+      {
+        "role": "user",
+        "sha256": "22a5885f5b2870028dd95a424e4633fa9dce6ed2303644e6183b1c1de600e111"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 45,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "56b6bf9465529a8d45308a2ce1f14ea2407f912c38e2d10fb711703155a180aa"
+      },
+      {
+        "role": "user",
+        "sha256": "255084858d0843a436a59ec7fdcdab6cc67a1bd6db5736caea1c4e60d7d25d40"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 0,
+    "schema": "PreferenceChoice",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "6d3f6056b19079c8b4eabb6a0978f963071d0a4f260a206e0b3c56201bcd8b8c"
+      },
+      {
+        "role": "user",
+        "sha256": "3570b62143a1cba7c73832a36c8059a5eb0f851cdb36e27747485cc866987d51"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 0,
+    "schema": "PreferenceChoice",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "6d3f6056b19079c8b4eabb6a0978f963071d0a4f260a206e0b3c56201bcd8b8c"
+      },
+      {
+        "role": "user",
+        "sha256": "3570b62143a1cba7c73832a36c8059a5eb0f851cdb36e27747485cc866987d51"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 46,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "0ee22f49cbf94338362194778c03c1d854a91c706552cfdac31a75aeec1b8f76"
+      },
+      {
+        "role": "user",
+        "sha256": "5b27671cda1d334cdc277e37d0aaf5987944b4061f3d559fc16e76c2372595d2"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 47,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "a1da8c5c90f5354625f20baba97a7fc1c969df9b10877f2ac3895758e53d78c5"
+      },
+      {
+        "role": "user",
+        "sha256": "28abd5419a252e75fdd64faa0b2098b9058660525a3fe434a6ee06c94c278455"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 48,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "949565fcc51717b23d23151caf1fa0f256922b3d2ef8c6feaf2ff3ac2ee2dc0d"
+      },
+      {
+        "role": "user",
+        "sha256": "54d3d5a7d1751f0de6ee38992973b08faf0e7514cff0e3f5c0dfa459bcd539e2"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 49,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "56b6bf9465529a8d45308a2ce1f14ea2407f912c38e2d10fb711703155a180aa"
+      },
+      {
+        "role": "user",
+        "sha256": "f277883a340cf78cfab7f5b1d6c167cd31c6446576b10b8bbff52d7654584dba"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 0,
+    "schema": "PreferenceChoice",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "6d3f6056b19079c8b4eabb6a0978f963071d0a4f260a206e0b3c56201bcd8b8c"
+      },
+      {
+        "role": "user",
+        "sha256": "3570b62143a1cba7c73832a36c8059a5eb0f851cdb36e27747485cc866987d51"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 7,
+    "schema": "PreferenceChoice",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "6d3f6056b19079c8b4eabb6a0978f963071d0a4f260a206e0b3c56201bcd8b8c"
+      },
+      {
+        "role": "user",
+        "sha256": "645f188ca05a66125b4f888364c6fe1d550d065e45d97af52044fb517d79fdb4"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 42,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "3bff93c7fbe8758267e32bf24a08f6b5f0bfc2b146bdb5f16c8021b9b1daf6ff"
+      },
+      {
+        "role": "user",
+        "sha256": "9ce27968fdee7e6a5dc762b0180b0db1142d76185f40158004bc3df7250d3417"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 43,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "3bff93c7fbe8758267e32bf24a08f6b5f0bfc2b146bdb5f16c8021b9b1daf6ff"
+      },
+      {
+        "role": "user",
+        "sha256": "febf8520b89e52a1252c8b3b285ef63f1dfc4eeaceac39828cf89276d67288b0"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 42,
+    "schema": "Reasoning",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "f6ff8cd264f0275e81f45454e71c136c265dec0377ae544938ea7230ce48ad6d"
+      },
+      {
+        "role": "user",
+        "sha256": "d115a74822383ea586dbf7d0071f7992246f9cb184e7acb1ddc416e4b35ffae8"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 142,
+    "schema": "Reasoning",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "f6ff8cd264f0275e81f45454e71c136c265dec0377ae544938ea7230ce48ad6d"
+      },
+      {
+        "role": "user",
+        "sha256": "f6da5805e2fa6fa6178b6c07ebb033b759fffca233979517695da419edcbbdab"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 143,
+    "schema": "Reasoning",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "f6ff8cd264f0275e81f45454e71c136c265dec0377ae544938ea7230ce48ad6d"
+      },
+      {
+        "role": "user",
+        "sha256": "f6da5805e2fa6fa6178b6c07ebb033b759fffca233979517695da419edcbbdab"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 144,
+    "schema": "Reasoning",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "f6ff8cd264f0275e81f45454e71c136c265dec0377ae544938ea7230ce48ad6d"
+      },
+      {
+        "role": "user",
+        "sha256": "740cdba25a6a96e0c7ea965ae6196cdf59b4a7ffaa4766f69b3bd59e8906cb47"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 242,
+    "schema": "Reasoning",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "f6ff8cd264f0275e81f45454e71c136c265dec0377ae544938ea7230ce48ad6d"
+      },
+      {
+        "role": "user",
+        "sha256": "800817b7d68ba7674438832456e81903621efb0950915cc960f90ec2088e5a94"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 243,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "3d274825937e3085eca355dfea1a0700edfe8ceb2bd2de5670542d2c587b06dc"
+      },
+      {
+        "role": "user",
+        "sha256": "224f677504b6fd6a7684d561cea9b96e8e15133415f2f8cec0ba5378e329097f"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 244,
+    "schema": "Reasoning",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "f6ff8cd264f0275e81f45454e71c136c265dec0377ae544938ea7230ce48ad6d"
+      },
+      {
+        "role": "user",
+        "sha256": "b4b31b7b943fdc7598f061467b952b6a89b68373f5dd3d452a509ef89779b2cd"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 0,
+    "schema": "PreferenceChoice",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "6d3f6056b19079c8b4eabb6a0978f963071d0a4f260a206e0b3c56201bcd8b8c"
+      },
+      {
+        "role": "user",
+        "sha256": "3570b62143a1cba7c73832a36c8059a5eb0f851cdb36e27747485cc866987d51"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 42,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "0ee22f49cbf94338362194778c03c1d854a91c706552cfdac31a75aeec1b8f76"
+      },
+      {
+        "role": "user",
+        "sha256": "9a40b37d0ad946a6d89b48637d352e255329de87f30892b5dea50827c48a3853"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 43,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "a1da8c5c90f5354625f20baba97a7fc1c969df9b10877f2ac3895758e53d78c5"
+      },
+      {
+        "role": "user",
+        "sha256": "20af8b24ab2f10facba5a3ca7244d082a586ca58c6ced084e300c0c03bc97fc4"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 44,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "949565fcc51717b23d23151caf1fa0f256922b3d2ef8c6feaf2ff3ac2ee2dc0d"
+      },
+      {
+        "role": "user",
+        "sha256": "3b87ddfc5920f8c251665deaf80ed81b060dba140472bb358937e519104fb464"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 45,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "56b6bf9465529a8d45308a2ce1f14ea2407f912c38e2d10fb711703155a180aa"
+      },
+      {
+        "role": "user",
+        "sha256": "99757fce28c4ff729a60166ea82b083c905958ed853e41b34b879d7ddba7ef9a"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 0,
+    "schema": "PreferenceChoice",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "6d3f6056b19079c8b4eabb6a0978f963071d0a4f260a206e0b3c56201bcd8b8c"
+      },
+      {
+        "role": "user",
+        "sha256": "3570b62143a1cba7c73832a36c8059a5eb0f851cdb36e27747485cc866987d51"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 0,
+    "schema": "PreferenceChoice",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "6d3f6056b19079c8b4eabb6a0978f963071d0a4f260a206e0b3c56201bcd8b8c"
+      },
+      {
+        "role": "user",
+        "sha256": "3570b62143a1cba7c73832a36c8059a5eb0f851cdb36e27747485cc866987d51"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 46,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "0ee22f49cbf94338362194778c03c1d854a91c706552cfdac31a75aeec1b8f76"
+      },
+      {
+        "role": "user",
+        "sha256": "dbce6b9293bba8fcee1d97c593db117b1b3647a182730658099da125b6f937ec"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 47,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "a1da8c5c90f5354625f20baba97a7fc1c969df9b10877f2ac3895758e53d78c5"
+      },
+      {
+        "role": "user",
+        "sha256": "31b706c0f5c99c5ceb70d62501cf60e3e947899dde39f50d3f0a470d5395162f"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 48,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "949565fcc51717b23d23151caf1fa0f256922b3d2ef8c6feaf2ff3ac2ee2dc0d"
+      },
+      {
+        "role": "user",
+        "sha256": "25e784239f694c54db71515a8fabfd8b5971027513b6878fecae687dc4048aa0"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 49,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "56b6bf9465529a8d45308a2ce1f14ea2407f912c38e2d10fb711703155a180aa"
+      },
+      {
+        "role": "user",
+        "sha256": "e108192573c8433c3b978d1385702ab912e99e57976c6ab1d330cc7b004df1ce"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 0,
+    "schema": "PreferenceChoice",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "6d3f6056b19079c8b4eabb6a0978f963071d0a4f260a206e0b3c56201bcd8b8c"
+      },
+      {
+        "role": "user",
+        "sha256": "3570b62143a1cba7c73832a36c8059a5eb0f851cdb36e27747485cc866987d51"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 7,
+    "schema": "PreferenceChoice",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "6d3f6056b19079c8b4eabb6a0978f963071d0a4f260a206e0b3c56201bcd8b8c"
+      },
+      {
+        "role": "user",
+        "sha256": "645f188ca05a66125b4f888364c6fe1d550d065e45d97af52044fb517d79fdb4"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 42,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "3bff93c7fbe8758267e32bf24a08f6b5f0bfc2b146bdb5f16c8021b9b1daf6ff"
+      },
+      {
+        "role": "user",
+        "sha256": "9ce27968fdee7e6a5dc762b0180b0db1142d76185f40158004bc3df7250d3417"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 43,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "3bff93c7fbe8758267e32bf24a08f6b5f0bfc2b146bdb5f16c8021b9b1daf6ff"
+      },
+      {
+        "role": "user",
+        "sha256": "febf8520b89e52a1252c8b3b285ef63f1dfc4eeaceac39828cf89276d67288b0"
+      }
+    ]
+  },
+  {
+    "role": "prompt_optimizer",
+    "seed": 42,
+    "schema": "PromptProposal",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "6fb42a0a071c82c5c62ea26524c638edf458e947005684ca47bbd377770e6214"
+      },
+      {
+        "role": "user",
+        "sha256": "5f92d6ba5ad34639e60d2ab4792518154c18d67d10f2f82fb087a41c969fd5ee"
+      }
+    ]
+  },
+  {
+    "role": "prompt_optimizer",
+    "seed": 43,
+    "schema": "PromptProposal",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "6fb42a0a071c82c5c62ea26524c638edf458e947005684ca47bbd377770e6214"
+      },
+      {
+        "role": "user",
+        "sha256": "3db24ab0a492a64665c18ca14f1837ebb2dceb0992aa258ea17d9b22bb444d68"
+      }
+    ]
+  },
+  {
+    "role": "block_selection",
+    "seed": 42,
+    "schema": "BlockVote",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "fde45d000f5a7983911b5925e5f3cbd7888a275c7a6b5439ae584b23cf384d04"
+      },
+      {
+        "role": "user",
+        "sha256": "ef62283e8c0092ce69ead53499920d30be892e5ada3cd8151fc03be17c715b5e"
+      }
+    ]
+  },
+  {
+    "role": "workflow_generator",
+    "seed": 42,
+    "schema": "WorkflowProposal",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "70cedd6a952efca15acf77b512146d8396de1fdf10beaa4333733ef3b218ef74"
+      },
+      {
+        "role": "user",
+        "sha256": "a7dcbcbe4df0d3cb453ad25be58b00f054a4595af73cf2676bc79e851ac4a833"
+      }
+    ]
+  },
+  {
+    "role": "schema",
+    "seed": 42,
+    "schema": "PromptProposal",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "f2e5d3a4334b0292e2d6dc8e73caf52f739132c57a7fb09c6bcb06d1ebab56ee"
+      },
+      {
+        "role": "user",
+        "sha256": "6c188e210e8c1acf762d319390cd87724e84c453ddb116e59faebc785a8ed453"
+      },
+      {
+        "role": "user",
+        "sha256": "6a73b74084b5acc2d5ad79a346b67e93fa9e7436adb77542f8de40e965f25cfd"
+      }
+    ]
+  },
+  {
+    "role": "retry",
+    "seed": 42,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "f2e5d3a4334b0292e2d6dc8e73caf52f739132c57a7fb09c6bcb06d1ebab56ee"
+      },
+      {
+        "role": "user",
+        "sha256": "6c188e210e8c1acf762d319390cd87724e84c453ddb116e59faebc785a8ed453"
+      }
+    ]
+  },
+  {
+    "role": "retry",
+    "seed": 104771,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "f2e5d3a4334b0292e2d6dc8e73caf52f739132c57a7fb09c6bcb06d1ebab56ee"
+      },
+      {
+        "role": "user",
+        "sha256": "6c188e210e8c1acf762d319390cd87724e84c453ddb116e59faebc785a8ed453"
+      },
+      {
+        "role": "user",
+        "sha256": "96f629abfe0780210e4f31517baeeb5c2bc9a5cedea2f228a44070101279bd21"
+      }
+    ]
+  }
+]

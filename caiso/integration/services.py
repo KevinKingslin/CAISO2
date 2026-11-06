@@ -7,7 +7,7 @@ import os
 import numpy as np
 
 from caiso.core.serialization import digest
-from caiso.prompts import entry as prompt_entry
+from caiso.prompts import render_messages
 from caiso.providers.base import ProviderRegistry
 from caiso.providers.embeddings import SentenceTransformerEmbeddings
 from caiso.utils import api
@@ -22,12 +22,10 @@ class MethodProvider:
     def complete(self, messages, *, seed, schema=None, temperature=0.2, max_tokens=None, **kwargs):
         instructions = list(messages)
         if schema is not None:
-            instructions.append(
-                {
-                    "role": "user",
-                    "content": prompt_entry('method', 'services.schema_instruction')
-                    + json.dumps(schema.model_json_schema()),
-                }
+            instructions.extend(
+                render_messages(
+                    "method", "services.schema_message", schema=json.dumps(schema.model_json_schema()),
+                )
             )
         with observe_transport(self.budget, self.on_error):
             result = api.get_llm_output(

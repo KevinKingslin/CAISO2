@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import random
 from caiso.arch.system import CompoundAISystem
 from caiso.prompts import entry as prompt_entry
+from caiso.prompts import render_messages
 from caiso.arch.base import BaseComponent
 from caiso.utils.api import get_llm_output
 import torch
@@ -60,12 +61,6 @@ class ModelSelectorModule(BaseComponent):
             print(f"{self.task_type}_model using force model {self.force_model}")
             return {f"{self.task_type}_model": self.force_model} 
         return {f"{self.task_type}_model": self.variable["model_selection"]}
-
-# Format prompt for yes/no/maybe answers
-FORMAT_PROMPT_YESNO = prompt_entry('systems/pubmed', 'FORMAT_PROMPT_YESNO')
-
-# System prompt
-SYS_SINGLE_SOL_PROMPT = prompt_entry('systems/pubmed', 'SYS_SINGLE_SOL_PROMPT')
 
 class ContextAnalystModule(BaseComponent):
     """
@@ -117,15 +112,18 @@ class ContextAnalystModule(BaseComponent):
             raise ValueError("Question is required")
         
         # Format the prompt
-        user_prompt = prompt_entry('systems/pubmed', 'ContextAnalystModule.template').format(instruction=self.variable, context=context, question=question)
+        request = render_messages(
+            'systems/pubmed', 'ContextAnalystModule.request',
+            instruction=self.variable, context=context, question=question,
+        )
         
         # Call the LLM with the selected model
         response = get_llm_output(
-            message=user_prompt,
+            message=request[1]['content'],
             model=model,  
             max_new_tokens=self.config.max_tokens,
             temperature=self.config.temperature,
-            system_prompt=SYS_SINGLE_SOL_PROMPT
+            system_prompt=request[0]['content']
         )
         
         return {"summary": response}
@@ -181,15 +179,18 @@ class ProblemSolverModule(BaseComponent):
             raise ValueError("Summary is required")
         
         # Format the prompt
-        user_prompt = prompt_entry('systems/pubmed', 'ProblemSolverModule.template').format(instruction=self.variable, question=question, summary=summary, format_prompt=FORMAT_PROMPT_YESNO)
+        request = render_messages(
+            'systems/pubmed', 'ProblemSolverModule.request',
+            instruction=self.variable, question=question, summary=summary,
+        )
         
         # Call the LLM with the selected model
         response = get_llm_output(
-            message=user_prompt,
+            message=request[1]['content'],
             model=model,
             max_new_tokens=self.config.max_tokens,
             temperature=self.config.temperature,
-            system_prompt=SYS_SINGLE_SOL_PROMPT
+            system_prompt=request[0]['content']
         )
         
         return {"answer": response}

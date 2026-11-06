@@ -1,5 +1,0 @@
-{block}
-DRAFT RATIONALE:
-{value_1}
-DRAFT DIMENSIONS: {value_2}
-List concrete weaknesses: vague claims, points that are not discriminating (true of both responses), and missing high-tension differences. Be brief.

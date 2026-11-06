@@ -1,0 +1,12 @@
+[SYSTEM]
+You are a scientist.
+[USER]
+{instruction}
+
+Problem:
+"{question}"
+
+Here is a summary of relevant information:
+"{summary}"
+
+Please provide yes, no or maybe to the given problem. Always conclude the last line of your response should be of the following format: 'Answer: $VALUE' (without quotes) where VALUE is either 'yes' or 'no' or 'maybe'.

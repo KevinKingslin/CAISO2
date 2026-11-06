@@ -2,9 +2,9 @@
 
 from caiso.core.parallel import ordered_map
 from caiso.core.recovery import ModelResponseError
-from caiso.providers.base import messages
+from caiso.prompts import render_messages
 
-from .reasoning_assembly import principle_instructions, prompt, valid_principle
+from .reasoning_assembly import valid_principle
 
 
 def abstract_clusters(
@@ -28,9 +28,8 @@ def abstract_clusters(
         members = [p for p, label in zip(principles, labels, strict=True) if label == cluster]
         return providers.complete(
             role,
-            messages(
-                prompt("abstraction") + "\n" + principle_instructions(config),
-                prompt("abstraction_user").format(principles="\n".join("- " + p for p in members)),
+            render_messages(
+                "dicai", "abstraction", principles="\n".join("- " + p for p in members),
             ),
             seed=seed + cluster,
             validate=valid_abstract,

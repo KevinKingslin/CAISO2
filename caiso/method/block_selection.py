@@ -7,11 +7,10 @@ from typing import Any
 from pydantic import Field, create_model
 
 from caiso.blocks.utils import block_strength
-from caiso.prompts import entry as prompt_entry
+from caiso.prompts import render_messages
 from caiso.core.content_filter import ContentFilteredError, record_skip
 from caiso.core.recovery import ModelResponseError
 from caiso.core.serialization import Record, canonical, plain, save_json
-from caiso.providers.base import messages
 
 
 class BlockVote(Record):
@@ -121,16 +120,10 @@ def select_block(
         try:
             vote = providers.complete(
                 role,
-                messages(
-                    prompt_entry('method', 'block_selection.system').format(value_0=', '.join(blocks)),
-                    canonical(
-                        {
-                            "constitution": constitution.principles,
-                            "trajectory": trajectory,
-                            "blocks": blocks,
-                            "optimization_history": optimization_history or {},
-                        }
-                    ),
+                render_messages(
+                    "method", "block_selection.request", block_ids=', '.join(blocks),
+                    constitution=constitution.principles, trajectory=trajectory,
+                    blocks=blocks, optimization_history=optimization_history or {},
                 ),
                 seed=seed + i,
                 schema=schema,

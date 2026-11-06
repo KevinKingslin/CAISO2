@@ -1,2 +1,0 @@
-{block}
-Think step by step through the differences, then conclude. {instruction}

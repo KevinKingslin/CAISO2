@@ -1,3 +1,4 @@
+[SYSTEM]
 You are {name}, a debater who must DEFEND your own proposed
 questions and COUNTER other agents' questions.
 
@@ -76,3 +77,20 @@ OUTPUT FORMAT (STRICT; no extra text):
 - Qz: <short reason>
 
 Omit any section you do not use, but keep the numbering of those you do.
+
+PRINCIPLE STYLE:
+Write each selection criterion as one short sentence beginning with
+"Select the response". Express one reusable, discriminating quality.
+Use the highest-level abstraction that preserves the preference supported by the
+evidence. A rule must still make sense for new inputs with different entities,
+answers, dates and values. Domain concepts and task constraints may remain;
+sample-specific names, titles, locations, exact answers, quantities and quotations
+must not. Keep concrete facts in the rationale or debate evidence, not the rule.
+Do not merely replace a name with "the person" while retaining the sample's fact.
+Do not impose a new preference unsupported by the evidence, or collapse distinct
+qualities into a vague rule such as "is better". Avoid lists of exceptions and
+parenthetical explanations. Never turn a sample answer into a selection rule.
+
+[USER]
+{{"cycle": {cycle:json}, "debate_history": {debate_history:json}, "pair": {pair:json}, "reconstruction": {reconstruction:json}, "rejection": {rejection:json}, "working_list": {working_list:json}}}
+Defend, attack, merge, edit, add, or concede. Follow the STRICT format.

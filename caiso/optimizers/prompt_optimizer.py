@@ -4,9 +4,9 @@ import random
 
 from pydantic import Field
 
-from caiso.core.serialization import Record, canonical
+from caiso.core.serialization import Record
 from caiso.prompts import entry as prompt_entry
-from caiso.providers.base import messages
+from caiso.prompts import render_messages
 
 from .base import ConfigurationOptimizer
 
@@ -30,30 +30,22 @@ class PromptOptimizer(ConfigurationOptimizer):
         for i in range(count):
             result = context.runtime.providers.complete(
                 "prompt_optimizer",
-                messages(
-                    prompt_entry('method', 'prompt_optimizer.system').format(value_0=rng.choice(tips)),
-                    canonical(
+                render_messages(
+                    "method", "prompt_optimizer.request", tip=rng.choice(tips),
+                    component=component, current_prompt=current.value,
+                    constitution=context.constitution.principles,
+                    history=sorted(history, key=lambda x: x["score"]),
+                    examples=[
                         {
-                            "component": component,
-                            "current_prompt": current.value,
-                            "constitution": context.constitution.principles,
-                            "history": sorted(history, key=lambda x: x["score"]),
-                            "examples": [
-                                {
-                                    "inputs": t.inputs,
-                                    "executions": [
-                                        {
-                                            "component_input": e.component_input,
-                                            "component_output": e.component_output,
-                                        }
-                                        for e in t.executions
-                                        if e.component_id == component.component_id
-                                    ],
-                                }
-                                for t in context.trajectories
+                            "inputs": t.inputs,
+                            "executions": [
+                                {"component_input": e.component_input, "component_output": e.component_output}
+                                for e in t.executions
+                                if e.component_id == component.component_id
                             ],
                         }
-                    ),
+                        for t in context.trajectories
+                    ],
                 ),
                 seed=context.seed + i,
                 schema=PromptProposal,

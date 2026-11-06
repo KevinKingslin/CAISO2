@@ -1,3 +1,6 @@
+[SYSTEM]
+You are a scientist.
+[USER]
 {instruction}
 
 Here is the given context:

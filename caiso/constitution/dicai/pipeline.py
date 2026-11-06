@@ -1,4 +1,4 @@
-"""Supplied official DICAI procedure integrated into CAISO.
+"""Democratic ICAI procedure adapted for CAISO system and block preferences.
 
 Independent pairs and reasoning requests overlap; dependent debate turns stay ordered.
 """
@@ -26,7 +26,7 @@ from .clustering import cluster_principles
 from .debate import debate, principle_key
 from .personas import assign_personas
 from .plotting import save_silhouette_artifacts
-from .reasoning_assembly import assemble, prompt
+from .reasoning_assembly import assemble
 from .reconstruction import minimize_constitution, validate_constitution
 
 PROTOCOL = "democratic-icai-c8d5-port-v3"
@@ -86,20 +86,8 @@ class DICAI:
                 "role": self.role,
                 "provider": self.providers.fingerprint(),
                 "embeddings": self.embeddings.fingerprint(),
-                "prompts": {
-                    name: prompt(name)
-                    for name in (
-                        "reasoning_base",
-                        "reasoning_json",
-                        "debater",
-                        "chairperson",
-                        "reconstruction",
-                        "abstraction",
-                        "abstraction_user",
-                        "principle_style",
-                    )
-                },
-                "prompt_fragments": catalog_entries("method"),
+                "prompts": catalog_entries("dicai"),
+                "method_prompts": catalog_entries("method"),
             }
         )
         artifacts = Path(output_dir) / provenance if output_dir else None

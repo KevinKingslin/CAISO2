@@ -1,0 +1,9 @@
+PROMPT:
+{context:json}
+
+RESPONSE A:
+{response_a:json}
+
+RESPONSE B:
+{response_b:json}
+PREFERRED: {preferred}

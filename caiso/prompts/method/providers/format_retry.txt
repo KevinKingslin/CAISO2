@@ -1,2 +1,3 @@
-Your previous response could not be used: {value_0}
+[USER]
+Your previous response could not be used: {error}
 Please return a fresh answer that satisfies the requested schema and format. Preserve the original evidence and criteria; do not add unsupported principles.

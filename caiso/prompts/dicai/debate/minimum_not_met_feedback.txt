@@ -1,0 +1,1 @@
+DEBATE_OVER REJECTED: requires at least {minimum} principles and {min_cycles} cycles. Continue; keep distinct qualities separate.

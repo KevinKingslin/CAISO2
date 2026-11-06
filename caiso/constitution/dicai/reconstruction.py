@@ -1,4 +1,4 @@
-"""Official common.apply_constitution/reconstructs, with validated responses.
+"""Adapted common.apply_constitution/reconstructs, with validated CAISO views.
 
 MIT attribution: third_party/democratic_icai. Gold labels are used only after
 inference, never in the blind judge's messages.
@@ -11,13 +11,11 @@ from typing import Literal
 from pydantic import Field
 
 from caiso.core.content_filter import ContentFilteredError, record_skip
-from caiso.prompts import entry as prompt_entry
 from caiso.core.parallel import ordered_map
-from caiso.core.serialization import Record, canonical
-from caiso.providers.base import messages
+from caiso.core.serialization import Record
+from caiso.prompts import render_messages
 
 from .preferences import candidate_views, task_view
-from .reasoning_assembly import prompt
 
 
 class PreferenceChoice(Record):
@@ -29,20 +27,12 @@ def apply_constitution(providers, role, pair, principles, seed=0, temperature=0.
     a, b = candidate_views(pair)
     swapped = random.Random(seed).random() < 0.5
     first, second = (b, a) if swapped else (a, b)
-    user = (
-        canonical(
-            {
-                "prompt": task_view(pair.context),
-                "principles": principles,
-                "response_1": first,
-                "response_2": second,
-            }
-        )
-        + prompt_entry('method', 'reconstruction.json_instruction')
-    )
     response = providers.complete(
         role,
-        messages(prompt("reconstruction"), user),
+        render_messages(
+            "dicai", "reconstruction", prompt=task_view(pair.context),
+            principles=principles, response_1=first, response_2=second,
+        ),
         seed=seed,
         schema=PreferenceChoice,
         temperature=temperature,

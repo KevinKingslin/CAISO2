@@ -8,7 +8,7 @@ import pytest
 import yaml
 
 from caiso.integration.config import load_experiment, load_method
-from caiso.prompts import catalog_entries, entry
+from caiso.prompts import catalog_entries, entry, render_messages
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -58,7 +58,14 @@ def test_extracted_prompts_match_pre_extraction_text_and_rendering():
             )
             assert actual_hash == sha256
     for case in fixture["rendered"].values():
-        assert entry(case["catalog"], case["key"]).format(**case["arguments"]) == case["expected"]
+        if case["catalog"] == "systems/pubmed":
+            request = render_messages(
+                case["catalog"], case["key"].replace(".template", ".request"), **case["arguments"]
+            )
+            assert request[0] == {"role": "system", "content": "You are a scientist."}
+            assert request[1]["content"] == case["expected"]
+        else:
+            assert entry(case["catalog"], case["key"]).format(**case["arguments"]) == case["expected"]
 
 
 def test_dspy_signatures_keep_instructions_and_field_metadata():

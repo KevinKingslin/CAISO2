@@ -192,7 +192,9 @@ configs/
   experiments/hotpotqa.yaml
   experiments/pubmedqa.yaml
 caiso/prompts/
-  dicai/*.txt
+  dicai/reasoning/*.txt
+  dicai/debate/*.txt
+  dicai/{reconstruction,abstraction}.txt
   method/<stage>/*.txt
   systems/amazon/<component>/*.txt
   systems/hotpotqa/<component>/*.txt
@@ -225,6 +227,12 @@ uses its existing `block_optimization.dpo` settings; reward-model training is no
 needed. Credentials, model deployments, backend choices and service URLs stay in
 `.env`. See [the configuration guide](configs/README.md) and
 [the prompt inventory](caiso/prompts/README.md).
+
+Stage request files contain complete `[SYSTEM]` and `[USER]` sections; fixed
+debate guidance, principle style and output instructions are included directly
+in each request file. Dynamic evidence and optimized instructions remain template
+values. The [prompt audit](docs/PROMPT_AUDIT.md) records exact OPTIMAS system-prompt
+parity and the existing DICAI adaptations.
 
 Each experiment's `caiso.persona_catalog` selects three dataset-specific expert
 profiles from `caiso/prompts/systems/<dataset>/personas/*.txt` for both system and

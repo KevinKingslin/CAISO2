@@ -9,25 +9,10 @@ from threading import BoundedSemaphore
 from pydantic import Field, field_validator
 
 from caiso.core.parallel import ordered_map
-from caiso.prompts import entry as prompt_entry
 from caiso.core.serialization import Record
-from caiso.providers.base import messages
-from caiso.prompts import text
+from caiso.prompts import render_messages
 
-from .preferences import pair_block
-
-
-def prompt(name):
-    return text("dicai/" + name)
-
-
-def principle_instructions(config=None):
-    """General, concise wording guidance without a numeric word-count limit.
-
-    The argument remains compatible with existing callers; legacy max_words
-    settings no longer add a hidden cap to induction prompts.
-    """
-    return prompt("principle_style")
+from .preferences import candidate_views, task_view
 
 
 def valid_principle(value):
@@ -74,11 +59,11 @@ def assemble(pair, personas, providers, role, seed, config=None):
     samples = config.get("self_consistency_samples", 5)
     steps = config.get("self_refine_steps", 2)
     temperatures = config.get("temperatures", {})
-    base = (
-        prompt("reasoning_base").format(pref=pair.preferred) + "\n" + principle_instructions(config)
-    )
-    instruction = prompt("reasoning_json")
-    block = pair_block(pair, labeled=True)
+    a, b = candidate_views(pair)
+    evidence = {
+        "pref": pair.preferred, "preferred": pair.preferred,
+        "context": task_view(pair.context), "response_a": a, "response_b": b,
+    }
     workers = config.get("reasoning_workers", 4)
     # Branches and independent samples overlap, with one shared request cap per
     # pair. No worker holds a slot while waiting for another branch/sample.
@@ -92,7 +77,7 @@ def assemble(pair, personas, providers, role, seed, config=None):
         trace, call_index = [None] * count, 0
 
         # Upstream reasoning is persona-neutral; identities enter during debate.
-        def request(user, stage, temperature, schema=Reasoning, system=base, number=None):
+        def request(stage, temperature, schema=Reasoning, number=None, **values):
             nonlocal call_index
             if number is None:
                 number = call_index
@@ -100,7 +85,7 @@ def assemble(pair, personas, providers, role, seed, config=None):
             with gate:
                 result = providers.complete(
                     role,
-                    messages(system, user),
+                    render_messages("dicai", "reasoning." + stage, **evidence, **values),
                     seed=seed + index * 100 + number,
                     schema=schema,
                     temperature=temperatures.get(stage, temperature),
@@ -111,7 +96,6 @@ def assemble(pair, personas, providers, role, seed, config=None):
 
         if persona.strategy == "reasoning_cot":
             rationale = request(
-                prompt_entry('method', 'reasoning.cot').format(block=block, instruction=instruction),
                 "cot",
                 0.4,
             )
@@ -119,7 +103,6 @@ def assemble(pair, personas, providers, role, seed, config=None):
             call_index = samples
             chains = ordered_map(
                 lambda number: request(
-                    prompt_entry('method', 'reasoning.self_consistency_sample').format(block=block, instruction=instruction),
                     "self_consistency_sample",
                     0.9,
                     number=number,
@@ -136,28 +119,27 @@ def assemble(pair, personas, providers, role, seed, config=None):
             stable = stable or [d for d, _ in counter.most_common(3)]
             joined = "\n".join("- " + c.reasoning for c in chains)
             rationale = request(
-                prompt_entry('method', 'reasoning.self_consistency_consensus').format(samples=samples, joined=joined, stable=stable, instruction=instruction),
                 "self_consistency_consensus",
                 0.2,
+                samples=samples, joined=joined, stable=stable,
             )
             if stable:
                 rationale.dimensions = stable
         else:
             rationale = request(
-                prompt_entry('method', 'reasoning.self_refine_draft').format(block=block, instruction=instruction), "self_refine_draft", 0.6
+                "self_refine_draft", 0.6
             )
             for _ in range(steps):
                 critique = request(
-                    prompt_entry('method', 'reasoning.self_refine_critique').format(block=block, value_1=rationale.reasoning, value_2=rationale.dimensions),
                     "self_refine_critique",
                     0.3,
                     schema=None,
-                    system=prompt_entry('method', 'reasoning.critique_system'),
+                    rationale=rationale.reasoning, dimensions=rationale.dimensions,
                 )
                 rationale = request(
-                    prompt_entry('method', 'reasoning.self_refine_revision').format(block=block, value_1=rationale.reasoning, critique=critique, instruction=instruction),
                     "self_refine_revision",
                     0.4,
+                    rationale=rationale.reasoning, critique=critique,
                 )
         return {
             "persona": persona.model_dump(),

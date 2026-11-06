@@ -19,6 +19,13 @@ All bundled data artifacts, dataset loaders, metrics and original experiment YAM
 remain protected. Prompt extraction is recorded below and has separate text and
 rendering regression tests.
 
+The [original-source prompt audit](PROMPT_AUDIT.md) verifies all 29 benchmark
+prompt entries against pinned OPTIMAS. DICAI prompts are adaptations: original
+reasoning/judging wording is combined with CAISO guidance and modified debate/
+abstraction text. They are not claimed to be verbatim original DICAI requests.
+Consolidating fragments into complete request files preserves all 104 message
+bodies in the 51-request regression capture.
+
 ## Ten explicit upstream exceptions
 
 1. `.gitignore`: adds local environment, cache, and build exclusions.

@@ -1,2 +1,0 @@
-
-PREFERRED: {value_0}

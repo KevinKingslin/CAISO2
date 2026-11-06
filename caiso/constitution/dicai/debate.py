@@ -1,4 +1,4 @@
-"""Official round-robin debate and reconstruction gate, via CAISO transports.
+"""Adapted round-robin debate and reconstruction gate, via CAISO transports.
 
 Adapted from Democratic ICAI debate.py, MIT; third_party/democratic_icai.
 """
@@ -6,13 +6,11 @@ Adapted from Democratic ICAI debate.py, MIT; third_party/democratic_icai.
 import re
 
 from caiso.core.recovery import ModelResponseError
-from caiso.prompts import entry as prompt_entry
 from caiso.core.serialization import canonical
-from caiso.providers.base import messages
+from caiso.prompts import render_messages, render_text
 
 from .personas import Persona
 from .preferences import pair_block
-from .reasoning_assembly import principle_instructions, prompt
 from .reconstruction import reconstructs
 
 
@@ -53,7 +51,6 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
     min_cycles = config.get("min_debate_rounds", 1)
     history_turns = config.get("history_turns", 8)
     temperatures = config.get("temperatures", {})
-    style = principle_instructions(config)
     if rounds < 1 or len(catalog) != 3:
         raise ValueError("DICAI requires three debaters and at least one round")
     working = dedupe([p for entry in catalog for p in entry["principles"]])
@@ -81,39 +78,22 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
         if progress:
             progress(cycle, "reconstruction before")
         result = check(cycle, "before")
-        status = prompt_entry("method", "debate.reconstruction_status").format(
-            status="YES" if result["reconstructed"] else "NO",
-            predicted=result["predicted"], preferred=pair.preferred,
+        status = (
+            f"RECONSTRUCTION: {'YES' if result['reconstructed'] else 'NO'} "
+            f"(predicted={result['predicted']}, preferred={pair.preferred})"
         )
         for i, entry in enumerate(catalog):
             if progress:
                 progress(cycle, f"debater {i + 1}/3")
             persona = Persona.model_validate(entry["persona"])
-            system = (
-                prompt("debater").format(
-                    name=persona.identity,
-                    identity=persona.prompt(),
-                    trace=entry["reasoning"],
-                    seeds=render(entry["principles"]),
-                )
-                + "\n"
-                + style
-            )
             text = providers.complete(
                 role,
-                messages(
-                    system,
-                    canonical(
-                        {
-                            "pair": story,
-                            "working_list": render(working),
-                            "reconstruction": status,
-                            "rejection": rejection,
-                            "debate_history": recent(history_turns),
-                            "cycle": cycle,
-                        }
-                    )
-                    + prompt_entry('method', 'debate.guidance_1'),
+                render_messages(
+                    "dicai", "debate.debater",
+                    name=persona.identity, identity=persona.prompt(),
+                    trace=entry["reasoning"], seeds=render(entry["principles"]),
+                    pair=story, working_list=render(working), reconstruction=status,
+                    rejection=rejection, debate_history=recent(history_turns), cycle=cycle,
                 ),
                 seed=seed + (cycle - 1) * 4 + i,
                 temperature=temperatures.get("debater", 0.7),
@@ -123,20 +103,12 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
             progress(cycle, "chairperson")
         chair = providers.complete(
             role,
-            messages(
-                prompt("chairperson").format(min_principles=minimum) + "\n" + style,
-                canonical(
-                    {
-                        "pair": story,
-                        "working_list": render(working),
-                        "reconstruction": status,
-                        "rejection": rejection,
-                        "debater_arguments": recent(3),
-                        "cycle": cycle,
-                        "total_cycles": rounds,
-                    }
-                )
-                + prompt_entry('method', 'debate.guidance_0').format(minimum=minimum),
+            render_messages(
+                "dicai", "debate.chairperson",
+                min_principles=minimum, minimum=minimum,
+                pair=story, working_list=render(working), reconstruction=status,
+                rejection=rejection, debater_arguments=recent(3),
+                cycle=cycle, total_cycles=rounds,
             ),
             seed=seed + (cycle - 1) * 4 + 3,
             validate=lambda text: (parse_principles(text), text)[1],
@@ -151,12 +123,8 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
         if over and result["reconstructed"] and len(working) >= minimum and cycle >= min_cycles:
             break
         if over:
-            reason = (
-                prompt_entry("method", "debate.rejection_failed")
-                if not result["reconstructed"]
-                else prompt_entry("method", "debate.rejection_minimum").format(minimum=minimum, min_cycles=min_cycles)
-            )
-            rejection = prompt_entry("method", "debate.rejection").format(reason=reason)
+            feedback = "feedback.reconstruction_failed" if not result["reconstructed"] else "feedback.minimum_not_met"
+            rejection = render_text("dicai", feedback, minimum=minimum, min_cycles=min_cycles)
             history.append({"speaker": "moderator", "content": rejection, "cycle": cycle})
     # Upstream returns best effort at the cycle cap. Never claim the gate passed.
     history.append(
