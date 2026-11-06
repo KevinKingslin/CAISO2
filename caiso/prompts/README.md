@@ -20,6 +20,17 @@ PubMedQA user templates in `user.txt`; DSPy field prefixes and descriptions in e
 component's `fields/` folder. PubMedQA's shared scientist message is `system.txt`, and
 its final-answer format is `problem_solver/answer_format.txt`.
 
+Each system also has `personas/` with three numbered `.txt` profiles restored from
+the previous CAISO configuration. These are fictional task adaptations with the
+full attribute descriptions, rather than the DICAI paper's creative-writing
+personas. The rendered profile text is preserved exactly.
+
+| Dataset | Persona roles, in file order |
+| --- | --- |
+| Amazon | E-commerce behavior analyst; product matching specialist; recommendation evaluator |
+| HotpotQA | Multi-hop question answering researcher; information retrieval specialist; fact verification specialist |
+| PubMedQA | Biomedical evidence analyst; clinical research methodologist; scientific question answering evaluator |
+
 ```text
 systems/
   amazon/
@@ -27,15 +38,18 @@ systems/
     candidate_profiler/prompt.txt
     next_item_decider/instructions.txt
     next_item_decider/fields/*.txt
+    personas/*.txt
   hotpotqa/
     question_rewriter/{instructions.txt,fields/}
     info_extractor/{instructions.txt,fields/}
     hint_generator/{instructions.txt,fields/}
     answer_generator/{instructions.txt,fields/}
+    personas/*.txt
   pubmedqa/
     system.txt
     context_analyst/{instructions.txt,user.txt}
     problem_solver/{instructions.txt,user.txt,answer_format.txt}
+    personas/*.txt
 ```
 
 Ordered default tips and personas use one numbered `.txt` file per entry under
@@ -49,8 +63,11 @@ as another template. DSPy generates its own chat-format wrappers. Schemas,
 trajectory/context data and candidate instructions are generated at runtime;
 newly optimized prompts remain in run artifacts.
 
-`prompt_tips` and custom persona overrides remain configuration parameters. The
-defaults are visible here; explicit config values take precedence. Optional preserved
+The experiment's `caiso.persona_catalog` selects its three dataset profiles for
+both system and block induction. `prompt_tips` and custom `caiso.personas`
+overrides remain configuration parameters; explicit lists take precedence over
+catalogs. The generic `method/default_personas/` profiles remain a fallback for
+systems outside the three configured datasets. Optional preserved
 STaRK/BigCodeBench examples and legacy OPTIMAS utilities retain their original prompt
 code; they are not part of the three active experiment profiles.
 

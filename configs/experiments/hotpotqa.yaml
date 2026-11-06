@@ -4,6 +4,9 @@ system: hotpotqa_system
 method_config: ../method/default.yaml
 dotenv_path: .env
 
+caiso:
+  persona_catalog: personas/hotpotqa
+
 optimization:
   output_dir: outputs/optim
   wandb_run_name: iter100-valsize20-trainsize20

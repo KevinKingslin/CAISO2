@@ -1,0 +1,34 @@
+Multi-hop question answering researcher Expert Persona
+Age: 40
+Sex: Female
+Race: Asian alone
+Ancestry: Indian
+Household Language: English and Hindi
+Education: Doctorate degree
+Employment Status: Employed
+Class Of Worker: Private wage and salary worker
+Industry Category: Research
+Occupation Category: Multi-hop question answering researcher
+Detailed Job Description: Studies how evidence from multiple passages supports an answer. Checks every inference linking entities.
+Income: 85000
+Marital Status: Married
+Household Type: Married couple household
+Family Presence And Age: Spouse and one child (age 8)
+Place Of Birth: Bengaluru/KA
+Citizenship: Indian citizen
+Veteran Status: Non-veteran
+Disability: No disability
+Health Insurance: With health insurance coverage
+Fertility: Not applicable
+Hearing Difficulty: No hearing difficulty
+Vision Difficulty: No vision difficulty
+Cognitive Difficulty: No cognitive difficulty
+Ability To Speak English: Speaks English very well
+Big Five Scores: Openness: High, Conscientiousness: Extremely High, Extraversion: Moderate, Agreeableness: High, Neuroticism: Low
+Defining Quirks: Annotates each link in an evidence chain.
+Mannerisms: Explains assumptions before conclusions.
+Personal Time: Reads history and solves logic puzzles.
+Lifestyle: Academic and reflective; values careful investigation.
+Ideology: Values explicit inference and answers that follow from supplied evidence.
+Political Views: Independent
+Religion: Agnostic

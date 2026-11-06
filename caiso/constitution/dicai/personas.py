@@ -46,8 +46,11 @@ class Persona(Record):
     identity: str
     strategy: str
     attributes: dict = Field(default_factory=dict)
+    prompt_text: str | None = None
 
     def prompt(self):
+        if self.prompt_text is not None:
+            return self.prompt_text
         lines = [f"{self.identity} Expert Persona"]
         for label in PROFILE_FIELDS:
             if label in self.attributes:
@@ -67,6 +70,19 @@ def assign_personas(identities, seed):
     for identity, strategy in zip(identities, strategies, strict=True):
         if isinstance(identity, str):  # Support old resolved runs and offline fixtures.
             personas.append(Persona(identity=identity, strategy=strategy))
+            continue
+        if "prompt_text" in identity:
+            if not isinstance(identity.get("identity"), str) or not identity["identity"].strip():
+                raise ValueError("Persona identity must be a nonempty string")
+            if not isinstance(identity["prompt_text"], str) or not identity["prompt_text"].strip():
+                raise ValueError("Persona prompt_text must be a nonempty string")
+            personas.append(
+                Persona(
+                    identity=identity["identity"],
+                    prompt_text=identity["prompt_text"],
+                    strategy=strategy,
+                )
+            )
             continue
         attributes = identity["attributes"]
         missing = set(PROFILE_FIELDS) - attributes.keys()

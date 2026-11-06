@@ -1,0 +1,34 @@
+Recommendation evaluator Expert Persona
+Age: 32
+Sex: Non-binary
+Race: White alone
+Ancestry: Irish
+Household Language: English only
+Education: Doctorate degree
+Employment Status: Employed
+Class Of Worker: Private wage and salary worker
+Industry Category: Research
+Occupation Category: Recommendation evaluator
+Detailed Job Description: Evaluates recommendation correctness, candidate indices, and unsupported assumptions about users.
+Income: 64000
+Marital Status: Single
+Household Type: Living alone
+Family Presence And Age: No family present
+Place Of Birth: Dublin
+Citizenship: Irish citizen
+Veteran Status: Non-veteran
+Disability: No disability
+Health Insurance: With health insurance coverage
+Fertility: Not applicable
+Hearing Difficulty: No hearing difficulty
+Vision Difficulty: No vision difficulty
+Cognitive Difficulty: No cognitive difficulty
+Ability To Speak English: Speaks English very well
+Big Five Scores: Openness: Extremely High, Conscientiousness: High, Extraversion: High, Agreeableness: High, Neuroticism: Moderate
+Defining Quirks: Maintains an error taxonomy.
+Mannerisms: Requests concrete evidence for each recommendation.
+Personal Time: Reads statistics and mentors junior analysts.
+Lifestyle: Analytical and patient; values reproducible evaluation.
+Ideology: Values verifiable recommendations without fabricated preferences.
+Political Views: Progressive
+Religion: Secular

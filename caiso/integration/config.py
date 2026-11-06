@@ -8,6 +8,47 @@ import yaml
 
 from caiso.method.config import validate_method
 
+DATASET_PERSONAS = {
+    "amazon": "personas/amazon",
+    "hotpotqa": "personas/hotpotqa",
+    "pubmed": "personas/pubmedqa",
+    "pubmedqa": "personas/pubmedqa",
+}
+
+
+def load_personas(experiment):
+    """Resolve exactly three dataset personas; explicit inline overrides win."""
+    from caiso.constitution.dicai.personas import assign_personas
+    from caiso.prompts import catalog_entries, entry
+
+    options = experiment.get("caiso", {})
+    if "personas" in options:
+        personas = deepcopy(options["personas"])
+    else:
+        catalog = options.get("persona_catalog", DATASET_PERSONAS.get(experiment.get("dataset")))
+        if catalog is None:
+            personas = entry("method", "default_personas")
+        else:
+            if not isinstance(catalog, str):
+                raise ValueError("caiso.persona_catalog must name a prompt catalog")
+            try:
+                profiles = catalog_entries(catalog)
+            except KeyError as error:
+                raise ValueError(f"Unknown persona catalog: {catalog}") from error
+            personas = [
+                {"identity": identity, "prompt_text": profile}
+                for identity, profile in profiles.items()
+            ]
+    if not isinstance(personas, list) or len(personas) != 3:
+        raise ValueError("caiso.personas must contain exactly three personas")
+    if any(isinstance(persona, str) and not persona.strip() for persona in personas):
+        raise ValueError("Persona identity must be a nonempty string")
+    try:
+        assign_personas(personas, seed=0)
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError(f"Invalid CAISO personas: {error}") from error
+    return personas
+
 
 def load_experiment(path, mode="optimize"):
     """Read either a CAISO experiment or a preserved OPTIMAS launcher profile."""
@@ -16,6 +57,8 @@ def load_experiment(path, mode="optimize"):
     if not isinstance(experiment, dict):
         raise ValueError(f"Expected a configuration mapping in {path}")
     if "method_config" not in experiment:
+        if mode == "optimize":
+            experiment.setdefault("caiso", {})["personas"] = load_personas(experiment)
         return experiment
     common = {"dataset": experiment["dataset"], "dotenv_path": experiment.get("dotenv_path", ".env")}
     if mode == "evaluate":
@@ -27,10 +70,12 @@ def load_experiment(path, mode="optimize"):
         "method_file": str(method_file),
         "method": merge(experiment.get("method", {}), experiment.get("caiso", {}).get("method", {})),
     })
-    return {
+    resolved = {
         **common, "system": experiment["system"],
         **experiment["optimization"], "evaluation": experiment["evaluation"], "caiso": options,
     }
+    resolved["caiso"]["personas"] = load_personas(resolved)
+    return resolved
 
 
 def merge(base, override):

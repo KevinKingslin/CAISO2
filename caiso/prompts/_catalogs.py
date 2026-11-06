@@ -74,4 +74,19 @@ CATALOGS = {
         "FORMAT_PROMPT_YESNO": "systems/pubmedqa/problem_solver/answer_format",
         "SYS_SINGLE_SOL_PROMPT": "systems/pubmedqa/system",
     },
+    "personas/amazon": {
+        "E-commerce behavior analyst": "systems/amazon/personas/01_behavior_analyst",
+        "Product matching specialist": "systems/amazon/personas/02_product_matching_specialist",
+        "Recommendation evaluator": "systems/amazon/personas/03_recommendation_evaluator",
+    },
+    "personas/hotpotqa": {
+        "Multi-hop question answering researcher": "systems/hotpotqa/personas/01_multi_hop_qa_researcher",
+        "Information retrieval specialist": "systems/hotpotqa/personas/02_information_retrieval_specialist",
+        "Fact verification specialist": "systems/hotpotqa/personas/03_fact_verification_specialist",
+    },
+    "personas/pubmedqa": {
+        "Biomedical evidence analyst": "systems/pubmedqa/personas/01_biomedical_evidence_analyst",
+        "Clinical research methodologist": "systems/pubmedqa/personas/02_clinical_research_methodologist",
+        "Scientific question answering evaluator": "systems/pubmedqa/personas/03_scientific_qa_evaluator",
+    },
 }

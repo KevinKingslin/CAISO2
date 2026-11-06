@@ -68,6 +68,21 @@
         "c3a37f1ec12294ce43310567242c1c809d1308b64eb18c0555f59fcddabf56ff",
         "ea8c39cd7ca12c3122dc4bf4c46ac68175183372d400e294910b5093e177e5bb"
       ]
+    },
+    "personas/amazon": {
+      "E-commerce behavior analyst": "f6f2a15e4a40a69caa621c1ad6aa8fbc1396779334b12bdc21ae806826dc01e3",
+      "Product matching specialist": "1925be02547d3eae26399f7d76f5c2d2e7c4e05f7e4d9826cfe7a2e85f3f7371",
+      "Recommendation evaluator": "99bb28c2fcb6663c713b3d6232b58c464b00d83e3cd414ca5fe5217832787401"
+    },
+    "personas/hotpotqa": {
+      "Multi-hop question answering researcher": "0817c49167233c4192969dd05d8d0c82b478b3f8973c6ba445c7b876f7430703",
+      "Information retrieval specialist": "3e406e3622bfe1c13367ece61d3fcdfd10dc3acf24fa1784c427ca526b202f83",
+      "Fact verification specialist": "4411b1a2e46b47116ddec3dcd6d46241d3cbd89cc54c3cfaff7dd53aef5fabaa"
+    },
+    "personas/pubmedqa": {
+      "Biomedical evidence analyst": "f2184cb7dc02fc9ec81989e4e229dc056801815d32c14656b5432abf249d8f98",
+      "Clinical research methodologist": "bb85d2803ac0174c2e351ec513c48158e5cd35ec8c0aed516f5cd7f8c8703fb2",
+      "Scientific question answering evaluator": "34e571e408f00e0863b8ade72fbd199e49f8474d16abc62cd088d0df7d9fa8fc"
     }
   },
   "rendered": {

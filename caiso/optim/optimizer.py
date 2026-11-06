@@ -1,17 +1,15 @@
 """CAISO orchestration on the upstream system interface; no OPTIMAS reward model."""
 
+from copy import deepcopy
 from pathlib import Path
 
 from caiso.constitution.dicai.pipeline import DICAI
-from caiso.prompts import entry as prompt_entry
 from caiso.core.budget import BudgetTracker
 from caiso.core.serialization import read_json, save_json
-from caiso.integration.config import load_method
+from caiso.integration.config import load_method, load_personas
 from caiso.integration.runtime import UpstreamRuntime, adapt_examples
 from caiso.integration.services import build_services
 from caiso.method.algorithm import Algorithm
-
-DEFAULT_PERSONAS = prompt_entry('method', 'default_personas')
 
 
 class CaisoOptimizer:
@@ -28,8 +26,10 @@ class CaisoOptimizer:
         block_dicai=None,
     ):
         self.system = system
-        self.experiment = config
+        self.experiment = deepcopy(config)
         self.config = load_method(config)
+        personas = load_personas(config)
+        self.experiment.setdefault("caiso", {})["personas"] = personas
         self.output = Path(output_dir)
         self.budget = BudgetTracker(len(system.components), **self.config["budget"])
         options = config.get("caiso", {})
@@ -43,7 +43,6 @@ class CaisoOptimizer:
         size = self.config["validation_batch_size"]
         validation = val_dataset if size == "all" else val_dataset[:size]
         self.validation = adapt_examples(system, validation, "validation")
-        personas = options.get("personas", DEFAULT_PERSONAS)
         self.dicai = dicai or DICAI(providers, embeddings, personas, self.config["dicai"])
         self.block_dicai = block_dicai or DICAI(
             providers, embeddings, personas, self.config["dicai"], role="block_constitution"

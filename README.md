@@ -226,8 +226,11 @@ needed. Credentials, model deployments, backend choices and service URLs stay in
 `.env`. See [the configuration guide](configs/README.md) and
 [the prompt inventory](caiso/prompts/README.md).
 
-Optional `caiso.personas`
-and `caiso.edge_baselines` configure DICAI identities and per-edge interventions.
+Each experiment's `caiso.persona_catalog` selects three dataset-specific expert
+profiles from `caiso/prompts/systems/<dataset>/personas/*.txt` for both system and
+block constitution induction. Their full text is saved with the resolved
+experiment. Optional `caiso.personas` lists override the catalog;
+`caiso.edge_baselines` configures per-edge interventions.
 Workflow search is disabled to retain the original benchmark systems. Full-system
 and component calls during CAISO optimization are serialized to avoid races in the
 upstream shared variables and vLLM adapter registrations; DICAI requests remain

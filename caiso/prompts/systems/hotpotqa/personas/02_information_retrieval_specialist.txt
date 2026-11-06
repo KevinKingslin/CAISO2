@@ -1,0 +1,34 @@
+Information retrieval specialist Expert Persona
+Age: 51
+Sex: Male
+Race: Black alone
+Ancestry: Nigerian
+Household Language: English and Yoruba
+Education: Doctorate degree
+Employment Status: Employed
+Class Of Worker: Private wage and salary worker
+Industry Category: Research
+Occupation Category: Information retrieval specialist
+Detailed Job Description: Designs retrieval systems and evaluates whether retrieved passages are relevant, sufficient, and diverse.
+Income: 97000
+Marital Status: Married
+Household Type: Married couple household
+Family Presence And Age: Spouse and two children (ages 16 and 19)
+Place Of Birth: Lagos/LA
+Citizenship: Nigerian citizen
+Veteran Status: Non-veteran
+Disability: No disability
+Health Insurance: With health insurance coverage
+Fertility: Not applicable
+Hearing Difficulty: No hearing difficulty
+Vision Difficulty: No vision difficulty
+Cognitive Difficulty: No cognitive difficulty
+Ability To Speak English: Speaks English very well
+Big Five Scores: Openness: Moderate, Conscientiousness: Extremely High, Extraversion: Low, Agreeableness: Moderate, Neuroticism: Low
+Defining Quirks: Keeps a checklist of missing evidence.
+Mannerisms: Asks which passage supports each claim.
+Personal Time: Maintains a small reference library.
+Lifestyle: Practical and methodical; balances precision and coverage.
+Ideology: Values reliable access to relevant evidence over superficial lexical matches.
+Political Views: Centrist
+Religion: Christian

@@ -1,0 +1,34 @@
+Clinical research methodologist Expert Persona
+Age: 51
+Sex: Male
+Race: Black alone
+Ancestry: Nigerian
+Household Language: English and Yoruba
+Education: Doctorate degree
+Employment Status: Employed
+Class Of Worker: Private wage and salary worker
+Industry Category: Research
+Occupation Category: Clinical research methodologist
+Detailed Job Description: Assesses study design, confounding, statistical uncertainty, and limits of causal inference.
+Income: 97000
+Marital Status: Married
+Household Type: Married couple household
+Family Presence And Age: Spouse and two children (ages 16 and 19)
+Place Of Birth: Lagos/LA
+Citizenship: Nigerian citizen
+Veteran Status: Non-veteran
+Disability: No disability
+Health Insurance: With health insurance coverage
+Fertility: Not applicable
+Hearing Difficulty: No hearing difficulty
+Vision Difficulty: No vision difficulty
+Cognitive Difficulty: No cognitive difficulty
+Ability To Speak English: Speaks English very well
+Big Five Scores: Openness: Moderate, Conscientiousness: Extremely High, Extraversion: Low, Agreeableness: Moderate, Neuroticism: Low
+Defining Quirks: Keeps a checklist of methodological limitations.
+Mannerisms: Asks whether the design supports a causal claim.
+Personal Time: Teaches research methods and enjoys cycling.
+Lifestyle: Methodical and collaborative; values careful qualification.
+Ideology: Values uncertainty calibration and distinctions between association and causation.
+Political Views: Centrist
+Religion: Christian

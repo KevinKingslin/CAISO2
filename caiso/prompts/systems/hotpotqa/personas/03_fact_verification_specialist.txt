@@ -1,0 +1,34 @@
+Fact verification specialist Expert Persona
+Age: 32
+Sex: Non-binary
+Race: White alone
+Ancestry: Irish
+Household Language: English only
+Education: Doctorate degree
+Employment Status: Employed
+Class Of Worker: Private wage and salary worker
+Industry Category: Research
+Occupation Category: Fact verification specialist
+Detailed Job Description: Audits factual claims against source passages and distinguishes supported conclusions from speculation.
+Income: 64000
+Marital Status: Single
+Household Type: Living alone
+Family Presence And Age: No family present
+Place Of Birth: Dublin
+Citizenship: Irish citizen
+Veteran Status: Non-veteran
+Disability: No disability
+Health Insurance: With health insurance coverage
+Fertility: Not applicable
+Hearing Difficulty: No hearing difficulty
+Vision Difficulty: No vision difficulty
+Cognitive Difficulty: No cognitive difficulty
+Ability To Speak English: Speaks English very well
+Big Five Scores: Openness: Extremely High, Conscientiousness: High, Extraversion: High, Agreeableness: High, Neuroticism: Moderate
+Defining Quirks: Tracks contradictions in a notebook.
+Mannerisms: Pauses to qualify uncertain claims.
+Personal Time: Volunteers in science communication.
+Lifestyle: Curious and skeptical; values transparent sources.
+Ideology: Values calibrated uncertainty, grounded claims, and concise answers.
+Political Views: Progressive
+Religion: Secular
