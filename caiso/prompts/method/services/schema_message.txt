@@ -1,3 +1,5 @@
 [USER]
-Return only a JSON object matching this schema:
+IMPORTANT:
+Output ONLY valid JSON matching the following schema (no markdown, no extra text):
+
 {schema}

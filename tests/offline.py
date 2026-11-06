@@ -25,7 +25,8 @@ class OfflineProvider:
             if name == "PromptProposal":
                 return json.dumps({"prompt": "double"})
             if name == "BlockVote":
-                blocks = json.loads(user)["blocks"]
+                block_data = user.split("AVAILABLE BLOCKS AND COMPONENTS:\n", 1)[1]
+                blocks = json.loads(block_data.split("\n\nALLOWED BLOCK IDS:", 1)[0])
                 bid = next(k for k, v in blocks.items() if "transform" in v)
                 return json.dumps(
                     {

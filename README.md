@@ -235,6 +235,11 @@ evidence and optimized instructions remain template values. The
 [prompt audit](docs/PROMPT_AUDIT.md) records the paper source, necessary input
 adaptations and exact OPTIMAS system-prompt parity.
 
+CAISO's prompt optimizer, block selector and workflow designer use the same
+writing format: named agents, numbered tasks, explicit output formats and
+labeled evidence sections. Each stage's complete request is in one `.txt` file
+under `caiso/prompts/method/`.
+
 Each experiment's `caiso.persona_catalog` selects three dataset-specific expert
 profiles from `caiso/prompts/systems/<dataset>/personas/*.txt` for both system and
 block constitution induction. Their full text is saved with the resolved

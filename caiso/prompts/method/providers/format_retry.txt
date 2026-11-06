@@ -1,3 +1,12 @@
 [USER]
-Your previous response could not be used: {error}
-Please return a fresh answer that satisfies the requested schema and format. Preserve the original evidence and criteria; do not add unsupported principles.
+Your previous response could not be used.
+
+RESPONSE ERROR:
+{error}
+
+Your job:
+1. Correct the response to satisfy the requested schema and format.
+2. Preserve the original evidence and criteria. Do not add unsupported principles.
+
+IMPORTANT:
+Return only the corrected answer in the originally requested format, with no extra text.

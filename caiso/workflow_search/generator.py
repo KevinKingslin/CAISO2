@@ -19,4 +19,5 @@ class WorkflowGenerator:
             ),
             seed=seed,
             schema=WorkflowProposal,
+            include_schema_instruction=False,
         )

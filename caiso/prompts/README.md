@@ -11,8 +11,12 @@ Benchmark prompts retain OPTIMAS text; DICAI uses the arXiv paper instructions.
 - `dicai/reconstruction.txt` and `abstraction.txt`: complete requests for blind
   judging and cluster abstraction.
 - `method/<stage>/prompt.txt`: complete block-selection, prompt-optimization and
-  workflow-proposal requests. `method/services/schema_message.txt` and
-  `method/providers/format_retry.txt` are complete supplemental user messages.
+  workflow-proposal requests written in DICAI's format: a named agent, available
+  evidence, numbered tasks, requirements and an explicit JSON output format.
+  User sections supply evidence under descriptive headings. These are CAISO
+  prompts, not transcriptions of the DICAI paper.
+- `method/services/schema_message.txt` and `method/providers/format_retry.txt`:
+  complete fallback schema and response-repair messages in the same style.
 - `method/preferences/*_pair.txt`: complete labeled/unlabeled evidence layouts.
 - `systems/hotpotqa/<component>/`: DSPy instructions and field prefixes.
 - `systems/amazon/<component>/`: both Qwen completion templates and the DSPy next-item
@@ -26,6 +30,11 @@ the corresponding request. No extra principle style, reconstruction stop gate,
 minimum-principle rule or moderator rejection feedback is added to DICAI.
 For example, open `dicai/debate/chairperson.txt` to see its system instructions,
 evidence fields, and instruction to publish the updated working list together.
+
+The three CAISO stage requests already include their required response formats,
+so the transport does not append a duplicate schema instruction to them. JSON
+validation and generic response-repair retries remain active. Preference-pair
+layouts, configured optimization tips and persona profiles retain their text.
 
 Chat request files use role sections:
 

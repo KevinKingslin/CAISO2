@@ -105,5 +105,23 @@
       "Existing transports, temperatures, clustering and optional post-induction minimization retained.",
       "Generic response validation/retries remain; no extra schema message on a valid DICAI request."
     ]
+  },
+  "current_caiso_method": {
+    "style": "Named agents, numbered tasks, requirements, explicit JSON response formats and labeled user evidence, following DICAI formatting.",
+    "templates": [
+      "prompt_optimizer.request",
+      "block_selection.request",
+      "generator.request",
+      "services.schema_message",
+      "providers.format_retry"
+    ],
+    "source": "CAISO-authored method instructions; not transcriptions of the DICAI paper.",
+    "preserved": "Existing method inputs, output fields, selection criteria, workflow restrictions, preference layouts, tips, personas, configuration values and benchmark prompts.",
+    "complete_request_capture": {
+      "requests": 35,
+      "message_bodies": 72,
+      "fixture": "tests/fixtures/complete_prompt_requests.json"
+    },
+    "normal_stage_schema_messages": "Response formats live in the complete stage templates; duplicate schema supplements disabled for the three stages."
   }
 }

@@ -104,12 +104,22 @@ instruction fragments to concatenate.
 
 The complete pre-consolidation requests were captured before changing the caller
 code: 51 requests, containing 104 message bodies. Their roles and UTF-8 hashes
-are stored in `tests/fixtures/complete_prompt_requests.json`. The regression
-capture exercises all reasoning stages, both debate rejection branches, blind
-judging, abstraction, prompt optimization, block selection, workflow proposal,
-schema guidance and format retries. This is a historical fixture: current tests
-retain parity for its non-DICAI requests, while DICAI is checked against the
-published paper source and `tests/fixtures/dicai_paper_prompts.json`.
+remain available in commit `14f299c`. That historical capture exercised the old
+reasoning stages, debate rejection branches and method requests.
+
+CAISO's prompt optimizer, block selector and workflow designer now use the same
+writing format as DICAI: named roles, numbered tasks, explicit JSON response
+formats and labeled evidence sections. Their existing selection criteria,
+workflow restrictions, inputs and output fields are retained. The formats are
+included in each stage file; no duplicate schema message is appended to normal
+stage requests. Generic schema and response-repair messages use the same style.
+Preference layouts, optimization tips, personas and benchmark prompts retain
+their prior text. These CAISO templates are not original DICAI paper prompts.
+
+The current reviewed requests are recorded in
+`tests/fixtures/complete_prompt_requests.json`. DICAI instruction wording is
+also independently checked against the published paper source and
+`tests/fixtures/dicai_paper_prompts.json`.
 These deterministic tests make no model API calls and do not measure task quality.
 
 ```sh

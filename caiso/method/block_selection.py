@@ -127,6 +127,7 @@ def select_block(
                 ),
                 seed=seed + i,
                 schema=schema,
+                include_schema_instruction=False,
                 validate=valid_vote,
             )
         except ContentFilteredError as error:

@@ -49,6 +49,7 @@ class PromptOptimizer(ConfigurationOptimizer):
                 ),
                 seed=context.seed + i,
                 schema=PromptProposal,
+                include_schema_instruction=False,
             )
             c = current.model_copy(deep=True)
             c.value = result.prompt
