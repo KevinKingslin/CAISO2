@@ -34,6 +34,40 @@
       "ProblemSolverModule.template": "2292fcfd58e647aa5f7c657bccd0e5d8ef2ff8dde24cff8787352a2051059963",
       "FORMAT_PROMPT_YESNO": "00414d3bd8237cbd473eb70aab3ea294aaa11807c458479356d198914d4e74a1",
       "SYS_SINGLE_SOL_PROMPT": "934511a1b0eb2ac9f508b90cd2c2bbfefea9c0bbf560821d4b6f9d47e5c09d84"
+    },
+    "method": {
+      "prompt_optimizer.default_tips": [
+        "831d66207c24388f8fe2e96cb500aba62b541ae1a1ef681de271057de855d55f",
+        "f58b53fde6af6937c3e2ac396af236bd9ed22869a9f1caca788a3584d287821a",
+        "11cab8edab48f2578c2e8400ea43b4c7e3c546ae984cd31a27a2c9438235d4be",
+        "e1f6b957885b0ee8eb83fdb7778e96c91abf686d8489bde16a909dbe45d663d9"
+      ],
+      "prompt_optimizer.system": "8a37e8af3609036ba5cd45c680a081a900808bcbd20f1b00a908ba5fe9853bde",
+      "generator.system": "70cedd6a952efca15acf77b512146d8396de1fdf10beaa4333733ef3b218ef74",
+      "block_selection.system": "00b0908cf051465a8baf1036ec0761673a14f7f449a972526237b8731fa21c07",
+      "reasoning.cot": "44885502fa44430ca070908882f171ebea4dc53a080c1f003547b91f338059c2",
+      "reasoning.self_consistency_consensus": "d303303ffc4e75fa7128b4d42edfd9945ac69acacc1de294a57f9fa5bbf26e18",
+      "reasoning.self_refine_draft": "fb78e07413e427d16671e450c8120545177df7c75907973db22ca01525b15900",
+      "reasoning.self_refine_critique": "1da7e30f5ec4a2950fae7982f34620ace86da96f837015379ec8bc68a1316d1c",
+      "reasoning.critique_system": "3d274825937e3085eca355dfea1a0700edfe8ceb2bd2de5670542d2c587b06dc",
+      "reasoning.self_refine_revision": "3d59f55fb175c0b467052e728ad30fdd0bfb7b77f876d6858a887f0104a97a50",
+      "reasoning.self_consistency_sample": "e1109b39e8574429fa9f0da545ca46b440983155e7e88043f8658c03ba5541cf",
+      "debate.guidance_0": "e53d77fcc7a21bd903089cb53f5f7d930bfb46e4626ff72e7ca93497609eb8b5",
+      "debate.guidance_1": "4ae3d3f083132f87dfd8cb9acbed3a2bf3c4972ceed97d5d0ab41ac3bc13aa6e",
+      "preferences.pair": "96a4becd1955c7e5071b7246659675db5b26377b2499492f2b3fd3253d4e728b",
+      "preferences.label": "a78087b704e5d52cbae428dcef382637373838760959c1eba0e784be6112ed2f",
+      "reconstruction.json_instruction": "d0320d33219cfeb8458e68ae84d3e8dd06a53ea80d39927a5a197f60405dd068",
+      "services.schema_instruction": "4a318b4505a15e461fe81cdce130ff57dae5ed4efffc9b31de27d26165fe9b67",
+      "providers.format_retry": "83859bf8d5542b4f706b8f5fa1e6972f3709b00f7e90ef51f02271c1dd0dc390",
+      "debate.reconstruction_status": "9ccdb66f5211e1c9237652c08685e72ea3630922d101f970be6d02fe1da0bc2a",
+      "debate.rejection_failed": "d1d5292b292473266c5d20a38551d592f9591747d092c42770f95aa4ad6e2bf8",
+      "debate.rejection_minimum": "a7cf85e1f844470da1c2aab4d569852caf173db5ce3173e11059331f17d5933e",
+      "debate.rejection": "95747baf6030e9d439b20bc028136951acff2fe2f864aa2879c70e2e6700c004",
+      "default_personas": [
+        "fbf1393620e20af3c2d0b264b06bbba864f33e6d7b2bfe2bd41cf19c290f6c8e",
+        "c3a37f1ec12294ce43310567242c1c809d1308b64eb18c0555f59fcddabf56ff",
+        "ea8c39cd7ca12c3122dc4bf4c46ac68175183372d400e294910b5093e177e5bb"
+      ]
     }
   },
   "rendered": {

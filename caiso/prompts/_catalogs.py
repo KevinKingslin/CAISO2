@@ -1,0 +1,77 @@
+"""Catalog keys mapped to text resources; prompt content lives only in .txt files.
+
+Paths are relative to this package without the .txt suffix. Tuples preserve
+the order of multi-entry defaults such as prompt tips and personas.
+"""
+
+CATALOGS = {
+    "method": {
+        "prompt_optimizer.default_tips": (
+            "method/prompt_optimizer/default_tips/01",
+            "method/prompt_optimizer/default_tips/02",
+            "method/prompt_optimizer/default_tips/03",
+            "method/prompt_optimizer/default_tips/04",
+        ),
+        "prompt_optimizer.system": "method/prompt_optimizer/system",
+        "generator.system": "method/generator/system",
+        "block_selection.system": "method/block_selection/system",
+        "reasoning.cot": "method/reasoning/cot",
+        "reasoning.self_consistency_consensus": "method/reasoning/self_consistency_consensus",
+        "reasoning.self_refine_draft": "method/reasoning/self_refine_draft",
+        "reasoning.self_refine_critique": "method/reasoning/self_refine_critique",
+        "reasoning.critique_system": "method/reasoning/critique_system",
+        "reasoning.self_refine_revision": "method/reasoning/self_refine_revision",
+        "reasoning.self_consistency_sample": "method/reasoning/self_consistency_sample",
+        "debate.guidance_0": "method/debate/guidance_0",
+        "debate.guidance_1": "method/debate/guidance_1",
+        "preferences.pair": "method/preferences/pair",
+        "preferences.label": "method/preferences/label",
+        "reconstruction.json_instruction": "method/reconstruction/json_instruction",
+        "services.schema_instruction": "method/services/schema_instruction",
+        "providers.format_retry": "method/providers/format_retry",
+        "debate.reconstruction_status": "method/debate/reconstruction_status",
+        "debate.rejection_failed": "method/debate/rejection_failed",
+        "debate.rejection_minimum": "method/debate/rejection_minimum",
+        "debate.rejection": "method/debate/rejection",
+        "default_personas": (
+            "method/default_personas/01",
+            "method/default_personas/02",
+            "method/default_personas/03",
+        ),
+    },
+    "systems/amazon": {
+        "SessionAnalyzerModule.template": "systems/amazon/session_analyzer/prompt",
+        "CandidateProfilerModule.template": "systems/amazon/candidate_profiler/prompt",
+        "NextItemDecider.instructions": "systems/amazon/next_item_decider/instructions",
+        "NextItemDecider.context.prefix": "systems/amazon/next_item_decider/fields/context_prefix",
+        "NextItemDecider.context.desc": "systems/amazon/next_item_decider/fields/context_description",
+        "NextItemDecider.feedback.prefix": "systems/amazon/next_item_decider/fields/feedback_prefix",
+        "NextItemDecider.feedback.desc": "systems/amazon/next_item_decider/fields/feedback_description",
+        "NextItemDecider.answer.prefix": "systems/amazon/next_item_decider/fields/answer_prefix",
+        "NextItemDecider.answer.desc": "systems/amazon/next_item_decider/fields/answer_description",
+    },
+    "systems/hotpotqa": {
+        "QuestionRewriter.instructions": "systems/hotpotqa/question_rewriter/instructions",
+        "QuestionRewriter.question.prefix": "systems/hotpotqa/question_rewriter/fields/question_prefix",
+        "QuestionRewriter.rewritten_query.prefix": "systems/hotpotqa/question_rewriter/fields/rewritten_query_prefix",
+        "InfoExtractor.instructions": "systems/hotpotqa/info_extractor/instructions",
+        "InfoExtractor.rewritten_query.prefix": "systems/hotpotqa/info_extractor/fields/rewritten_query_prefix",
+        "InfoExtractor.search_keywords.prefix": "systems/hotpotqa/info_extractor/fields/search_keywords_prefix",
+        "HintGenerator.instructions": "systems/hotpotqa/hint_generator/instructions",
+        "HintGenerator.rewritten_query.prefix": "systems/hotpotqa/hint_generator/fields/rewritten_query_prefix",
+        "HintGenerator.retrieve_content.prefix": "systems/hotpotqa/hint_generator/fields/retrieve_content_prefix",
+        "HintGenerator.hints.prefix": "systems/hotpotqa/hint_generator/fields/hints_prefix",
+        "AnswerGenerator.instructions": "systems/hotpotqa/answer_generator/instructions",
+        "AnswerGenerator.rewritten_query.prefix": "systems/hotpotqa/answer_generator/fields/rewritten_query_prefix",
+        "AnswerGenerator.hints.prefix": "systems/hotpotqa/answer_generator/fields/hints_prefix",
+        "AnswerGenerator.answer.prefix": "systems/hotpotqa/answer_generator/fields/answer_prefix",
+    },
+    "systems/pubmed": {
+        "ContextAnalystModule.instruction": "systems/pubmedqa/context_analyst/instructions",
+        "ContextAnalystModule.template": "systems/pubmedqa/context_analyst/user",
+        "ProblemSolverModule.instruction": "systems/pubmedqa/problem_solver/instructions",
+        "ProblemSolverModule.template": "systems/pubmedqa/problem_solver/user",
+        "FORMAT_PROMPT_YESNO": "systems/pubmedqa/problem_solver/answer_format",
+        "SYS_SINGLE_SOL_PROMPT": "systems/pubmedqa/system",
+    },
+}

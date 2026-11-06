@@ -1,16 +1,23 @@
 """Editable, packaged prompts shared by the method and benchmark systems."""
 
-import json
 from importlib.resources import files
+
+from ._catalogs import CATALOGS
 
 
 def text(name):
-    return files(__package__).joinpath(name + ".txt").read_text()
+    """Read prompt text verbatim, including significant leading/trailing spaces."""
+    return files(__package__).joinpath(name + ".txt").read_text(encoding="utf-8")
 
 
 def entry(catalog, key):
-    return catalog_entries(catalog)[key]
+    """Keep existing catalog keys while loading only the requested text files."""
+    reference = CATALOGS[catalog][key]
+    if isinstance(reference, tuple):
+        return [text(name) for name in reference]
+    return text(reference)
 
 
 def catalog_entries(catalog):
-    return json.loads(files(__package__).joinpath(catalog + ".json").read_text())
+    """Read all catalog text, including ordered lists, for cache provenance."""
+    return {key: entry(catalog, key) for key in CATALOGS[catalog]}

@@ -42,14 +42,15 @@ rendering regression tests.
    convenience launcher can reuse this evaluator without duplicating it.
 6. `examples/systems/hotpotqa/five_components.py`: reads `COLBERT_URL` (or
    `colbert_url`) from the environment/.env, retaining the original retrieval URL
-   as the fallback. Loads signature text from `caiso/prompts/systems/hotpotqa.json`.
+   as the fallback. Loads signature text from component folders under
+   `caiso/prompts/systems/hotpotqa/`.
    Prompt text, k, and the search space are unchanged.
 7. `examples/systems/amazon/local_models_for_next_item_selection.py`: loads the same
    completion templates and DSPy instruction/field metadata from
-   `caiso/prompts/systems/amazon.json`.
+   component folders under `caiso/prompts/systems/amazon/`.
 8. `examples/systems/pubmed/three_components_with_model_selection.py`: loads the
    same system message, initial instructions, answer format and user templates from
-   `caiso/prompts/systems/pubmed.json`.
+   `caiso/prompts/systems/pubmedqa/`.
 9. `caiso/arch/base.py`: propagates explicit policy skips, exhausted transport
    retries and non-retryable service failures immediately instead of resampling
    them in the generic component retry loop. Ordinary response retries stay intact.

@@ -50,7 +50,13 @@ def test_extracted_prompts_match_pre_extraction_text_and_rendering():
         actual = catalog_entries(catalog)
         assert set(actual) == set(expected)
         for key, sha256 in expected.items():
-            assert hashlib.sha256(actual[key].encode()).hexdigest() == sha256
+            value = actual[key]
+            actual_hash = (
+                [hashlib.sha256(item.encode()).hexdigest() for item in value]
+                if isinstance(value, list)
+                else hashlib.sha256(value.encode()).hexdigest()
+            )
+            assert actual_hash == sha256
     for case in fixture["rendered"].values():
         assert entry(case["catalog"], case["key"]).format(**case["arguments"]) == case["expected"]
 

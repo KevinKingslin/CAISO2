@@ -1,0 +1,2 @@
+
+Return JSON: {"choice": "1" or "2", "reason": "brief justification"}.

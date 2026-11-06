@@ -1,0 +1,1 @@
+requires at least {minimum} principles and {min_cycles} cycles

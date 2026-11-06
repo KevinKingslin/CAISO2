@@ -1,0 +1,2 @@
+
+Publish an UPDATED WORKING LIST. Finalize only if reconstruction is YES, the list is stable and non-overlapping and retains at least {minimum} distinct one-quality questions.

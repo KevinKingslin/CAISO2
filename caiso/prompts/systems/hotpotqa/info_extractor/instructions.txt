@@ -1,0 +1,1 @@
+Extract keywords from the query to retrieve relevant content.

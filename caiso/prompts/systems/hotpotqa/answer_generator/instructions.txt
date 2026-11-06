@@ -1,0 +1,1 @@
+Given some hints, directly answer the query with a short answer for the query.

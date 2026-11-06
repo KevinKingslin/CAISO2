@@ -1,0 +1,8 @@
+PROMPT:
+{value_0}
+
+RESPONSE A:
+{value_1}
+
+RESPONSE B:
+{value_2}

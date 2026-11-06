@@ -1,0 +1,9 @@
+{instruction}
+
+Here is the given context:
+"{context}"
+
+Problem:
+"{question}"
+
+Please summarize the relevant information from the context related to the question.

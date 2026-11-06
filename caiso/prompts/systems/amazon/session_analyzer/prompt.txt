@@ -1,0 +1,6 @@
+You are an e-commerce behaviour analyst.
+
+Session sequence:
+{sequence}
+
+Provide a 2-3 sentence summary of the user's browsing intent.

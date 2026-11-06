@@ -1,0 +1,6 @@
+{block}
+PREVIOUS RATIONALE:
+{value_1}
+REVIEWER CRITIQUE:
+{critique}
+Revise the rationale to fix every weakness. Keep only discriminating, specific points. {instruction}

@@ -1,0 +1,2 @@
+# DSPy field prefixes intentionally end with a space that is part of the model input.
+caiso/prompts/systems/**/fields/*_prefix.txt whitespace=-blank-at-eol

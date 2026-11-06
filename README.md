@@ -193,8 +193,10 @@ configs/
   experiments/pubmedqa.yaml
 caiso/prompts/
   dicai/*.txt
-  method.json
-  systems/{amazon,hotpotqa,pubmed}.json
+  method/<stage>/*.txt
+  systems/amazon/<component>/*.txt
+  systems/hotpotqa/<component>/*.txt
+  systems/pubmedqa/<component>/*.txt
 ```
 
 All current parameter values are retained. `method_config` is relative to the

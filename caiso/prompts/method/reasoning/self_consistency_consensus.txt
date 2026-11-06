@@ -1,0 +1,5 @@
+{samples} independent analyses were produced for the same preference judgement.
+ANALYSES:
+{joined}
+DIMENSIONS THAT RECUR ACROSS A MAJORITY: {stable}
+Write one consensus rationale that relies only on the recurring dimensions and discards idiosyncratic points. {instruction}

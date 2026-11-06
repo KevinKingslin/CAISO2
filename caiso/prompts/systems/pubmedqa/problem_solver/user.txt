@@ -1,0 +1,9 @@
+{instruction}
+
+Problem:
+"{question}"
+
+Here is a summary of relevant information:
+"{summary}"
+
+Please provide yes, no or maybe to the given problem. {format_prompt}
