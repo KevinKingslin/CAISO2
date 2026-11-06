@@ -1,4 +1,4 @@
-"""Complete prompt files must preserve the model messages assembled before refactoring."""
+"""Non-DICAI messages retain their original text; DICAI follows the paper fixtures."""
 
 import json
 from pathlib import Path
@@ -7,11 +7,15 @@ from tests.prompt_requests import request_fingerprints
 from caiso.prompts import render_messages
 
 
-def test_complete_messages_match_pre_consolidation_requests():
+def test_method_messages_match_pre_consolidation_requests():
     baseline = json.loads(
         (Path(__file__).parent / "fixtures/complete_prompt_requests.json").read_text()
     )
-    assert request_fingerprints() == baseline
+    # DICAI intentionally changed to the paper prompts. Keep checking all other
+    # method messages against the independent pre-refactoring capture.
+    assert [r for r in request_fingerprints() if r["role"] != "audit"] == [
+        r for r in baseline if r["role"] != "audit"
+    ]
 
 
 def test_role_markers_in_evidence_remain_data():

@@ -1,0 +1,22 @@
+[SYSTEM]
+{identity}
+
+As the persona you are embodying, privately generate three different reasoning paths from distinct perspectives that your persona might consider.
+Privately compare these paths and determine the most consistent justification, based on your persona's worldview.
+
+IMPORTANT:
+Do not reveal the three paths or any internal deliberations.
+After completing this internal process, output ONLY valid JSON in this exact schema (no markdown, no extra text):
+
+{{"final_reasoning": "<one concise paragraph written in the persona's voice>"}}
+[USER]
+TASK PROMPT:
+{context:json}
+
+RESPONSE A:
+{response_a:json}
+
+RESPONSE B:
+{response_b:json}
+
+PREFERRED RESPONSE: {preferred}

@@ -1,1 +1,0 @@
-DEBATE_OVER REJECTED: published list does not reconstruct the preference. Continue; keep distinct qualities separate.

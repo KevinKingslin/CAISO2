@@ -1,15 +1,15 @@
 # Active prompt inventory
 
-These files are read by CAISO and the three configured benchmark systems. Text,
-whitespace and configuration/generation values were preserved during extraction.
+These files are read by CAISO and the three configured benchmark systems.
+Benchmark prompts retain OPTIMAS text; DICAI uses the arXiv paper instructions.
 
-- `dicai/reasoning/*.txt`: complete requests for CoT, self-consistency samples and
-  consensus, and self-refinement draft, critique and revision.
+- `dicai/reasoning/{cot,self_consistency,self_refine}.txt`: complete requests
+  matching Appendix G, Figures 10–12 of arXiv:2606.28294v2. Each returns only
+  `final_reasoning`; self-consistency/refinement happen within that one request.
 - `dicai/debate/debater.txt` and `chairperson.txt`: complete system/user requests,
-  including principle style and the turn-specific instructions.
+  matching Figures 13–14, plus dynamic persona/evidence/history inputs.
 - `dicai/reconstruction.txt` and `abstraction.txt`: complete requests for blind
   judging and cluster abstraction.
-- `dicai/debate/*_feedback.txt`: complete moderator feedback for rejected stops.
 - `method/<stage>/prompt.txt`: complete block-selection, prompt-optimization and
   workflow-proposal requests. `method/services/schema_message.txt` and
   `method/providers/format_retry.txt` are complete supplemental user messages.
@@ -20,9 +20,10 @@ whitespace and configuration/generation values were preserved during extraction.
 - `systems/pubmedqa/`: scientist system message, component instructions,
   yes/no/maybe format and context-analysis/problem-solving user templates.
 
-Each request template contains the complete instructions for its stage. Shared
-style, output-format instructions, and debate guidance are written directly into
-the corresponding request, rather than loaded as fragments from other files.
+Each request template contains the complete instructions for its stage. The
+paper's output-format instructions and debate guidance are written directly into
+the corresponding request. No extra principle style, reconstruction stop gate,
+minimum-principle rule or moderator rejection feedback is added to DICAI.
 For example, open `dicai/debate/chairperson.txt` to see its system instructions,
 evidence fields, and instruction to publish the updated working list together.
 
@@ -102,8 +103,11 @@ STaRK/BigCodeBench examples and legacy OPTIMAS utilities retain their original p
 code; they are not part of the three active experiment profiles.
 
 DICAI includes the complete method and DICAI templates in cache provenance, so
-editing them invalidates induction caches. Prompt changes can affect benchmark
-scores; this extraction retains the previous content.
+editing them invalidates induction caches. Prompt changes can affect optimization
+results; start a new run to regenerate constitutions saved in older checkpoints.
 
 See [the original-source audit](../../docs/PROMPT_AUDIT.md): benchmark system
-prompts match pinned OPTIMAS, while DICAI contains documented CAISO adaptations.
+prompts match pinned OPTIMAS; DICAI instruction wording is checked against the
+paper's retained LaTeX source, with dynamic task evidence and dataset personas
+documented separately. The prompt transcriptions retain the paper's CC BY-NC-SA
+4.0 license and attribution in `third_party/democratic_icai/paper/`.

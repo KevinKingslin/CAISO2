@@ -42,17 +42,7 @@ class Recorder:
         )
         if schema is not None:
             values = {
-                "Reasoning": {
-                    "reasoning": "Use the supplied evidence, not sample-specific answer facts.",
-                    "dimensions": ["evidence", "relevance"],
-                    "questions": [
-                        {"select_prompt": p, "reason": "Supported quality."} for p in PRINCIPLES
-                    ],
-                },
-                "PreferenceChoice": {
-                    "choice": "1",
-                    "reason": "The principles favor this response.",
-                },
+                "Reasoning": {"final_reasoning": "The preferred response preserves the evidence."},
                 "PromptProposal": {"prompt": f"Revised instruction {seed}"},
                 "BlockVote": {"block_id": "block-0", "brief_justification": "Improve this block."},
                 "WorkflowProposal": {
@@ -65,7 +55,7 @@ class Recorder:
                 },
             }
             result = schema.model_validate(values[schema.__name__])
-        elif "You are the Moderator/Judge" in messages[0]["content"]:
+        elif "You are the Chairperson Agent" in messages[0]["content"]:
             result = (
                 "FINAL LIST\n"
                 + "\n".join(f"- Q{i}: {p}" for i, p in enumerate(PRINCIPLES, 1))
@@ -73,10 +63,10 @@ class Recorder:
             )
         elif "a debater who must" in messages[0]["content"]:
             result = "1. DEFEND:\n- Q1: Preserve the evidence."
-        elif "strict reviewer" in messages[0]["content"]:
-            result = "Keep only discriminating qualities."
-        elif "You abstract a cluster" in messages[0]["content"]:
+        elif "You are given a set of preference principles" in messages[0]["content"]:
             result = PRINCIPLES[0]
+        elif "selects outputs according to rules" in messages[0]["content"]:
+            result = "Output(a)"
         else:
             raise AssertionError("Unexpected prompt in complete-message capture")
         return validate(result) if validate else result

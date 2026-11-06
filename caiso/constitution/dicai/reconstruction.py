@@ -1,26 +1,26 @@
-"""Adapted common.apply_constitution/reconstructs, with validated CAISO views.
+"""Constitution-guided judging from arXiv:2606.28294v2, Figure 16.
 
 MIT attribution: third_party/democratic_icai. Gold labels are used only after
 inference, never in the blind judge's messages.
 """
 
 import random
+import re
 from collections import Counter
-from typing import Literal
-
-from pydantic import Field
 
 from caiso.core.content_filter import ContentFilteredError, record_skip
 from caiso.core.parallel import ordered_map
-from caiso.core.serialization import Record
+from caiso.core.recovery import ModelResponseError
 from caiso.prompts import render_messages
 
-from .preferences import candidate_views, task_view
+from .preferences import candidate_views
 
 
-class PreferenceChoice(Record):
-    choice: Literal["1", "2"]
-    reason: str = Field(min_length=1)
+def parse_choice(text):
+    match = re.fullmatch(r"Output\(([ab])\)", text.strip())
+    if not match:
+        raise ModelResponseError("Constitution judge must return Output(a) or Output(b)")
+    return match.group(1)
 
 
 def apply_constitution(providers, role, pair, principles, seed=0, temperature=0.0):
@@ -30,15 +30,15 @@ def apply_constitution(providers, role, pair, principles, seed=0, temperature=0.
     response = providers.complete(
         role,
         render_messages(
-            "dicai", "reconstruction", prompt=task_view(pair.context),
-            principles=principles, response_1=first, response_2=second,
+            "dicai", "reconstruction", constitution="\n".join(principles),
+            response_1=first, response_2=second,
         ),
         seed=seed,
-        schema=PreferenceChoice,
+        validate=lambda text: (parse_choice(text), text)[1],
         temperature=temperature,
     )
-    choice = ("B" if swapped else "A") if response.choice == "1" else ("A" if swapped else "B")
-    return choice, {"predicted": choice, "reason": response.reason, "swapped": swapped}
+    choice = ("B" if swapped else "A") if parse_choice(response) == "a" else ("A" if swapped else "B")
+    return choice, {"predicted": choice, "response": response, "swapped": swapped}
 
 
 def reconstructs(providers, role, pair, principles, votes=1, temperature=0.0):

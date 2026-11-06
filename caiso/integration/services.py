@@ -19,9 +19,12 @@ class MethodProvider:
         self.model, self.budget, self.max_tokens = model, budget, max_tokens
         self.on_error = None
 
-    def complete(self, messages, *, seed, schema=None, temperature=0.2, max_tokens=None, **kwargs):
+    def complete(
+        self, messages, *, seed, schema=None, temperature=0.2, max_tokens=None,
+        include_schema_instruction=True, **kwargs,
+    ):
         instructions = list(messages)
-        if schema is not None:
+        if schema is not None and include_schema_instruction:
             instructions.extend(
                 render_messages(
                     "method", "services.schema_message", schema=json.dumps(schema.model_json_schema()),

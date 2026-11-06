@@ -29,7 +29,7 @@ from .plotting import save_silhouette_artifacts
 from .reasoning_assembly import assemble
 from .reconstruction import minimize_constitution, validate_constitution
 
-PROTOCOL = "democratic-icai-c8d5-port-v3"
+PROTOCOL = "democratic-icai-arxiv-2606.28294v2-prompts-v1"
 
 
 def implementation_fingerprint():
@@ -338,7 +338,7 @@ class DICAI:
                 "principle_pair_ids": origins,
                 "reasoning_catalogues": catalogues,
                 "debate_transcripts": transcripts,
-                "source": "User-supplied Democratic-ICAI-C8D5; third_party/democratic_icai/SOURCE.json",
+                "source": "DICAI arXiv:2606.28294v2 Appendix G; third_party/democratic_icai/SOURCE.json",
                 "protocol": PROTOCOL,
                 "provenance": provenance,
                 "implementation_fingerprint": implementation,

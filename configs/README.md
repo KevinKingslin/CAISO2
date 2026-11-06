@@ -36,6 +36,15 @@ Resolved persona names and complete prompt text are included in saved experiment
 configuration and DICAI cache provenance. Persona changes apply to new inductions;
 start a new run to regenerate constitutions already stored in a checkpoint.
 
+DICAI follows the prompts in arXiv:2606.28294v2, Appendix G. CoT,
+self-consistency and self-refine each make one request per persona. Legacy
+`self_consistency_samples`, `self_refine_steps`, `min_debate_rounds` and
+`min_principles` values remain readable in existing files but no longer change
+this paper prompt flow. Existing temperature keys `cot`,
+`self_consistency_sample` and `self_refine_draft` set the three request
+temperatures. Consensus/critique/revision temperatures are unused. Debate uses
+all configured `debate_rounds`; reconstruction runs afterward as a diagnostic.
+
 ```sh
 ./scripts/caiso run amazon
 ./scripts/caiso evaluate amazon --unoptimized

@@ -11,5 +11,24 @@
     "debate.py": "0803c7f025f6a011bc6869dbd5ba015bfcc80eec380bc5aeac8d08590b7a31a7",
     "reasoning.py": "5c46b03ee7eded7da0de3562d3e3f3fa667098c502d95a3f106a3a2686676163",
     "run_pipeline.py": "d1acf4600580422d8234f566a09ccaa1d590510f42947ef006d167e6992212f2"
+  },
+  "active_prompt_source": {
+    "title": "Democratic ICAI: Debating Our Way to Steering Principles from Preferences",
+    "arxiv": "2606.28294v2",
+    "url": "https://arxiv.org/abs/2606.28294v2",
+    "prompt_figures": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "source_file": "paper/appendix_g.tex",
+    "sha256": "77a62fb5d2edf4fc927cbef50b02e16f8e8c1b62937a6a34797ad0c5cc442500",
+    "license": "CC BY-NC-SA 4.0 (paper; original code remains MIT)",
+    "verified_on": "2026-11-06",
+    "transcription": "Published wording, with TeX layout/list markers normalized for plain text."
   }
 }

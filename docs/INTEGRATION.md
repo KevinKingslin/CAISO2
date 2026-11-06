@@ -20,11 +20,12 @@ remain protected. Prompt extraction is recorded below and has separate text and
 rendering regression tests.
 
 The [original-source prompt audit](PROMPT_AUDIT.md) verifies all 29 benchmark
-prompt entries against pinned OPTIMAS. DICAI prompts are adaptations: original
-reasoning/judging wording is combined with CAISO guidance and modified debate/
-abstraction text. They are not claimed to be verbatim original DICAI requests.
-Consolidating fragments into complete request files preserves all 104 message
-bodies in the 51-request regression capture.
+prompt entries against pinned OPTIMAS. Active DICAI instructions now follow
+arXiv:2606.28294v2, Appendix G, Figures 10–16, with no added principle-style or
+reconstruction-gate instructions. Task evidence and QA/recommendation personas
+are supplied as dynamic inputs. The earlier 51-request/104-message capture is
+historical; non-DICAI messages retain parity, while DICAI is tested against the
+published appendix source.
 
 ## Ten explicit upstream exceptions
 

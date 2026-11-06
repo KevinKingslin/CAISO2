@@ -228,11 +228,12 @@ needed. Credentials, model deployments, backend choices and service URLs stay in
 `.env`. See [the configuration guide](configs/README.md) and
 [the prompt inventory](caiso/prompts/README.md).
 
-Stage request files contain complete `[SYSTEM]` and `[USER]` sections; fixed
-debate guidance, principle style and output instructions are included directly
-in each request file. Dynamic evidence and optimized instructions remain template
-values. The [prompt audit](docs/PROMPT_AUDIT.md) records exact OPTIMAS system-prompt
-parity and the existing DICAI adaptations.
+Stage request files contain complete `[SYSTEM]` and `[USER]` sections. DICAI uses
+the published instructions in arXiv:2606.28294v2, Appendix G, Figures 10–16,
+without the added principle-style or reconstruction-gate guidance. Dynamic
+evidence and optimized instructions remain template values. The
+[prompt audit](docs/PROMPT_AUDIT.md) records the paper source, necessary input
+adaptations and exact OPTIMAS system-prompt parity.
 
 Each experiment's `caiso.persona_catalog` selects three dataset-specific expert
 profiles from `caiso/prompts/systems/<dataset>/personas/*.txt` for both system and

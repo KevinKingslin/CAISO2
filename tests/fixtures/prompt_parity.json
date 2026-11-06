@@ -69,18 +69,13 @@
       "Scientific question answering evaluator": "34e571e408f00e0863b8ade72fbd199e49f8474d16abc62cd088d0df7d9fa8fc"
     },
     "dicai": {
-      "reasoning.cot": "ad03b0f90ff0de048b4ad57aa2056e746b2b3a8d9905650b8966decffffe1cd1",
-      "reasoning.self_consistency_sample": "4650bf95f41a1734ec4ab01bdc8df03c58bc6ef5f5d99e5eb8d59d02ced8207f",
-      "reasoning.self_consistency_consensus": "9da62ac8c7703ce8fef919c526276ccd83007aab54e73daf5d38d55f83963acc",
-      "reasoning.self_refine_draft": "2a5b6875a0668f0c754b760868c74975df87baa25ade425545c56b733230f616",
-      "reasoning.self_refine_critique": "3252f1fa6b6a603b2493f9d131a8caa95c9d8e9eb3f2d4cc59b0e552eaffe11f",
-      "reasoning.self_refine_revision": "4784cbb4f784dfcfdd79808b99b62e6aa376972a84614485baa9e3e3c2597834",
-      "debate.debater": "02be6a3cc3338a70fc8bc4da3b67c3b7f7914e19ae6efab82f036065f570ec4f",
-      "debate.chairperson": "158b6b870a897a77298fe2dacdfdc730efd232a6ab1ee47fa3c351e538d8fd0b",
-      "feedback.reconstruction_failed": "825bb6c0dfd52c6b9e294436cb6a6715bd114bf32db88d3fbaa72221ee02b48f",
-      "feedback.minimum_not_met": "708ab89bcec4ffe24c5a9e371d4b1fc9c2d672569a22c024df2fba888f098a8e",
-      "reconstruction": "524035c1f610a81b9a70a3da69a35a736c4c1fb790e3fcd7d1b09a2a4684f982",
-      "abstraction": "ef25db4f7621a09a5315e472743b2213cadcea8e66f097284b21816563d7d954"
+      "reasoning.cot": "b74dfa284e09f82af39d8a85316f1c6ad89d9cd0e5024db50943408e586d0449",
+      "reasoning.self_consistency": "352f1f757848ee4ec3433ee528a13123e13c8957a5412704decc6147fbf18f40",
+      "reasoning.self_refine": "e18c1d0b9ab7fb3c380618cd2989358e4a0fae8b423bb2e54ef616a5ee3f5487",
+      "debate.debater": "a860f1d374c64997ac87c6bd1845288c072c3a6999e261ca4f937fd30b238d87",
+      "debate.chairperson": "629752bc8dd1219de4da154341b1f3249259be7065ce17a29a602a7f19469b5f",
+      "reconstruction": "bd04736e4b37a896d399308b8a78fa057cd7676661bc19387c4ef5d37a01e6a6",
+      "abstraction": "30104380b23365b7e2a9fb5fceda7a31637233107b11f838b55e67f1fa263354"
     }
   },
   "rendered": {

@@ -1,4 +1,4 @@
-"""Constitution-guided inference uses the supplied official blind judging procedure."""
+"""Constitution-guided inference uses DICAI paper Figure 16, blind to labels."""
 
 from caiso.constitution.models import PreferencePair
 

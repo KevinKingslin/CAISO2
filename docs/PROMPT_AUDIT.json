@@ -78,5 +78,32 @@
     "requests": 51,
     "message_bodies": 104,
     "result": "exact UTF-8 and role match"
+  },
+  "historical_scope": "Pre-paper-prompt migration. DICAI pre-consolidation and request-parity findings describe the historical baseline, not current DICAI requests.",
+  "current_dicai": {
+    "title": "Democratic ICAI: Debating Our Way to Steering Principles from Preferences",
+    "arxiv": "2606.28294v2",
+    "url": "https://arxiv.org/abs/2606.28294v2",
+    "prompt_figures": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "source_file": "paper/appendix_g.tex",
+    "sha256": "77a62fb5d2edf4fc927cbef50b02e16f8e8c1b62937a6a34797ad0c5cc442500",
+    "license": "CC BY-NC-SA 4.0 (paper; original code remains MIT)",
+    "verified_on": "2026-11-06",
+    "transcription": "Published wording, with TeX layout/list markers normalized for plain text.",
+    "result": "Appendix G Figures 10–16 wording restored; no added principle style, reconstruction gate or minimum-principle instructions.",
+    "adaptations": [
+      "Three configured QA/recommendation persona profiles, rather than creative-writing personas.",
+      "Dynamic CAISO task/trajectory evidence and turn counters supplied in user messages.",
+      "Existing transports, temperatures, clustering and optional post-induction minimization retained.",
+      "Generic response validation/retries remain; no extra schema message on a valid DICAI request."
+    ]
   }
 }
