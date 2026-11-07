@@ -84,6 +84,11 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path):
     assert (tmp_path / "iterations/0001/01_attribution/edge_weights.json").is_file()
     assert (tmp_path / "iterations/0001/02_blocks/weighted_graph.graphml").is_file()
     assert (tmp_path / "iterations/0001/04_block_constitution/silhouette.png").is_file()
+    configurations = json.loads((tmp_path / "iterations/0001/07_state/component_configurations.json").read_text())
+    assert configurations["original"]["transform"]["value"] == "identity"
+    assert configurations["current"]["transform"]["value"] == "double"
+    assert configurations["candidate"]["transform"]["value"] == "double"
+    assert configurations["candidate_status"] == "Accepted"
     # Restore the accepted checkpoint onto a fresh copy of the benchmark system.
     fresh = make_system()
     restored = CaisoOptimizer(

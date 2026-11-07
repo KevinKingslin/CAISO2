@@ -59,6 +59,7 @@ def compatibility_adapt(
             },
             optimizer.output_dir,
             optimizer.optimizers,
+            on_candidate=optimizer.on_candidate,
         )
     local_train = train[: search_config.get("training_batch_size", 2)]
     report["training_examples"] = len(local_train)

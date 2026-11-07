@@ -181,6 +181,17 @@ class Algorithm:
 
     def run(self, initial, train, validation, preferences=None, resume=None):
         self.report = IterationReport(self.output, self.config, self.runtime.budget)
+        self.report.configuration_state(original=initial, current=initial)
+        previous_candidate_observer = None
+        if isinstance(self.optimizer, JointBlockOptimizer):
+            previous_candidate_observer = self.optimizer.on_candidate
+
+            def show_candidate(candidate):
+                self.report.configuration_state(candidate=candidate, status="Evaluating local proposal")
+                if previous_candidate_observer:
+                    previous_candidate_observer(candidate)
+
+            self.optimizer.on_candidate = show_candidate
         previous_recovery = self.runtime.providers.recovery
         self.recovery = Recovery(
             self.config.get("error_handling"), self.report.error_event, self.runtime.budget
@@ -228,6 +239,8 @@ class Algorithm:
                 return initial.model_copy(deep=True)
             raise
         finally:
+            if isinstance(self.optimizer, JointBlockOptimizer):
+                self.optimizer.on_candidate = previous_candidate_observer
             self.runtime.providers.recovery = previous_recovery
             self.report.close()
 
@@ -324,6 +337,7 @@ class Algorithm:
                 status="completed",
             )
 
+        self.report.configuration_state(current=current)
         # A manual resume gets another bounded recovery window; all spent budgets persist.
         consecutive_errors = 0
 
@@ -358,7 +372,7 @@ class Algorithm:
                 if cfg.get("max_iterations") is not None and iteration >= cfg["max_iterations"]:
                     break
                 self.runtime.budget.check()
-                self.report.begin(iteration, score, best_score)
+                self.report.begin(iteration, score, best_score, state=current)
                 budget_before = self.runtime.budget.snapshot()
                 accepted, selection, gate, workflow_report = False, None, None, None
                 discovered_blocks = {}
@@ -466,6 +480,7 @@ class Algorithm:
                     preliminary = self.optimizer.propose(
                         current, members, qsys, local_train, step_seed
                     )
+                    self.report.configuration_state(status="Evaluated for preference generation")
                     preliminary = optimization_history.filter_candidates(current, preliminary)
                     self.report.save_phase(
                         "04_block_constitution",
@@ -559,12 +574,14 @@ class Algorithm:
                         scored = self.optimizer.propose(
                             current, members, qb, local_train, step_seed + 10000
                         )
+                        self.report.configuration_state(status="Local candidates evaluated")
                         scored = [
                             c
                             for c in optimization_history.filter_candidates(current, scored)
                             if current.with_configs(c.configurations) != current
                         ]
                         if not scored:
+                            self.report.configuration_state(clear_candidate=True, status="No new candidate")
                             optimization_history.record_no_candidate(iteration, current, members)
                             self.report.save_phase(
                                 "05_block_optimization",
@@ -574,6 +591,7 @@ class Algorithm:
                         else:
                             chosen = self.optimizer.select(scored, current, members, step_seed)
                             candidate = current.with_configs(chosen.configurations)
+                            self.report.configuration_state(candidate=candidate, status="Selected for validation")
                             self.report.save_phase(
                                 "05_block_optimization",
                                 candidate_state=candidate,
@@ -616,12 +634,14 @@ class Algorithm:
                                 iteration, current, candidate, members, gate
                             )
                             current = updated
+                            self.report.configuration_state(current=current, candidate=candidate, status="Accepted" if gate.accepted else "Rejected")
                             score = gate.candidate_score if gate.accepted else gate.current_score
                             accepted = gate.accepted
                             self.accounting.event(
                                 "block_acceptance", iteration=iteration, **gate.model_dump()
                             )
                     else:
+                        self.report.configuration_state(clear_candidate=True, status="No new candidate")
                         optimization_history.record_no_candidate(iteration, current, members)
                         self.report.save_phase(
                             "04_block_constitution",
@@ -677,11 +697,17 @@ class Algorithm:
                             self.allowed_connections,
                         )
                         self.report.save_phase("06_workflow", report=workflow_report)
+                        if workflow_report.get("candidate_state"):
+                            self.report.configuration_state(
+                                candidate=workflow_report["candidate_state"],
+                                status="Workflow accepted" if workflow_report["accepted"] else "Workflow rejected",
+                            )
                         self.report.update(
                             "Applying workflow acceptance decision", workflow=workflow_report
                         )
                         if workflow_report["accepted"]:
                             current = updated
+                            self.report.configuration_state(current=current)
                             score = workflow_report["candidate_score"]
                             if score > best_score:
                                 best, best_score = current.model_copy(deep=True), score

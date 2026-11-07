@@ -59,6 +59,7 @@ PHASE_FILES = {
         "accepted_state": "accepted_state.json",
         "system_constitution": "system_constitution.json",
         "method_config": "method_config.json",
+        "component_configurations": "component_configurations.json",
     },
 }
 

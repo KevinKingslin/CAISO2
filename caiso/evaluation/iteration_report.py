@@ -11,12 +11,15 @@ from pathlib import Path
 from threading import RLock
 from time import monotonic, time_ns
 
-from rich.console import Console
+from rich import box
+from rich.console import Console, Group
 from rich.live import Live
 from rich.panel import Panel
 from rich.text import Text
+from rich.table import Table
 
-from caiso.core.serialization import append_jsonl, read_json, save_json
+from caiso.core.serialization import append_jsonl, canonical, plain, read_json, save_json
+from caiso.evaluation.console_logging import capture_console_logging
 from caiso.evaluation.phase_artifacts import save_phase_artifacts
 from caiso.evaluation.results import update_result, write_overview
 
@@ -38,6 +41,7 @@ class IterationReport:
         self.started = monotonic()
         self.phase_started = self.started
         self.data = {"phase": "Initializing system constitution and baseline"}
+        self.component_configurations = {"original": {}, "current": {}, "candidate": None, "candidate_status": "Not proposed yet"}
         # Reading completed reports makes plot history and ETA survive a resume.
         summaries = [read_json(p) for p in sorted(self.output.glob("iterations/*/summary.json"))]
         self.history = [
@@ -142,8 +146,9 @@ class IterationReport:
 
         # Separate FDs ensure suppressing stdout cannot hide Python stderr errors.
         stdout, stderr = ModelLog(), ModelLog()
+        original_stdout, original_stderr = sys.stdout, sys.stderr
         try:
-            with redirect_stdout(stdout), redirect_stderr(stderr):
+            with redirect_stdout(stdout), redirect_stderr(stderr), capture_console_logging(stdout, stderr, self.console.file, original_stdout, original_stderr):
                 yield
         finally:
             stdout.detach()
@@ -151,7 +156,7 @@ class IterationReport:
 
     def start(self):
         write_overview(self.output)
-        if self.options.get("cli", True):
+        if self.options.get("cli", True) and self.console.is_terminal and not self.console.is_dumb_terminal:
             # Redirected output gets a final summary only, without terminal escape codes.
             self.live = Live(
                 self,
@@ -160,6 +165,7 @@ class IterationReport:
                 transient=True,
                 redirect_stdout=False,
                 redirect_stderr=False,
+                vertical_overflow="crop",
             )
             self.live.start()
 
@@ -167,7 +173,28 @@ class IterationReport:
         if self.live:
             self.live.stop()
         if self.options.get("cli", True):
-            self.console.print(self.render_styled())
+            self.console.print(self)
+
+    def configuration_state(self, *, original=None, current=None, candidate=None, status=None, clear_candidate=False):
+        """Observe canonical states, never temporary component apply/restore logs."""
+        def configurations(state):
+            values = getattr(state, "configurations", None)
+            if values is None:
+                values = state.get("configurations", state)
+            return deepcopy(plain(values))
+
+        with self.lock:
+            for key, state in (("original", original), ("current", current), ("candidate", candidate)):
+                if state is not None:
+                    self.component_configurations[key] = configurations(state)
+            if clear_candidate:
+                self.component_configurations["candidate"] = None
+            if status is not None:
+                self.component_configurations["candidate_status"] = status
+            snapshot = deepcopy(self.component_configurations)
+            if self.folder:
+                self.save_phase("07_state", component_configurations=snapshot)
+        self.update(component_configurations=snapshot)
 
     def error_event(self, event):
         """Always persist the full diagnostic; show its concise version in red."""
@@ -198,7 +225,7 @@ class IterationReport:
         label = "RECOVERED" if error["action"] == "recovered" else "ERROR"
         return f"{label} [{error['action']}{attempt}] {error['stage']}: {error['exception_type']}: {message}"
 
-    def begin(self, iteration, score, best_score):
+    def begin(self, iteration, score, best_score, state=None):
         self.folder = self.output / "iterations" / f"{iteration + 1:04d}"
         if self.folder.exists() and any(self.folder.iterdir()):
             # A hard interruption can leave phase results beyond the last
@@ -211,6 +238,9 @@ class IterationReport:
         self.folder.mkdir(parents=True, exist_ok=True)
         self.started = monotonic()
         self.phase_started = self.started
+        if state is not None:
+            self.component_configurations["current"] = deepcopy(plain(state.configurations))
+        self.component_configurations.update(candidate=None, candidate_status="Not proposed yet")
         self.data = {
             "iteration": iteration,
             "display_iteration": iteration + 1,
@@ -223,9 +253,10 @@ class IterationReport:
             "blocks": {},
             "phase_timings": [],
             "started_at": datetime.now(timezone.utc).isoformat(),
+            "component_configurations": deepcopy(self.component_configurations),
         }
         self.phase_dir = "01_attribution"
-        self.save_phase("07_state", method_config=self.config)
+        self.save_phase("07_state", method_config=self.config, component_configurations=self.component_configurations)
         self.update()
         write_overview(self.output)
         return self.folder
@@ -237,8 +268,10 @@ class IterationReport:
                 if phase_dir and phase_dir != self.phase_dir:
                     self.save_phase(self.phase_dir, status="completed")
                     self.phase_dir = phase_dir
-                self.data.pop("progress", None)
-                self.data.pop("induction_activity", None)
+                if "progress" not in fields:
+                    self.data.pop("progress", None)
+                if "induction_activity" not in fields:
+                    self.data.pop("induction_activity", None)
                 if self.folder:
                     self.data["phase_timings"].append(
                         {
@@ -338,7 +371,7 @@ class IterationReport:
             "budget": self.budget.snapshot().model_dump(),
         }
 
-    def render_text(self):
+    def render_text(self, include_configurations=True):
         info = self.snapshot()
         number = info.get("display_iteration", "setup")
         total = info.get("max_iterations")
@@ -409,10 +442,16 @@ class IterationReport:
                 f"Errors in this iteration: {count} (full details in the phase errors.jsonl)"
             )
             lines.append(self.error_line(errors[-1]))
+        if include_configurations:
+            rows = self.configuration_rows(info)
+            if rows:
+                lines.append("Component configurations | Candidate: " + info["component_configurations"]["candidate_status"])
+                for cid, original, current, candidate in rows:
+                    lines.extend((f"  {cid}", f"    Original: {original}", f"    Current: {current}", f"    Candidate: {candidate}"))
         return "\n".join(lines)
 
-    def render_styled(self):
-        text = Text(self.render_text())
+    def render_styled(self, include_configurations=True):
+        text = Text(self.render_text(include_configurations))
         start = text.plain.find("ERROR [")
         if start >= 0:
             text.stylize("bold red", start, len(text))
@@ -421,10 +460,71 @@ class IterationReport:
             text.stylize("bold green", recovered, len(text))
         return text
 
+    @staticmethod
+    def configuration_rows(info):
+        configurations = info.get("component_configurations", {})
+        original, current, candidate = (configurations.get(key) or {} for key in ("original", "current", "candidate"))
+
+        def describe(config):
+            if config is None:
+                return "Inactive"
+            value = config["value"]
+            return "Fixed" if config["kind"] == "NONE" else (value if isinstance(value, str) else canonical(value))
+
+        return [
+            (
+                cid, describe(original.get(cid)),
+                "Same as original" if cid in original and current.get(cid) == original[cid] else describe(current.get(cid)),
+                "Not proposed yet" if configurations.get("candidate") is None
+                else "Same as current" if cid in current and candidate.get(cid) == current[cid]
+                else describe(candidate.get(cid)),
+            )
+            for cid in dict.fromkeys([*original, *current, *candidate])
+        ]
+
     def __rich__(self):
-        return Panel(self.render_styled(), title="Current iteration")
+        info = self.snapshot()
+        rows = self.configuration_rows(info)
+        if not rows:
+            return Panel(self.render_styled(False), title="Current iteration")
+        lines = self.render_text(False).splitlines()
+        priority = ("CAISO |", "Phase:", "Elapsed:", "Validation:", "Budget:", "Active preference records:", "ERROR [", "RECOVERED [")
+        main = [line for line in lines if line.startswith(priority) or line == info.get("progress")]
+        details = [line for line in lines if line not in main]
+        # Keep every component visible even in a short terminal. Full values are
+        # saved separately; terminal previews never change the actual states.
+        max_lines = 2 if self.console.height >= len(main) + 2 * len(rows) + 9 else 1
+        name_width = min(25, max(20, self.console.width // 5))
+        value_width = max(8, (self.console.width - name_width - 18) // 3)
+
+        def preview(value, width):
+            value = " ".join(str(value).split())
+            limit = width * max_lines
+            if len(value) > limit:
+                value = value[:limit // 2 - 1] + "…" + value[-(limit // 2):]
+            wrapped = Text(value).wrap(self.console, width, overflow="fold")
+            if len(wrapped) > max_lines:
+                wrapped[max_lines - 1].truncate(width - 1)
+                wrapped[max_lines - 1].append("…")
+            return Text("\n").join(wrapped[:max_lines])
+
+        table = Table(box=box.SIMPLE_HEAD, expand=True, padding=(0, 1))
+        table.add_column("Component", width=name_width)
+        for name in ("Original", "Current", "Candidate"):
+            table.add_column(name, ratio=1)
+        for row in rows:
+            table.add_row(preview(row[0], name_width), *(preview(value, value_width) for value in row[1:]))
+        status = Text("Candidate: " + info["component_configurations"]["candidate_status"])
+        text = Text("\n".join(main))
+        if any(line.startswith("ERROR [") for line in main):
+            text.highlight_regex(r"ERROR \[.*", "bold red")
+        if any(line.startswith("RECOVERED [") for line in main):
+            text.highlight_regex(r"RECOVERED \[.*", "bold green")
+        available = max(0, self.console.height - len(main) - len(rows) * max_lines - 9)
+        return Panel(Group(text, status, table, Text("Full values: 07_state/component_configurations.json"), Text("\n".join(details[:available]))), title="Current iteration")
 
     def finish(self, record, budget_before, state, constitution, status="completed"):
+        self.configuration_state(current=state)
         self.update(
             "Completed" if status == "completed" else status, **{**record, "status": status}
         )

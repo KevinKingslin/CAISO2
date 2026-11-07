@@ -29,7 +29,7 @@ def default_optimizers(config):
 
 
 class JointBlockOptimizer:
-    def __init__(self, runtime, judge, config, output_dir, optimizers=None):
+    def __init__(self, runtime, judge, config, output_dir, optimizers=None, on_candidate=None):
         legacy = {
             "task_score_weight",
             "joint_beam_size",
@@ -44,6 +44,7 @@ class JointBlockOptimizer:
             )
         self.runtime, self.judge, self.config, self.output_dir = runtime, judge, config, output_dir
         self.optimizers = optimizers or default_optimizers(config)
+        self.on_candidate = on_candidate
         task = config.get("task_scoring", {})
         if not isinstance(task, dict):
             raise ValueError("task_scoring must be a configuration mapping")
@@ -89,6 +90,8 @@ class JointBlockOptimizer:
         include_task_score=True,
     ):
         candidate = state.with_configs(updates)
+        if self.on_candidate:
+            self.on_candidate(candidate.model_copy(deep=True))
         members = list(members or updates)
 
         def run_block(current, reference):

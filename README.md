@@ -169,6 +169,15 @@ Their reports are `evaluation.json` and `evaluation_unoptimized.json` at the run
 root. Automatic post-optimization evaluation also writes `evaluation.json`.
 The run contains `config.yaml`, `README.md`, `setup.json`, `run.json`, `history.csv`,
 `iterations/`, `checkpoint/`, and `.internal/`, plus the current checkpoint exports.
+
+The current-iteration terminal panel shows every component's original, current
+accepted, and candidate configuration, with the candidate's evaluation or
+acceptance status. Long values use compact previews; complete values are saved
+in each iteration's `07_state/component_configurations.json`. Temporary variable
+apply/restore messages and queued model logs go to the active phase's `model.log`.
+Capable terminals update one panel in place; redirected output and terminals
+without cursor control receive one final panel.
+
 Explicit `--output` paths are still respected; existing results are not moved.
 Both use the current evaluation profile for that dataset. An existing YAML can be
 passed as the target or via `--config`; `--system amazon` is also accepted in place
