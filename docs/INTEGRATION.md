@@ -100,10 +100,17 @@ its known behavior on words containing "no". Amazon keeps the original raw
 completion payload, including `max_new_tokens`. STaRK and BigCodeBench sources and
 evaluation profiles are also retained; their external environments are required.
 
-All CAISO validation phases receive the same fixed validation prefix selected by
-the released optimization configuration. `caiso.method.validation_batch_size: all`
-explicitly opts into the full validation set and changes that protocol. The test
-set is never passed to CAISO's optimizer. Original preference-data/reward-model/PPO
+By default, all CAISO validation phases receive the same fixed validation prefix
+selected by the released optimization configuration (`validation_sampling: first`).
+The experiment override `method.validation_sampling: seeded` retains the complete
+validation pool and draws a reproducible acceptance subset of
+`validation_batch_size` examples using the method seed. That acceptance subset
+stays fixed across iterations. Attribution and diagnostics draw their separate
+mini-batches from the complete pool in seeded mode. Setting
+`method.validation_batch_size: all` uses the full pool for acceptance. These
+overrides change the protocol; start a new run instead of resuming a checkpoint
+created with another selection. The test set is never passed to CAISO's optimizer.
+Original preference-data/reward-model/PPO
 settings are not mapped onto a different CAISO mechanism: CAISO induces its own
 constitutions and uses constitution-labelled DPO for weight components.
 

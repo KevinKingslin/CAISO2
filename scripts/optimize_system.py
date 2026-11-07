@@ -72,8 +72,9 @@ def main(argv=None):
             method,
         ),
     )
-    # The optimizer applies the released valset[:val_size] prefix to every validation
-    # phase; an explicit method override can request 'all'. Test data stays separate.
+    # The default 'first' mode preserves the released validation prefix. 'seeded'
+    # samples from the complete validation pool; 'all' uses it for acceptance.
+    # Test data stays separate.
     if config.get("system_state_dict_path"):
         system.load_state_dict(torch.load(config["system_state_dict_path"], weights_only=False))
     torch.save(system.state_dict(), output / "initial_system.pth")

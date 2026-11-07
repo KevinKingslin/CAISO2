@@ -19,6 +19,27 @@ Values were copied without retuning. Original `scripts/configs/` files and packa
 Reward-model/PPO settings in those files are unused by CAISO. Its existing DPO
 settings remain in the shared method file.
 
+To replace the default validation prefix with a reproducible random subset,
+change these keys inside the experiment's existing `method` block:
+
+```yaml
+method:
+  validation_sampling: seeded
+  validation_batch_size: 10
+  seed: 42
+```
+
+The subset is sampled from the complete validation split and stays fixed for the
+initial baseline and every current/candidate acceptance comparison. Keep your
+existing `validation_batch_size` to retain its sample count; change `seed` to
+choose a different subset. Attribution and block-selection diagnostics sample
+their independently configured mini-batches from the full validation pool.
+
+For acceptance on the complete validation split, set
+`method.validation_batch_size: all`. `validation_sampling: first` retains the
+released OPTIMAS-compatible prefix behavior. Changing the protocol or seed
+requires a new run; saved checkpoints verify their configuration and data hashes.
+
 Keep credentials, deployments, backend choices and service URLs in `.env`.
 Prompt text is under [`caiso/prompts`](../caiso/prompts/README.md). `prompt_tips`
 remains a method parameter with its existing values.

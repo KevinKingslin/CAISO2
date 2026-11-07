@@ -42,7 +42,14 @@ class CaisoOptimizer:
         self.runtime.initial_state.system = config.get("system", "upstream")
         self.train = adapt_examples(system, train_dataset, "train")
         size = self.config["validation_batch_size"]
-        validation = val_dataset if size == "all" else val_dataset[:size]
+        # Only the explicit OPTIMAS-compatible mode limits every validation
+        # phase to a prefix. Seeded selection must see the complete pool;
+        # validation_batch chooses its fixed acceptance sample.
+        validation = (
+            val_dataset[:size]
+            if size != "all" and self.config.get("validation_sampling", "seeded") == "first"
+            else val_dataset
+        )
         self.validation = adapt_examples(system, validation, "validation")
         self.dicai = dicai or DICAI(providers, embeddings, personas, self.config["dicai"])
         self.block_dicai = block_dicai or DICAI(
