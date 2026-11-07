@@ -43,6 +43,7 @@ class Recorder:
         if schema is not None:
             values = {
                 "Reasoning": {"final_reasoning": "The preferred response preserves the evidence."},
+                "SeedQuestions": {"questions": [PRINCIPLES[0]]},
                 "PromptProposal": {"prompt": f"Revised instruction {seed}"},
                 "BlockVote": {"block_id": "block-0", "brief_justification": "Improve this block."},
                 "WorkflowProposal": {

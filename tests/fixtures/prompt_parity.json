@@ -75,7 +75,8 @@
       "debate.debater": "a860f1d374c64997ac87c6bd1845288c072c3a6999e261ca4f937fd30b238d87",
       "debate.chairperson": "629752bc8dd1219de4da154341b1f3249259be7065ce17a29a602a7f19469b5f",
       "reconstruction": "bd04736e4b37a896d399308b8a78fa057cd7676661bc19387c4ef5d37a01e6a6",
-      "abstraction": "30104380b23365b7e2a9fb5fceda7a31637233107b11f838b55e67f1fa263354"
+      "abstraction": "30104380b23365b7e2a9fb5fceda7a31637233107b11f838b55e67f1fa263354",
+      "reasoning.seed_questions": "457a9384fde3a1bc7b25ed57f72e18b1f28ab101a32f90c3c3afd93de60103b5"
     }
   },
   "rendered": {

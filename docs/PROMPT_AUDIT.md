@@ -43,11 +43,15 @@ list numbering and typography normalization.
 
 - CoT, self-consistency and self-refine each use one persona-conditioned request
   and return only `final_reasoning`. The latter two strategies carry out their
-  internal steps within that request, as specified by Figures 11–12. Since that
-  schema contains no seed questions, the initial question list is empty;
-  debaters propose questions through the paper's `ADD` section and the
-  chairperson builds the working list. No additional seed-generation prompt is
-  introduced.
+  internal steps within that request, as specified by Figures 11–12. Their
+  schema still contains no seed questions. A separate CAISO-authored extraction
+  request (`dicai/reasoning/seed_questions.txt`) converts each final rationale
+  into grounded candidate questions. The union initializes the working list,
+  restoring the input supplied by `reasoning.py`/`seed_questions()` in the
+  anonymous DICAI code. Starting from an empty list previously caused debaters
+  to defend nonexistent questions and the chairperson to publish empty lists.
+  This bridge is a documented implementation adaptation, not an eighth paper
+  prompt transcription. It adds three budgeted, checkpointed calls per pair.
 - Chairperson and debater instructions match Figures 13–14. The added principle
   style, one-quality rule, reconstruction stop gate and minimum-principle
   instructions have been removed. All configured debate rounds run in order.
@@ -120,15 +124,19 @@ The current reviewed requests are recorded in
 `tests/fixtures/complete_prompt_requests.json`. DICAI instruction wording is
 also independently checked against the published paper source and
 `tests/fixtures/dicai_paper_prompts.json`.
-The normal request messages retain their text. The response-repair request now
-includes the actual invalid assistant answer before the existing repair
-instruction, so the current capture contains 35 requests and 73 message bodies.
+Published paper instructions retain their text. The capture includes the new
+candidate-question extraction requests and populated seed/working-list inputs.
+The response-repair request includes the actual invalid assistant answer before
+the existing repair instruction. The current capture contains 41 requests and
+85 message bodies.
 These deterministic tests make no model API calls and do not measure task quality.
 
 Runtime parsing accepts presentation variations without adding preference
 criteria. Chairperson rounds can retain the last validated working list on a
 format failure, with an explicit transcript event, and continue the configured
-rounds. An empty final working list remains an error. Successful individual
+rounds. Error feedback no longer includes a copyable placeholder criterion.
+An empty final list or a seed list with no usable chairperson turn remains an
+error; seeds alone are not settled principles. Successful individual
 induction requests are checkpointed and validated on reuse. These safeguards do
 not change the paper prompt text or benchmark task prompts and scoring.
 

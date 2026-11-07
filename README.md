@@ -235,6 +235,13 @@ evidence and optimized instructions remain template values. The
 [prompt audit](docs/PROMPT_AUDIT.md) records the paper source, necessary input
 adaptations and exact OPTIMAS system-prompt parity.
 
+Each persona's final rationale is then converted into candidate questions with
+`dicai/reasoning/seed_questions.txt`, a separate CAISO-authored extraction prompt.
+These real criteria seed the debate's initial working list, restoring the input
+expected by the original DICAI debate code. This adds three method calls per
+preference pair; their budget use and checkpoints are recorded. The seven paper
+prompt transcriptions remain unchanged.
+
 CAISO's prompt optimizer, block selector and workflow designer use the same
 writing format: named agents, numbered tasks, explicit output formats and
 labeled evidence sections. Each stage's complete request is in one `.txt` file
@@ -253,6 +260,9 @@ include the answer that failed. Successful constitution-induction requests are
 checkpointed individually, so retrying an interrupted induction can reuse
 completed model calls. Chairperson format failures retain the last validated
 working list when available; an empty constitution is never substituted.
+A candidate seed list also requires at least one usable chairperson turn before
+it can be included as settled principles. A corrected induction has a new
+provenance fingerprint; use a new run to replace older constitutions.
 
 Each experiment's `caiso.persona_catalog` selects three dataset-specific expert
 profiles from `caiso/prompts/systems/<dataset>/personas/*.txt` for both system and

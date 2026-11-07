@@ -1,5 +1,5 @@
 {
-  "verified_date": "2026-11-06",
+  "verified_date": "2026-11-07",
   "optimas_commit": "71871a2dd98081231d733debd41178ba47e13528",
   "system_prompts": {
     "amazon": {
@@ -103,8 +103,14 @@
       "Three configured QA/recommendation persona profiles, rather than creative-writing personas.",
       "Dynamic CAISO task/trajectory evidence and turn counters supplied in user messages.",
       "Existing transports, temperatures, clustering and optional post-induction minimization retained.",
-      "Generic response validation/retries remain; no extra schema message on a valid DICAI request."
-    ]
+      "Generic response validation/retries remain; no extra schema message on a valid DICAI request.",
+      "A separate CAISO-authored question-drafting request extracts candidate criteria from each persona rationale to seed the working list, as expected by the original debate code; three additional budgeted and checkpointed method calls per pair."
+    ],
+    "candidate_question_prompt": {
+      "path": "caiso/prompts/dicai/reasoning/seed_questions.txt",
+      "source": "CAISO-authored bridge; not an Appendix G transcription",
+      "purpose": "Initialize persona proposals and the shared working list from rationale-grounded criteria instead of empty lists."
+    }
   },
   "current_caiso_method": {
     "style": "Named agents, numbered tasks, requirements, explicit JSON response formats and labeled user evidence, following DICAI formatting.",
@@ -118,15 +124,15 @@
     "source": "CAISO-authored method instructions; not transcriptions of the DICAI paper.",
     "preserved": "Existing method inputs, output fields, selection criteria, workflow restrictions, preference layouts, tips, personas, configuration values and benchmark prompts.",
     "complete_request_capture": {
-      "requests": 35,
-      "message_bodies": 73,
+      "requests": 41,
+      "message_bodies": 85,
       "fixture": "tests/fixtures/complete_prompt_requests.json"
     },
     "normal_stage_schema_messages": "Response formats live in the complete stage templates; duplicate schema supplements disabled for the three stages."
   },
   "method_response_recovery": {
-    "normal_prompt_text": "unchanged",
-    "repair": "Includes the invalid assistant response before the format-repair instruction; raw response and call context are logged.",
+    "normal_prompt_text": "Seven published paper prompt transcriptions unchanged; separate candidate extraction and populated seed inputs added.",
+    "repair": "Includes the invalid assistant response before the format-repair instruction; raw response and call context are logged. Principle validation errors no longer include a copyable placeholder criterion.",
     "request_checkpoints": "Successful DICAI requests are saved under each induction provenance directory and validated on reuse."
   }
 }

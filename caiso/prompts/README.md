@@ -6,6 +6,12 @@ Benchmark prompts retain OPTIMAS text; DICAI uses the arXiv paper instructions.
 - `dicai/reasoning/{cot,self_consistency,self_refine}.txt`: complete requests
   matching Appendix G, Figures 10–12 of arXiv:2606.28294v2. Each returns only
   `final_reasoning`; self-consistency/refinement happen within that one request.
+- `dicai/reasoning/seed_questions.txt`: a separate CAISO-authored request turns
+  each persona's final rationale into grounded candidate questions. The
+  published reasoning prompts remain unchanged. The union seeds the initial
+  working list, as in the original DICAI code, so the debate can defend and edit
+  actual criteria. This adds one method call per persona (three per pair), all
+  included in budget accounting and request checkpoints.
 - `dicai/debate/debater.txt` and `chairperson.txt`: complete system/user requests,
   matching Figures 13–14, plus dynamic persona/evidence/history inputs.
 - `dicai/reconstruction.txt` and `abstraction.txt`: complete requests for blind
@@ -47,8 +53,10 @@ If a chairperson turn cannot be parsed after its retries, the last validated
 working list is retained and the next configured round runs. An explicit
 unchanged-list finalization is accepted only when such a list exists. The
 transcript records retained lists and failed turns. A pair with no usable
-chairperson list still fails; no criteria are invented or taken from rejected
-debater arguments.
+chairperson list still fails; a seed proposal is never reported as settled
+without at least one usable chairperson turn. No criteria are invented or taken
+from rejected debater arguments. Retry feedback contains no example criterion
+with a placeholder that the model could mistake for an actual principle.
 
 Successful DICAI model requests are atomically checkpointed under
 `.internal/dicai/<scope>/<provenance>/requests/`. Re-entering the same induction

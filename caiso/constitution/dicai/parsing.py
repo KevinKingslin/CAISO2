@@ -126,9 +126,11 @@ def parse_principles(text):
         except ModelResponseError:
             pass
     raise ModelResponseError(
-        'No published principles found. Return the complete list, for example:\n'
-        'UPDATED WORKING LIST:\n- Q1: Select the response that <actual criterion>.\n'
-        'Use actual criteria, not placeholders, prose commentary or DEBATE_OVER alone.'
+        'No published principles found. Publish the complete nonempty working list '
+        'as Q-numbered bullets beginning "Select the response". Use actual criteria '
+        'from the supplied preference rationales and candidate questions. Merge '
+        'redundant criteria while retaining their shared criterion. '
+        'Do not return placeholders, an empty list, commentary or DEBATE_OVER alone.'
     )
 
 

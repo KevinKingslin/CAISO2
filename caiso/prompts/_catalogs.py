@@ -77,6 +77,7 @@ CATALOGS = {
         "reasoning.cot": "dicai/reasoning/cot",
         "reasoning.self_consistency": "dicai/reasoning/self_consistency",
         "reasoning.self_refine": "dicai/reasoning/self_refine",
+        "reasoning.seed_questions": "dicai/reasoning/seed_questions",
         "debate.debater": "dicai/debate/debater",
         "debate.chairperson": "dicai/debate/chairperson",
         "reconstruction": "dicai/reconstruction",

@@ -79,21 +79,25 @@ def pair(preferred="A"):
     )
 
 
-def test_reasoning_returns_only_final_paragraph_once_per_persona():
+def test_paper_reasoning_is_unchanged_and_separate_drafting_seeds_each_persona():
     recorder = Recorder()
     personas = assign_personas(["First", "Second", "Third"], 42)
     catalog = assemble(
         pair(), personas, recorder, "audit", 42,
         {"reasoning_workers": 1, "self_consistency_samples": 50, "self_refine_steps": 50},
     )
-    assert len(recorder.calls) == 3
-    for persona, call, row in zip(personas, recorder.calls, catalog, strict=True):
+    assert len(recorder.calls) == 6
+    for persona, call, draft, row in zip(personas, recorder.calls[::2], recorder.calls[1::2], catalog, strict=True):
         assert call["schema"] == "Reasoning"
         assert persona.prompt() in call["messages"][0]["content"]
         assert '"final_reasoning"' in call["messages"][0]["content"]
         assert set(row["trace"][0]["output"]) == {"final_reasoning"}
-        assert row["calls_before_retries"] == 1
-        assert row["principles"] == []
+        assert draft["schema"] == "SeedQuestions"
+        assert row["reasoning"] in draft["messages"][1]["content"]
+        assert persona.prompt() in draft["messages"][1]["content"]
+        assert row["trace"][1]["stage"] == "seed_questions"
+        assert row["calls_before_retries"] == 2
+        assert row["principles"] == [PRINCIPLES[0]]
 
 
 def test_debate_runs_three_rounds_without_reconstruction_gates():
@@ -107,6 +111,11 @@ def test_debate_runs_three_rounds_without_reconstruction_gates():
     )
     assert principles == PRINCIPLES
     assert len(recorder.calls) == 12
+    assert history[0]["content"] == "- Q1: " + PRINCIPLES[0]
+    for call in recorder.calls:
+        user = call["messages"][1]["content"]
+        assert "CURRENT WORKING LIST:\n(none)" not in user
+        assert "YOUR OWN PROPOSED QUESTION LIST:\n(none)" not in user
     assert [row["speaker"] for row in history[1:-1]] == [
         "debater_1", "debater_2", "debater_3", "chairperson",
     ] * 3

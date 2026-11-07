@@ -16,6 +16,21 @@
   },
   {
     "role": "audit",
+    "seed": 43,
+    "schema": "SeedQuestions",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "459cbd73385825b867f6c52b2c5d8b92463a63d5b6fa4188c37aa1fecf52b5c0"
+      },
+      {
+        "role": "user",
+        "sha256": "9589f7322d3eead26aae76828ea66ef61de04cc6b8f125e8c06562b121785735"
+      }
+    ]
+  },
+  {
+    "role": "audit",
     "seed": 142,
     "schema": "Reasoning",
     "messages": [
@@ -26,6 +41,21 @@
       {
         "role": "user",
         "sha256": "cdd3f281f0096c252fa51794c2d5e26c4cc906a1d23f33dfade7d60929d09065"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 143,
+    "schema": "SeedQuestions",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "459cbd73385825b867f6c52b2c5d8b92463a63d5b6fa4188c37aa1fecf52b5c0"
+      },
+      {
+        "role": "user",
+        "sha256": "0970737262ba23fed3b4b22d358551206d30aca85ed99c1d55699e84fc73f10c"
       }
     ]
   },
@@ -46,6 +76,21 @@
   },
   {
     "role": "audit",
+    "seed": 243,
+    "schema": "SeedQuestions",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "459cbd73385825b867f6c52b2c5d8b92463a63d5b6fa4188c37aa1fecf52b5c0"
+      },
+      {
+        "role": "user",
+        "sha256": "b053148ad284bb3f5eac5eda291f7b3723e47e7f2f299cf75111eb366de75e82"
+      }
+    ]
+  },
+  {
+    "role": "audit",
     "seed": 42,
     "schema": null,
     "messages": [
@@ -55,7 +100,7 @@
       },
       {
         "role": "user",
-        "sha256": "a6db94cf0a9d28034977c35573e5d6d03a62874c377eca2306fdc150d219d864"
+        "sha256": "f6ad5ab4f1d1b1b901ce8d955c374eda370fa8e9d63c194dca93f3db23971682"
       }
     ]
   },
@@ -70,7 +115,7 @@
       },
       {
         "role": "user",
-        "sha256": "bb9d6d653ab175446c9ea79d6cdaf2b8ebac3de1ad0b2b824250a731520db1c9"
+        "sha256": "b66d74a2772b635823a46371a9fdeaa249214c9ff7eb9f7c52cfcbbcad968fc8"
       }
     ]
   },
@@ -85,7 +130,7 @@
       },
       {
         "role": "user",
-        "sha256": "d0fc025a0e3d9ef6f1b0b73d85c3edf27a444fb99693357eda85ed386a31ba8f"
+        "sha256": "b36f28f08c8172f09b526395153dfe9d6e65e38b2a11ba0c85f551ada22b2d56"
       }
     ]
   },
@@ -100,7 +145,7 @@
       },
       {
         "role": "user",
-        "sha256": "219343345e951efc8b4d407ba4674e0af63a554b7c7d61f660c5f86a73c97769"
+        "sha256": "ad7a3376f1b80026adeab2e4d840fbbde590ca78b50edd981a43fca0ec0163bf"
       }
     ]
   },
@@ -115,7 +160,7 @@
       },
       {
         "role": "user",
-        "sha256": "7f8cfcd8a03b431d4d7b2357f338dffea918b0954d5ad83b46f335092def0a0f"
+        "sha256": "f475fc3dcef519bbca4a738f71d9a48ad4da457b1065a6209af982bac5830edf"
       }
     ]
   },
@@ -130,7 +175,7 @@
       },
       {
         "role": "user",
-        "sha256": "50197c56a730d98fced87c5142cbae23452913b10a479290934799843e61004c"
+        "sha256": "c2d6b6e888e81a1f0510416a72fba1e82e7d38b2c65b26085e4e65512ad8d723"
       }
     ]
   },
@@ -145,7 +190,7 @@
       },
       {
         "role": "user",
-        "sha256": "15819750cafaaf63b7b492f91820dcadf2004d0d1f82e3934bfdcb874322999f"
+        "sha256": "7ee8f8e56f6c0dcd2c940aa8371ce4bf6158b6f43ae70e5b4d6ce91acd29f952"
       }
     ]
   },
@@ -226,6 +271,21 @@
   },
   {
     "role": "audit",
+    "seed": 43,
+    "schema": "SeedQuestions",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "459cbd73385825b867f6c52b2c5d8b92463a63d5b6fa4188c37aa1fecf52b5c0"
+      },
+      {
+        "role": "user",
+        "sha256": "9ce22c352e9dd81c6df6fcb3333c25ae5ccbc0f4d69762707e859d9f17a3b28b"
+      }
+    ]
+  },
+  {
+    "role": "audit",
     "seed": 142,
     "schema": "Reasoning",
     "messages": [
@@ -236,6 +296,21 @@
       {
         "role": "user",
         "sha256": "e5c5a2fbd9f37fbee5ab3bc8eb72c288431ad49cbf8a02aab75223e2cbba64ed"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 143,
+    "schema": "SeedQuestions",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "459cbd73385825b867f6c52b2c5d8b92463a63d5b6fa4188c37aa1fecf52b5c0"
+      },
+      {
+        "role": "user",
+        "sha256": "8c9445d22b2530cac4fe66f3729cc83c731773b2a2d8d16fde2ba81b7f48b8d8"
       }
     ]
   },
@@ -256,6 +331,21 @@
   },
   {
     "role": "audit",
+    "seed": 243,
+    "schema": "SeedQuestions",
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "459cbd73385825b867f6c52b2c5d8b92463a63d5b6fa4188c37aa1fecf52b5c0"
+      },
+      {
+        "role": "user",
+        "sha256": "322769972e776823063d4a1b9fb9433e4d3cd6f069c5c599a98064669ba669c8"
+      }
+    ]
+  },
+  {
+    "role": "audit",
     "seed": 42,
     "schema": null,
     "messages": [
@@ -265,7 +355,7 @@
       },
       {
         "role": "user",
-        "sha256": "9ebaed20288fd91f038f4899254ad6a0a1b477ffb0673e0c9b5ebf92f3e53075"
+        "sha256": "26f9ec5504425654b4511364ce8050b416191179364d0a0adbb612d80d9c29d3"
       }
     ]
   },
@@ -280,7 +370,7 @@
       },
       {
         "role": "user",
-        "sha256": "a52923afb1fba38f59d717317f1ae3d95bfc0d9f2f79be0aaa64ac87de183363"
+        "sha256": "c0aeb02cbb74893a5f35cefc981b50478f0146fd5d051de7c78ad128246424c9"
       }
     ]
   },
@@ -295,7 +385,7 @@
       },
       {
         "role": "user",
-        "sha256": "0bfee74e509f7b4003dabc7da958857cddd0576bdea5e3c9b35c6d9a9d0b32f5"
+        "sha256": "79ba725c31c6edad60f5c0295a2d48579b2dd442a44e6babb08f264e91ce0be5"
       }
     ]
   },
@@ -310,7 +400,7 @@
       },
       {
         "role": "user",
-        "sha256": "d1d87a8d19d03b204d56d576aa985f9a146572044e56eb2edc8dcaec1271c8a4"
+        "sha256": "6200b6e009f94bb7ba4c8575c5f678d7e7cc7321882add95691201b039f0b746"
       }
     ]
   },
@@ -325,7 +415,7 @@
       },
       {
         "role": "user",
-        "sha256": "6350e8166b1d0c03c65a339bd5c1ba69abdb3eb6e32392a85b8bc7de4a38cc85"
+        "sha256": "759a921545f1f2d8ecb97954ca0c27d3049c0f7edc97e941cb86af2f15c31b0f"
       }
     ]
   },
@@ -340,7 +430,7 @@
       },
       {
         "role": "user",
-        "sha256": "f33fd65d274c905aa15a0f67b3e5d28e6d48e633298867bad568f0d609d6a1ed"
+        "sha256": "d9f927e822051ae63e1b653580105fdff1bd44c8ff23e1808f37234ba82be4c7"
       }
     ]
   },
@@ -355,7 +445,7 @@
       },
       {
         "role": "user",
-        "sha256": "f204f68c2dfa49981013255ef47b4119aa9bf00ac3b44362416fb759f104ebfd"
+        "sha256": "0353b78a15c920bc7712cecb4bd8591a5bcadf544b890ed0c5ea5675c0cb431d"
       }
     ]
   },

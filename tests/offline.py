@@ -22,6 +22,10 @@ class OfflineProvider:
                 return json.dumps(
                     {"final_reasoning": "The preferred candidate applies the requested transformation correctly."}
                 )
+            if name == "SeedQuestions":
+                return json.dumps({"questions": [
+                    "Select the response that applies the requested arithmetic operation correctly."
+                ]})
             if name == "PromptProposal":
                 return json.dumps({"prompt": "double"})
             if name == "BlockVote":

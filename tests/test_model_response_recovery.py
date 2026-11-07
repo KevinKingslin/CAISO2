@@ -12,6 +12,7 @@ from caiso.constitution.dicai.personas import assign_personas
 from caiso.constitution.dicai.pipeline import DICAI
 from caiso.constitution.dicai.reconstruction import parse_choice
 from caiso.constitution.dicai.request_cache import RequestCache
+from caiso.constitution.dicai.reasoning_assembly import SeedQuestions, assemble
 from caiso.constitution.models import PreferencePair
 from caiso.core.budget import BudgetExceeded
 from caiso.core.recovery import ModelResponseError, RetryExhausted, TransportExhausted, TransportRequestError
@@ -191,6 +192,65 @@ def test_bad_first_round_can_recover_without_seed_questions():
 def test_all_bad_rounds_never_create_fake_or_unsettled_principles():
     with pytest.raises(ModelResponseError, match="No constitution was fabricated"):
         debate(pair(), catalog(), DebateProvider([ModelResponseError("bad")] * 3), "test", 42, rounds=3)
+
+
+@pytest.mark.parametrize("answer", [
+    "UPDATED WORKING LIST:\n- Q1: Select the response that <actual criterion>\n\n"
+    "(none, as Q1 has been unanimously deemed redundant and fully addressed in the response)",
+    "FINAL LIST:\n(none)\nDEBATE_OVER",
+])
+def test_reported_empty_or_placeholder_reply_retains_published_seed_criterion(answer):
+    from tests.prompt_requests import Recorder
+
+    drafts = assemble(pair(), assign_personas(["One", "Two", "Three"], 42), Recorder(), "test", 42, {"reasoning_workers": 1})
+    actual_seed = drafts[0]["principles"][0]
+
+    class Provider(DebateProvider):
+        def __init__(self):
+            self.chairs = []
+        def complete(self, messages, **kwargs):
+            if "Chairperson Agent" in messages[0]["content"]:
+                assert actual_seed in messages[1]["content"]
+                self.chairs.append(messages)
+                if len(self.chairs) == 1:
+                    return "UPDATED WORKING LIST:\n- Q1: " + actual_seed
+                return answer
+            assert "YOUR OWN PROPOSED QUESTION LIST:\n- " + actual_seed in messages[-1]["content"]
+            return "1. DEFEND:\n- Q1: This criterion captures the supplied rationale."
+
+    source = Provider()
+    models = registry(source, retries=1)
+    values, transcript = debate(pair(), drafts, models, "test", 42, rounds=3)
+    assert values == [actual_seed]
+    assert len(source.chairs) == 5
+    assert len([e for e in transcript if e["speaker"] == "chairperson_format_error"]) == 2
+    assert transcript[-1]["finalized"] is False
+
+
+def test_proposed_seeds_are_never_reported_as_settled_without_a_valid_chair_turn():
+    drafts = catalog()
+    for row in drafts:
+        row["principles"] = [ONE]
+    with pytest.raises(ModelResponseError, match="No constitution was fabricated"):
+        debate(pair(), drafts, DebateProvider([ModelResponseError("bad")] * 3), "test", 42, rounds=3)
+
+
+def test_empty_list_retry_feedback_never_offers_a_copyable_placeholder():
+    source = SequenceProvider(["FINAL LIST:\n(none)\nDEBATE_OVER", f"- Q1: {ONE}"])
+    result = registry(source).complete("test", [{"role": "user", "content": "Publish the list."}], seed=42, validate=parse_principles)
+    assert result == [ONE]
+    repair = source.calls[1][0][-1]["content"]
+    assert "<actual criterion>" not in repair
+    assert "Q1: Select the response" not in repair
+    assert "rationales and candidate questions" in repair
+
+
+@pytest.mark.parametrize("questions", [[], [""], ["Select the response that <actual criterion>"], ["Select the response that"], ["Prefer response A"]])
+def test_seed_drafting_rejects_missing_or_fake_criteria(questions):
+    from pydantic import ValidationError
+
+    with pytest.raises((ModelResponseError, ValidationError)):
+        SeedQuestions(questions=questions)
 
 
 @pytest.mark.parametrize("error", [BudgetExceeded("cap"), TransportExhausted("quota"), TransportRequestError("auth")])

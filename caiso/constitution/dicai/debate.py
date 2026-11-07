@@ -32,6 +32,7 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
     # The paper settles the list after T rounds; reconstruction is a later
     # diagnostic, not a stop-rejection prompt or a minimum-principle constraint.
     finalized = False
+    published = False
     for cycle in range(1, rounds + 1):
         for i, entry in enumerate(catalog):
             if progress:
@@ -42,7 +43,10 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
                 render_messages(
                     "dicai", "debate.debater",
                     agent_name=persona.identity, identity=persona.prompt(),
-                    trace=entry["reasoning"], seeds=render(entry.get("principles", [])) or "(none)",
+                    trace=entry["reasoning"],
+                    # Own proposals are unnumbered, as in the original code.
+                    # Only the shared working list assigns authoritative Q IDs.
+                    seeds="\n".join(f"- {p}" for p in entry.get("principles", [])) or "(none)",
                     pair=story, working_list=render(working) or "(none)",
                     debate_history=recent(), cycle=cycle, total_cycles=rounds,
                 ),
@@ -84,10 +88,11 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
             finalized = False
             continue
         history.append({"speaker": "chairperson", "content": chair, "cycle": cycle})
+        published = True
         if not explicitly_unchanged(chair):
             working = parse_principles(chair)
         finalized = "DEBATE_OVER" in chair.upper()
-    if not working:
+    if not working or not published:
         raise ModelResponseError(
             f"Pair {pair.pair_id}: no usable chairperson principles after {rounds} rounds. "
             "No constitution was fabricated; successful requests are checkpointed for retry."
