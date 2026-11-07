@@ -19,7 +19,7 @@ DATASET_PERSONAS = {
 def load_personas(experiment):
     """Resolve exactly three dataset personas; explicit inline overrides win."""
     from caiso.constitution.dicai.personas import assign_personas
-    from caiso.prompts import catalog_entries, entry
+    from caiso.prompts import catalog_entries, entry, validate_resources
 
     options = experiment.get("caiso", {})
     if "personas" in options:
@@ -27,11 +27,13 @@ def load_personas(experiment):
     else:
         catalog = options.get("persona_catalog", DATASET_PERSONAS.get(experiment.get("dataset")))
         if catalog is None:
+            validate_resources({"method": ["default_personas"]})
             personas = entry("method", "default_personas")
         else:
             if not isinstance(catalog, str):
                 raise ValueError("caiso.persona_catalog must name a prompt catalog")
             try:
+                validate_resources({catalog: None})
                 profiles = catalog_entries(catalog)
             except KeyError as error:
                 raise ValueError(f"Unknown persona catalog: {catalog}") from error
@@ -87,6 +89,31 @@ def merge(base, override):
             else deepcopy(value)
         )
     return result
+
+
+def validate_optimization_prompts(method, dataset=None):
+    """Check resources needed by this run before models, data or paid calls."""
+    from caiso.prompts import CATALOGS, validate_resources
+
+    keys = ["block_selection.request", "preferences.labeled_pair", "providers.format_retry"]
+    optimization = method.get("block_optimization", {})
+    if optimization.get("prompt_candidates", 3) > 0:
+        keys.append("prompt_optimizer.request")
+        if "prompt_tips" not in optimization:
+            keys.append("prompt_optimizer.default_tips")
+    workflow = method.get("workflow", {})
+    if workflow.get("enabled", False):
+        keys.append("generator.request")
+        search = workflow.get("compatibility_search", {})
+        if search.get("prompt_candidates", 3) > 0:
+            keys.append("prompt_optimizer.request")
+            if "prompt_tips" not in search:
+                keys.append("prompt_optimizer.default_tips")
+    selection = {"dicai": None, "method": keys}
+    catalog = "systems/" + ("pubmed" if dataset == "pubmedqa" else str(dataset))
+    if catalog in CATALOGS:
+        selection[catalog] = None
+    return validate_resources(selection)
 
 
 def load_method(experiment):

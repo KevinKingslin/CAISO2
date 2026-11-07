@@ -240,6 +240,12 @@ writing format: named agents, numbered tasks, explicit output formats and
 labeled evidence sections. Each stage's complete request is in one `.txt` file
 under `caiso/prompts/method/`.
 
+Check that all prompt resources are present with
+`python -m scripts.verify_prompts`. Optimization checks the prompts needed by
+its configuration before loading benchmark models. Missing-file reports list
+the package location and recovery steps; configured personas and tips do not
+require their unused default files.
+
 Each experiment's `caiso.persona_catalog` selects three dataset-specific expert
 profiles from `caiso/prompts/systems/<dataset>/personas/*.txt` for both system and
 block constitution induction. Their full text is saved with the resolved

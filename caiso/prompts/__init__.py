@@ -8,9 +8,28 @@ from caiso.core.serialization import canonical
 from ._catalogs import CATALOGS
 
 
+class PromptResourceError(FileNotFoundError):
+    """Report an incomplete prompt installation with all missing paths."""
+
+    def __init__(self, root, missing):
+        self.missing = tuple(missing)
+        paths = "\n".join("- " + name + ".txt" for name in self.missing)
+        super().__init__(
+            f"CAISO prompt files are missing from {root}:\n{paths}\n"
+            "Update the complete CAISO2 checkout and reinstall it with "
+            "`python -m pip install --no-cache-dir --force-reinstall --no-deps -e .`. "
+            "For locally deleted tracked files, restore only the listed missing files "
+            "from Git. Run `python -m scripts.verify_prompts` to check the installation."
+        )
+
+
 def text(name):
     """Read prompt text verbatim, including significant leading/trailing spaces."""
-    return files(__package__).joinpath(name + ".txt").read_text(encoding="utf-8")
+    root = files(__package__)
+    try:
+        return root.joinpath(name + ".txt").read_text(encoding="utf-8")
+    except FileNotFoundError as error:
+        raise PromptResourceError(root, [name]) from error
 
 
 def entry(catalog, key):
@@ -21,9 +40,28 @@ def entry(catalog, key):
     return text(reference)
 
 
-def catalog_entries(catalog):
-    """Read all catalog text, including ordered lists, for cache provenance."""
-    return {key: entry(catalog, key) for key in CATALOGS[catalog]}
+def catalog_entries(catalog, keys=None):
+    """Read selected catalog text, including ordered lists, for cache provenance."""
+    return {key: entry(catalog, key) for key in (CATALOGS[catalog] if keys is None else keys)}
+
+
+def validate_resources(selection=None):
+    """Check selected catalog entries together, without loading unused defaults.
+
+    With no selection, verify every catalog resource for distribution checks.
+    A selection maps catalog names to entry keys, or None for the whole catalog.
+    """
+    selection = dict.fromkeys(CATALOGS) if selection is None else selection
+    root = files(__package__)
+    names = set()
+    for catalog, keys in selection.items():
+        for key in CATALOGS[catalog] if keys is None else keys:
+            reference = CATALOGS[catalog][key]
+            names.update(reference if isinstance(reference, tuple) else [reference])
+    missing = [name for name in sorted(names) if not root.joinpath(name + ".txt").is_file()]
+    if missing:
+        raise PromptResourceError(root, missing)
+    return len(names)
 
 
 class _PromptFormatter(Formatter):

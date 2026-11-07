@@ -18,7 +18,7 @@ from caiso.core.recovery import ModelResponseError
 from caiso.core.serialization import digest, read_json, save_json
 from caiso.method.config import validate_method
 from caiso.providers.base import check_dicai_provider
-from caiso.prompts import catalog_entries
+from caiso.prompts import catalog_entries, validate_resources
 
 from .abstraction import abstract_clusters
 from .activity import InductionActivity
@@ -30,6 +30,7 @@ from .reasoning_assembly import assemble
 from .reconstruction import minimize_constitution, validate_constitution
 
 PROTOCOL = "democratic-icai-arxiv-2606.28294v2-prompts-v1"
+INDUCTION_METHOD_PROMPTS = ("preferences.labeled_pair", "providers.format_retry")
 
 
 def implementation_fingerprint():
@@ -55,6 +56,7 @@ class DICAI:
             raise ValueError("Constitution induction requires training preference pairs")
         if len({p.pair_id for p in pairs}) != len(pairs):
             raise ValueError("DICAI preference pair IDs must be unique")
+        validate_resources({"dicai": None, "method": INDUCTION_METHOD_PROMPTS})
         started = monotonic()
         workers = self.config.get("max_workers", 4)
         reasoning_workers = self.config.get("reasoning_workers", 4)
@@ -87,7 +89,7 @@ class DICAI:
                 "provider": self.providers.fingerprint(),
                 "embeddings": self.embeddings.fingerprint(),
                 "prompts": catalog_entries("dicai"),
-                "method_prompts": catalog_entries("method"),
+                "method_prompts": catalog_entries("method", INDUCTION_METHOD_PROMPTS),
             }
         )
         artifacts = Path(output_dir) / provenance if output_dir else None

@@ -1,0 +1,2 @@
+recursive-include caiso/prompts *.txt
+include caiso/config/*.yaml

@@ -19,14 +19,17 @@ class PromptOptimizer(ConfigurationOptimizer):
     def propose(self, component, context):
         current = context.state.configurations[component.component_id]
         candidates, history = [current.model_copy(deep=True)], []
-        tips = context.config.get(
-            "prompt_tips",
-            prompt_entry('method', 'prompt_optimizer.default_tips'),
+        count = context.config.get("prompt_candidates", 3)
+        if count == 0:
+            return candidates
+        tips = (
+            context.config["prompt_tips"]
+            if "prompt_tips" in context.config
+            else prompt_entry("method", "prompt_optimizer.default_tips")
         )
         if not tips:
             raise ValueError("prompt_tips must contain at least one instruction")
         rng = random.Random(context.seed)
-        count = context.config.get("prompt_candidates", 3)
         for i in range(count):
             result = context.runtime.providers.complete(
                 "prompt_optimizer",

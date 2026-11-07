@@ -23,7 +23,8 @@ test = ["pytest", "ruff"]
 include = ["caiso*", "examples*", "scripts*"]
 
 [tool.setuptools.package-data]
-caiso = ["config/*.yaml", "prompts/**/*.txt"]
+caiso = ["config/*.yaml"]
+"caiso.prompts" = ["**/*.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

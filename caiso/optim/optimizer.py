@@ -6,7 +6,7 @@ from pathlib import Path
 from caiso.constitution.dicai.pipeline import DICAI
 from caiso.core.budget import BudgetTracker
 from caiso.core.serialization import read_json, save_json
-from caiso.integration.config import load_method, load_personas
+from caiso.integration.config import load_method, load_personas, validate_optimization_prompts
 from caiso.integration.runtime import UpstreamRuntime, adapt_examples
 from caiso.integration.services import build_services
 from caiso.method.algorithm import Algorithm
@@ -29,6 +29,7 @@ class CaisoOptimizer:
         self.experiment = deepcopy(config)
         self.config = load_method(config)
         personas = load_personas(config)
+        validate_optimization_prompts(self.config, config.get("dataset"))
         self.experiment.setdefault("caiso", {})["personas"] = personas
         self.output = Path(output_dir)
         self.budget = BudgetTracker(len(system.components), **self.config["budget"])

@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 import yaml
 
 from caiso.core.serialization import save_json
-from caiso.integration.config import load_experiment, load_method
+from caiso.integration.config import load_experiment, load_method, validate_optimization_prompts
 from caiso.integration.provenance import benchmark_manifest
 from scripts.results_layout import write_evaluation
 from caiso.providers.transport import configure_transport
@@ -29,6 +29,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     config = load_experiment(args.config)
     method = load_method(config)  # Fail invalid settings before loading models/data.
+    validate_optimization_prompts(method, config.get("dataset"))
     load_dotenv(config.get("dotenv_path", ".env"))
 
     import torch

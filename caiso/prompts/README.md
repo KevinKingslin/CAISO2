@@ -111,9 +111,28 @@ systems outside the three configured datasets. Optional preserved
 STaRK/BigCodeBench examples and legacy OPTIMAS utilities retain their original prompt
 code; they are not part of the three active experiment profiles.
 
-DICAI includes the complete method and DICAI templates in cache provenance, so
-editing them invalidates induction caches. Prompt changes can affect optimization
-results; start a new run to regenerate constitutions saved in older checkpoints.
+DICAI includes its templates and the labeled-pair/response-repair templates it
+uses in cache provenance, along with its resolved personas and configuration.
+Unused generic personas, optimizer tips and disabled workflow templates are not
+loaded by constitution induction. Prompt changes can affect optimization results;
+start a new run to regenerate constitutions saved in older checkpoints.
+
+Check every catalog resource without making model calls:
+
+```sh
+python -m scripts.verify_prompts
+```
+
+Optimization checks its required resources before loading benchmark models and
+reports all missing paths together. Required files remain mandatory; configured
+personas and tips do not depend on the unused default files. Clean wheels and
+source distributions include all catalog `.txt` files.
+
+For an incomplete installation, update the complete checkout and reinstall with
+`python -m pip install --no-cache-dir --force-reinstall --no-deps -e .`.
+If a listed tracked file was deleted locally, restore that missing file from
+Git; preserve any other prompt edits. Check the resource report's package path
+to confirm that Python is loading this checkout.
 
 See [the original-source audit](../../docs/PROMPT_AUDIT.md): benchmark system
 prompts match pinned OPTIMAS; DICAI instruction wording is checked against the
