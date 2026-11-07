@@ -16,11 +16,14 @@ from time import monotonic
 from caiso.core.component import Component
 from caiso.core.configuration import Configuration, ConfigurationType as Kind
 from caiso.core.execution import CompoundAISystem
+from caiso.core.recovery import ModelResponseError
 from caiso.core.serialization import digest
 from caiso.core.system_state import SystemState
 from caiso.core.trajectory import ComponentExecution, Example, Trajectory
 from caiso.core.workflow import Baseline, Edge, Workflow
 from caiso.wrappers.example import Example as BenchmarkExample
+
+WIKIPEDIA_RETRIEVER = "examples.systems.hotpotqa.five_components.WikipediaRetriever"
 
 
 def adapt_examples(system, examples, split):
@@ -204,6 +207,10 @@ class UpstreamRuntime(CompoundAISystem):
             edge = next((e for e in state.workflow.edges if e.edge_id == intervention), None)
             if edge is None:
                 raise ValueError(f"Unknown intervention edge: {intervention}")
+        affected = {edge.target} if edge is not None else set()
+        for cid in state.workflow.topological_order():
+            if any(e.source in affected and e.target == cid for e in state.workflow.edges):
+                affected.add(cid)
         # No task-output cache and no added generation seeds: preserve upstream calls.
         with self._lock, self._configuration(state.configurations):
             self.budget.check()
@@ -211,6 +218,7 @@ class UpstreamRuntime(CompoundAISystem):
                 self.budget.usage.system_attempts += 1
                 self.budget.usage.causal_intervention_runs += int(edge is not None)
             executions = []
+            blank_inputs, empty_query_retrievals = [], []
             original_call = self.engine._single_call
 
             def observed_call(component, inputs):
@@ -223,14 +231,74 @@ class UpstreamRuntime(CompoundAISystem):
                             if baseline.policy == "zero_like"
                             else deepcopy(baseline.resolve(example.inputs))
                         )
+                if cid in affected:
+                    # An ablated input can make later generators emit "".
+                    # Preserve blank evidence using the same nonempty text
+                    # representation as zero_like, rather than retrying a
+                    # consumer forever with an unchanged empty input.
+                    for field, value in values.items():
+                        if isinstance(value, str) and value == "":
+                            values[field] = " "
+                            blank_inputs.append(f"{cid}.{field}")
                 self.budget.component(self.library[cid].cost_weight)
                 started = monotonic()
-                with self.budget.component_calls():
-                    outputs = original_call(component, values)
-                elapsed = monotonic() - started
-                with self.budget.lock:
-                    times = self.budget.usage.component_seconds
-                    times[cid] = times.get(cid, 0) + elapsed
+                # A normal keyword-generation failure belongs to its producer.
+                # Retry fresh generation before a consumer ever sees it. Blank
+                # counterfactual outputs and explicitly masked deliveries are
+                # allowed and handled as absent evidence below.
+                required_queries = [
+                    src
+                    for binding in state.workflow.edges
+                    if binding.source == cid and cid not in affected
+                    and binding.edge_id != intervention
+                    and self.library[binding.target].settings["upstream_class"] == WIKIPEDIA_RETRIEVER
+                    for src, dst in binding.bindings.items() if dst == "search_keywords"
+                ]
+
+                def generate(attempt, previous):
+                    if attempt:
+                        self.budget.component(self.library[cid].cost_weight)
+                    with self.budget.component_calls():
+                        if (
+                            cid in affected
+                            and self.library[cid].settings["upstream_class"] == WIKIPEDIA_RETRIEVER
+                            and isinstance(values.get("search_keywords"), str)
+                            and not values["search_keywords"].strip()
+                        ):
+                            # No query means no retrieved evidence in this
+                            # counterfactual. Never send a dummy query.
+                            outputs = {"retrieve_content": ""}
+                            empty_query_retrievals.append(cid)
+                            component.traj = {
+                                "input": deepcopy(values), "output": deepcopy(outputs),
+                                "variable": deepcopy(component.variable),
+                            }
+                        else:
+                            outputs = original_call(component, values)
+                    for field in required_queries:
+                        value = outputs.get(field)
+                        if not isinstance(value, str) or not value.strip():
+                            raise ModelResponseError(
+                                f"{cid}.{field}: keyword generation returned no usable retrieval query. "
+                                "Retry the producer before calling the retriever.",
+                                raw_response=repr(outputs),
+                                response_context={"component_id": cid, "input_id": example.example_id, "intervention": intervention},
+                            )
+                    return outputs
+
+                try:
+                    outputs = (
+                        self.providers.recovery.call(
+                            generate, stage=f"component_output:{cid}",
+                            retries=self.providers.recovery.config.get("response_retries", 2),
+                        )
+                        if required_queries else generate(0, None)
+                    )
+                finally:
+                    elapsed = monotonic() - started
+                    with self.budget.lock:
+                        times = self.budget.usage.component_seconds
+                        times[cid] = times.get(cid, 0) + elapsed
                 executions.append(
                     ComponentExecution(
                         component_id=cid,
@@ -270,6 +338,10 @@ class UpstreamRuntime(CompoundAISystem):
                     "intervention": intervention,
                     "cache_hit": False,
                     "task_generation_seeded": False,
+                    **({
+                        "blank_intervention_inputs": blank_inputs,
+                        "empty_query_retrievals": empty_query_retrievals,
+                    } if edge is not None else {}),
                 },
             )
 

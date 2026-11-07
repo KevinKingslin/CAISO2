@@ -124,6 +124,22 @@ original components' nonempty-input checks still hold. Selector-edge baselines u
 the original initial model, since an empty model identifier is invalid. Overrides
 may specify a constant or pass-through baseline per edge/input field.
 
+During an intervention, a downstream generator may also return an empty string
+after receiving blank evidence. In the intervened component and its descendants,
+the runtime represents empty text inputs with the same single blank space. For
+HotpotQA, an empty/whitespace-only retrieval query produces no retrieved evidence
+without a ColBERT request. This avoids repeatedly executing the strict retriever
+with an empty keyword input or retrieving unrelated documents for a dummy query.
+Trajectory metadata records `blank_intervention_inputs` and
+`empty_query_retrievals`. If the keyword generator returns an empty or whitespace
+query on an ordinary input during optimization, the runtime retries that
+producer using the configured `response_retries` limit (two retries by default),
+charges each execution, and logs its output. Persistent failure stops with a
+producer-specific error instead of repeatedly executing the retriever on the
+same invalid input. Valid upstream calls and the separate evaluation script
+retain their original behavior; no fallback question, model or passage is
+substituted.
+
 Upstream component defaults, per-thread variables, trajectory storage, and adapter
 IDs are mutable shared state. Optimization execution is protected by a lock;
 raising CAISO's execution worker count does not make those calls simultaneous.

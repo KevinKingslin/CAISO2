@@ -12,6 +12,7 @@ import litellm
 import pytest
 
 from caiso.core.budget import BudgetTracker
+from caiso.core.recovery import RetryExhausted
 from caiso.integration.runtime import UpstreamRuntime, adapt_examples
 from caiso.providers.base import ProviderRegistry
 from caiso.wrappers.example import Example
@@ -90,6 +91,100 @@ def test_hotpotqa_real_pipeline_preserves_requests_and_f1(monkeypatch, fake_comp
         call["max_tokens"] == 1024 and call["temperature"] == 0.6 for call in fake_completion
     )
     assert runtime.initial_state.configurations["wikipedia_retriever"].value == {"k": 1}
+    # Exercise every edge intervention on the real system, including a blank
+    # keyword delivery to the strict retriever (not just ordinary evaluation).
+    from caiso.attribution.estimator import estimate_all_edges
+    example = adapt_examples(system, [Example(question="Who wrote this?", gd_answer="Alice")], "train")[0]
+    effects = estimate_all_edges(runtime, runtime.initial_state, [example], [42])
+    assert {effect.edge_id for effect in effects} == {edge.edge_id for edge in runtime.initial_state.workflow.edges}
+
+
+def test_hotpotqa_blank_intervention_can_propagate_through_keyword_generation(monkeypatch, fake_completion):
+    from examples.systems.hotpotqa import five_components as hotpot
+
+    retrievals = []
+    def retrieve(self, query, k=10, **kwargs):
+        retrievals.append(query)
+        return [dspy.Example(long_text="Alice wrote the book.")]
+
+    monkeypatch.setattr(dspy.ColBERTv2, "__call__", retrieve)
+    system = hotpot.system_engine()
+    runtime = assert_parity(
+        system, Example(question="Who wrote this?", gd_answer="Alice"), fake_completion
+    )
+    example = adapt_examples(system, [Example(question="Who wrote this?", gd_answer="Alice")], "train")[0]
+    completion = litellm.completion
+    def empty_keywords(**kwargs):
+        response = completion(**kwargs)
+        if "starting with the field `[[ ## search_keywords ## ]]`" in kwargs["messages"][-1]["content"]:
+            response.choices[0].message.content = "[[ ## search_keywords ## ]]\n\n[[ ## completed ## ]]"
+        return response
+
+    monkeypatch.setattr(litellm, "completion", empty_keywords)
+    retrievals.clear()
+    trajectory = runtime.execute(
+        runtime.initial_state, example, 42, intervention="question_rewriter->info_extractor"
+    )
+    by_id = {entry.component_id: entry for entry in trajectory.executions}
+    assert by_id["info_extractor"].component_input == {"rewritten_query": " "}
+    assert by_id["info_extractor"].component_output == {"search_keywords": ""}
+    assert by_id["wikipedia_retriever"].component_input == {"search_keywords": " "}
+    assert by_id["wikipedia_retriever"].component_output == {"retrieve_content": ""}
+    assert by_id["hint_generator"].component_input["retrieve_content"] == " "
+    assert retrievals == []  # No arbitrary fallback query or fabricated passages.
+    assert trajectory.metadata["blank_intervention_inputs"] == [
+        "wikipedia_retriever.search_keywords", "hint_generator.retrieve_content",
+    ]
+    assert trajectory.metadata["empty_query_retrievals"] == ["wikipedia_retriever"]
+    # The intervention observer is restored; ordinary upstream behavior stays strict.
+    runtime.providers.recovery.config = {"response_retries": 2, "backoff_seconds": 0}
+    fake_completion.clear()
+    with pytest.raises(RetryExhausted, match="keyword generation returned no usable retrieval query"):
+        runtime.execute(runtime.initial_state, example, 42)
+    # One question rewrite, three fresh keyword attempts, no retriever loop.
+    assert len(fake_completion) == 4
+    assert retrievals == []
+
+
+def test_hotpotqa_retries_empty_keyword_output_at_its_producer(monkeypatch, fake_completion):
+    from examples.systems.hotpotqa import five_components as hotpot
+
+    queries = []
+    def retrieve(self, query, k=10, **kwargs):
+        queries.append(query)
+        return [dspy.Example(long_text="Alice wrote the book.")]
+    monkeypatch.setattr(dspy.ColBERTv2, "__call__", retrieve)
+    system = hotpot.system_engine()
+    runtime = assert_parity(
+        system, Example(question="Who wrote this?", gd_answer="Alice"), fake_completion
+    )
+    example = adapt_examples(system, [Example(question="Who wrote this?", gd_answer="Alice")], "train")[0]
+    runtime.providers.recovery.config = {"response_retries": 2, "backoff_seconds": 0}
+    events = []
+    runtime.providers.recovery.on_error = events.append
+    completion = litellm.completion
+    generated = []
+    def empty_once(**kwargs):
+        response = completion(**kwargs)
+        if "starting with the field `[[ ## search_keywords ## ]]`" in kwargs["messages"][-1]["content"]:
+            generated.append(kwargs)
+            if len(generated) == 1:
+                response.choices[0].message.content = "[[ ## search_keywords ## ]]\n\n[[ ## completed ## ]]"
+        return response
+    monkeypatch.setattr(litellm, "completion", empty_once)
+    fake_completion.clear()
+    queries.clear()
+    executions_before = runtime.budget.usage.component_executions
+    trajectory = runtime.execute(runtime.initial_state, example, 42)
+    assert trajectory.reward == 1
+    assert len(fake_completion) == 5  # Only the bad producer was regenerated.
+    assert generated[0]["messages"] == generated[1]["messages"]
+    assert queries == ["writer"]
+    assert runtime.budget.usage.component_executions - executions_before == 6
+    assert [event["action"] for event in events] == ["retry", "recovered"]
+    assert events[0]["response_context"]["component_id"] == "info_extractor"
+    assert events[0]["raw_response"] == "{'search_keywords': ''}"
+    assert "empty_query_retrievals" not in trajectory.metadata
 
 
 def test_pubmed_real_pipeline_preserves_whitespace_models_and_metric(monkeypatch):
