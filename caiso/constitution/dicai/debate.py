@@ -1,38 +1,12 @@
 """Round-robin debate using arXiv:2606.28294v2, Appendix G.2 prompts."""
 
-import re
-
-from caiso.core.recovery import ModelResponseError
+from caiso.core.recovery import ModelResponseError, RetryExhausted, response_failure
 from caiso.prompts import render_messages
 
 from .personas import Persona
 from .preferences import pair_block
-
-
-def principle_key(text):
-    return re.sub(r"[^a-z0-9 ]", "", text.lower()).strip()
-
-
-def dedupe(values):
-    seen, output = set(), []
-    for value in values:
-        key = principle_key(value)
-        if key and key not in seen:
-            seen.add(key)
-            output.append(value.strip())
-    return output
-
-
-def parse_principles(text):
-    # Use the last final/working list, not Q-lines inside earlier quoted arguments.
-    headers = list(re.finditer(r"(?:FINAL|WORKING)\s+LIST\s*:?", text, re.I))
-    source = text[headers[-1].end() :] if headers else text
-    values = re.findall(
-        r"^\s*[-*]?\s*Q\s*\d+\s*[:.)]\s*(Select the response[^\n]+)", source, re.I | re.M
-    )
-    if not values:
-        raise ModelResponseError("Chairperson produced no valid Q-numbered principles")
-    return dedupe(values)
+from .parsing import dedupe, explicitly_unchanged, parse_principles
+from .parsing import principle_key as principle_key
 
 
 def render(values):
@@ -57,6 +31,7 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
 
     # The paper settles the list after T rounds; reconstruction is a later
     # diagnostic, not a stop-rejection prompt or a minimum-principle constraint.
+    finalized = False
     for cycle in range(1, rounds + 1):
         for i, entry in enumerate(catalog):
             if progress:
@@ -73,28 +48,55 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
                 ),
                 seed=seed + (cycle - 1) * 4 + i,
                 temperature=temperatures.get("debater", 0.7),
+                response_context={"pair_id": pair.pair_id, "stage": "debater", "cycle": cycle, "debater": i + 1},
             )
             history.append({"speaker": f"debater_{i + 1}", "content": text, "cycle": cycle})
         if progress:
             progress(cycle, "chairperson")
-        chair = providers.complete(
-            role,
-            render_messages(
-                "dicai", "debate.chairperson",
-                pair=story, working_list=render(working) or "(none)",
-                debate_history=recent(), cycle=cycle, total_cycles=rounds,
-            ),
-            seed=seed + (cycle - 1) * 4 + 3,
-            validate=lambda text: (parse_principles(text), text)[1],
-            temperature=temperatures.get("chairperson", 0.2),
-        )
+        def valid_update(text):
+            if working and explicitly_unchanged(text):
+                return text
+            parse_principles(text)
+            return text
+
+        try:
+            chair = providers.complete(
+                role,
+                render_messages(
+                    "dicai", "debate.chairperson",
+                    pair=story, working_list=render(working) or "(none)",
+                    debate_history=recent(), cycle=cycle, total_cycles=rounds,
+                ),
+                seed=seed + (cycle - 1) * 4 + 3,
+                validate=valid_update,
+                temperature=temperatures.get("chairperson", 0.2),
+                response_context={"pair_id": pair.pair_id, "stage": "chairperson", "cycle": cycle},
+            )
+        except (ModelResponseError, RetryExhausted) as error:
+            if not response_failure(error):
+                raise  # Auth, budget, transport failures and code errors remain fatal.
+            history.append({
+                "speaker": "chairperson_format_error", "cycle": cycle,
+                "content": "The chairperson returned no usable updated list. "
+                + ("The last validated working list was retained." if working else "The working list remains empty."),
+                "error": str(error), "retained_principles": list(working),
+            })
+            finalized = False
+            continue
         history.append({"speaker": "chairperson", "content": chair, "cycle": cycle})
-        working = parse_principles(chair)
+        if not explicitly_unchanged(chair):
+            working = parse_principles(chair)
+        finalized = "DEBATE_OVER" in chair.upper()
+    if not working:
+        raise ModelResponseError(
+            f"Pair {pair.pair_id}: no usable chairperson principles after {rounds} rounds. "
+            "No constitution was fabricated; successful requests are checkpointed for retry."
+        )
     history.append(
         {
             "speaker": "debate_outcome",
             "cycles": rounds,
-            "finalized": "DEBATE_OVER" in chair.upper(),
+            "finalized": finalized,
         }
     )
     return working, history

@@ -12,6 +12,11 @@ from pydantic import ValidationError
 class ModelResponseError(ValueError):
     """A model answered, but its answer cannot be used by the algorithm."""
 
+    def __init__(self, message, *, raw_response=None, response_context=None):
+        super().__init__(message)
+        self.raw_response = raw_response
+        self.response_context = response_context or {}
+
 
 class RetryExhausted(RuntimeError):
     """A recoverable operation still failed after its configured retries."""
@@ -23,6 +28,13 @@ class TransportExhausted(RetryExhausted):
 
 class TransportRequestError(ValueError):
     """A non-retryable service error, such as invalid credentials or deployment."""
+
+
+def response_failure(error):
+    """True only for invalid model output, including an exhausted format retry."""
+    while isinstance(error, RetryExhausted) and not isinstance(error, TransportExhausted):
+        error = error.__cause__
+    return isinstance(error, (ModelResponseError, ValidationError))
 
 
 def recoverable(exc):
@@ -77,6 +89,11 @@ class Recovery:
             "traceback": "".join(traceback.format_exception(exc)),
             **fields,
         }
+        if isinstance(exc, ModelResponseError):
+            event["response_context"] = exc.response_context
+            if exc.raw_response is not None:
+                event["raw_response"] = exc.raw_response[:64000]
+                event["raw_response_truncated"] = len(exc.raw_response) > 64000
         if self.on_error:
             self.on_error(event)
         return event

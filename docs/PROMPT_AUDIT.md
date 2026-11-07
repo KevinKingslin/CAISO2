@@ -120,7 +120,17 @@ The current reviewed requests are recorded in
 `tests/fixtures/complete_prompt_requests.json`. DICAI instruction wording is
 also independently checked against the published paper source and
 `tests/fixtures/dicai_paper_prompts.json`.
+The normal request messages retain their text. The response-repair request now
+includes the actual invalid assistant answer before the existing repair
+instruction, so the current capture contains 35 requests and 73 message bodies.
 These deterministic tests make no model API calls and do not measure task quality.
+
+Runtime parsing accepts presentation variations without adding preference
+criteria. Chairperson rounds can retain the last validated working list on a
+format failure, with an explicit transcript event, and continue the configured
+rounds. An empty final working list remains an error. Successful individual
+induction requests are checkpointed and validated on reuse. These safeguards do
+not change the paper prompt text or benchmark task prompts and scoring.
 
 ```sh
 python -m pytest -q tests/test_complete_prompts.py tests/test_config_and_prompts.py tests/test_benchmark_boundary.py

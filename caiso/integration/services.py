@@ -36,9 +36,13 @@ class MethodProvider:
                 model=self.model,
                 temperature=temperature,
                 max_new_tokens=max_tokens or self.max_tokens,
-                json_object=schema is not None,
+                # Keep the wire-level JSON mode but let the method registry
+                # parse/validate the original text and handle format retries.
+                json_object=False,
+                **({"response_format": {"type": "json_object"}} if schema is not None else {}),
             )
-        return json.dumps(result) if schema is not None else result
+        # Support test/custom API implementations that already return decoded JSON.
+        return json.dumps(result) if schema is not None and isinstance(result, (dict, list)) else result
 
     def fingerprint(self):
         return digest({"method_model": self.model, "max_tokens": self.max_tokens})

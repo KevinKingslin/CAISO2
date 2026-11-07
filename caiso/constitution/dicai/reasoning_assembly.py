@@ -3,24 +3,27 @@
 Each paper strategy returns one final_reasoning paragraph in a single request.
 """
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from caiso.core.parallel import ordered_map
 from caiso.core.serialization import Record
 from caiso.prompts import render_messages
 
 from .preferences import candidate_views, task_view
+from .parsing import normalize_principle as valid_principle
 
-
-def valid_principle(value):
-    value = value.strip()
-    if not value.startswith("Select the response") or value == "Select the response":
-        raise ValueError('Invalid DICAI principle: begin with "Select the response"')
-    return value
+__all__ = ["Reasoning", "assemble", "valid_principle"]
 
 
 class Reasoning(Record):
     final_reasoning: str = Field(min_length=1)
+
+    @field_validator("final_reasoning")
+    @classmethod
+    def nonempty_paragraph(cls, value):
+        if not value.strip():
+            raise ValueError("final_reasoning must contain a nonempty final paragraph")
+        return value
 
 
 def assemble(pair, personas, providers, role, seed, config=None):
@@ -48,6 +51,7 @@ def assemble(pair, personas, providers, role, seed, config=None):
             seed=seed + index * 100,
             schema=Reasoning,
             include_schema_instruction=False,  # The paper already specifies the exact JSON.
+            response_context={"pair_id": pair.pair_id, "stage": "reasoning." + stage},
             temperature=temperatures.get(temperature_key, default),
         )
         return {

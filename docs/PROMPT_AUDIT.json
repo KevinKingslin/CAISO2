@@ -119,9 +119,14 @@
     "preserved": "Existing method inputs, output fields, selection criteria, workflow restrictions, preference layouts, tips, personas, configuration values and benchmark prompts.",
     "complete_request_capture": {
       "requests": 35,
-      "message_bodies": 72,
+      "message_bodies": 73,
       "fixture": "tests/fixtures/complete_prompt_requests.json"
     },
     "normal_stage_schema_messages": "Response formats live in the complete stage templates; duplicate schema supplements disabled for the three stages."
+  },
+  "method_response_recovery": {
+    "normal_prompt_text": "unchanged",
+    "repair": "Includes the invalid assistant response before the format-repair instruction; raw response and call context are logged.",
+    "request_checkpoints": "Successful DICAI requests are saved under each induction provenance directory and validated on reuse."
   }
 }

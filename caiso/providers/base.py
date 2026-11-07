@@ -6,6 +6,7 @@ from pydantic import BaseModel, ValidationError
 from caiso.core.recovery import ModelResponseError, Recovery
 from caiso.prompts import render_messages
 from caiso.core.serialization import digest
+from .responses import json_object
 
 DICAI_ROLES = {"system_constitution", "block_constitution", "constitution_judge", "block_selection"}
 
@@ -54,7 +55,7 @@ class ProviderRegistry:
             raise ValueError(f"Provider alias {alias!r} is not configured")
         return self.providers[alias]
 
-    def complete(self, alias, messages, *, seed, schema=None, validate=None, **kwargs):
+    def complete(self, alias, messages, *, seed, schema=None, validate=None, response_context=None, **kwargs):
         kwargs = {**self.generation.get(alias, {}), **kwargs}
         provider = self.get(alias)  # Fail configuration errors before entering a retry loop.
 
@@ -64,18 +65,30 @@ class ProviderRegistry:
             if format_error and kwargs.get("prompt_format") != "completion":
                 instructions = [
                     *messages,
+                    *(
+                        [{"role": "assistant", "content": previous_error.raw_response}]
+                        if isinstance(previous_error, ModelResponseError) and previous_error.raw_response
+                        else []
+                    ),
                     *render_messages("method", "providers.format_retry", error=str(previous_error)[:1500]),
                 ]
             retry_seed = (seed + attempt * 104729) % (2**31 - 1) if format_error else seed
-            text = provider.complete(instructions, seed=retry_seed, schema=schema, **kwargs)
-            # Raw completion can stop at EOS immediately. OPTIMAS passes that
-            # empty context/feedback downstream rather than resampling it.
-            if not isinstance(text, str) or (
-                not text.strip() and kwargs.get("prompt_format") != "completion"
-            ):
-                raise ModelResponseError("Model returned an empty or non-text response")
-            result = schema.model_validate_json(text) if schema else text
-            return validate(result) if validate else result
+            text = None
+            try:
+                text = provider.complete(instructions, seed=retry_seed, schema=schema, **kwargs)
+                # Preserve the original task-model empty raw completion behavior.
+                if not isinstance(text, str) or (
+                    not text.strip() and kwargs.get("prompt_format") != "completion"
+                ):
+                    raise ModelResponseError("Model returned an empty or non-text response")
+                result = schema.model_validate(json_object(text)) if schema else text
+                return validate(result) if validate else result
+            except (ModelResponseError, ValidationError) as error:
+                raise ModelResponseError(
+                    str(error),
+                    raw_response=text if isinstance(text, str) else getattr(error, "raw_response", None),
+                    response_context={"role": alias, "seed": retry_seed, **(response_context or {})},
+                ) from error
 
         return self.recovery.call(
             request, stage=f"model:{alias}", retries=self.recovery.config.get("response_retries", 2)

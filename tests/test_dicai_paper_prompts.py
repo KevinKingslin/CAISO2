@@ -151,4 +151,5 @@ def test_method_transport_does_not_append_schema_instructions_to_paper_prompt():
             request, seed=42, schema=Reasoning, include_schema_instruction=False,
         )
     assert api.call_args.args[0] == request
-    assert api.call_args.kwargs["json_object"] is True
+    assert api.call_args.kwargs["json_object"] is False
+    assert api.call_args.kwargs["response_format"] == {"type": "json_object"}

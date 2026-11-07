@@ -33,6 +33,7 @@ def abstract_clusters(
             ),
             seed=seed + cluster,
             validate=valid_abstract,
+            response_context={"stage": "abstraction", "cluster": cluster},
             temperature=temperature,
         )
 

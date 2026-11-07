@@ -246,6 +246,14 @@ its configuration before loading benchmark models. Missing-file reports list
 the package location and recovery steps; configured personas and tips do not
 require their unused default files.
 
+Method responses tolerate Markdown/list presentation differences and wrapped
+JSON while retaining schema validation. Rejected answers and their pair/stage
+context are recorded in `.internal/logs/phase_errors.jsonl`, and repair attempts
+include the answer that failed. Successful constitution-induction requests are
+checkpointed individually, so retrying an interrupted induction can reuse
+completed model calls. Chairperson format failures retain the last validated
+working list when available; an empty constitution is never substituted.
+
 Each experiment's `caiso.persona_catalog` selects three dataset-specific expert
 profiles from `caiso/prompts/systems/<dataset>/personas/*.txt` for both system and
 block constitution induction. Their full text is saved with the resolved

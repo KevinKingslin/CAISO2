@@ -27,6 +27,7 @@ from .debate import debate, principle_key
 from .personas import assign_personas
 from .plotting import save_silhouette_artifacts
 from .reasoning_assembly import assemble
+from .request_cache import RequestCache
 from .reconstruction import minimize_constitution, validate_constitution
 
 PROTOCOL = "democratic-icai-arxiv-2606.28294v2-prompts-v1"
@@ -93,6 +94,7 @@ class DICAI:
             }
         )
         artifacts = Path(output_dir) / provenance if output_dir else None
+        providers = RequestCache(self.providers, artifacts / "requests" if artifacts else None)
         if artifacts:
             save_json(
                 artifacts / "manifest.json",
@@ -119,12 +121,12 @@ class DICAI:
             monitor.update(i, "reasoning")
             personas = assign_personas(self.identities, seed + i)
             catalog = assemble(
-                pair, personas, self.providers, self.role, seed + i * 1000, self.config
+                pair, personas, providers, self.role, seed + i * 1000, self.config
             )
             values, transcript = debate(
                 pair,
                 catalog,
-                self.providers,
+                providers,
                 self.role,
                 seed + i * 1000 + 500,
                 rounds,
@@ -240,7 +242,7 @@ class DICAI:
         abstractions = abstract_clusters(
             settled,
             labels,
-            self.providers,
+            providers,
             self.role,
             seed + 900000,
             max_workers=workers,
@@ -279,7 +281,7 @@ class DICAI:
             progress("reconstruction", 0, len(pairs))
         reconstruction_started = monotonic()
         report = validate_constitution(
-            self.providers,
+            providers,
             self.role,
             pairs,
             outputs,
@@ -298,7 +300,7 @@ class DICAI:
             if size and size < len(pairs):
                 subset = random.Random(seed).sample(pairs, size)
             outputs, dropped = minimize_constitution(
-                self.providers,
+                providers,
                 self.role,
                 subset,
                 outputs,
@@ -308,7 +310,7 @@ class DICAI:
                 max_workers=workers,
             )
             report = validate_constitution(
-                self.providers,
+                providers,
                 self.role,
                 pairs,
                 outputs,
@@ -358,6 +360,8 @@ class DICAI:
                 "preference_records": len(pairs),
                 "skipped_content_filter_pair_ids": skipped_pair_ids,
                 "reused_pair_records": reused,
+                "request_cache_hits": providers.hits,
+                "model_requests_before_retries": providers.requests,
                 "reasoning_debate_calls_before_retries": expected_calls,
                 "max_workers": workers,
                 "reasoning_workers": reasoning_workers,

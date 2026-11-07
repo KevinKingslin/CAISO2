@@ -12,15 +12,17 @@ from caiso.core.content_filter import ContentFilteredError, record_skip
 from caiso.core.parallel import ordered_map
 from caiso.core.recovery import ModelResponseError
 from caiso.prompts import render_messages
+from caiso.providers.responses import unwrap
 
 from .preferences import candidate_views
 
 
 def parse_choice(text):
-    match = re.fullmatch(r"Output\(([ab])\)", text.strip())
+    value = unwrap(text).strip().strip('"\'`*“”‘’ ')
+    match = re.fullmatch(r"Output\s*\(\s*([ab])\s*\)[.!]?", value, re.I)
     if not match:
         raise ModelResponseError("Constitution judge must return Output(a) or Output(b)")
-    return match.group(1)
+    return match.group(1).lower()
 
 
 def apply_constitution(providers, role, pair, principles, seed=0, temperature=0.0):
@@ -35,6 +37,7 @@ def apply_constitution(providers, role, pair, principles, seed=0, temperature=0.
         ),
         seed=seed,
         validate=lambda text: (parse_choice(text), text)[1],
+        response_context={"pair_id": pair.pair_id, "stage": "reconstruction"},
         temperature=temperature,
     )
     choice = ("B" if swapped else "A") if parse_choice(response) == "a" else ("A" if swapped else "B")

@@ -36,6 +36,27 @@ so the transport does not append a duplicate schema instruction to them. JSON
 validation and generic response-repair retries remain active. Preference-pair
 layouts, configured optimization tips and persona profiles retain their text.
 
+Method response parsing accepts complete JSON objects in Markdown/prose wrappers
+and ordinary Markdown/list formatting around published principles. It preserves
+the criteria and still rejects missing fields, ambiguous JSON, truncated output
+and empty principles. A repair attempt includes the rejected assistant answer,
+with raw output and pair/stage context saved in the local phase-error log.
+Normal DICAI paper prompts are unchanged.
+
+If a chairperson turn cannot be parsed after its retries, the last validated
+working list is retained and the next configured round runs. An explicit
+unchanged-list finalization is accepted only when such a list exists. The
+transcript records retained lists and failed turns. A pair with no usable
+chairperson list still fails; no criteria are invented or taken from rejected
+debater arguments.
+
+Successful DICAI model requests are atomically checkpointed under
+`.internal/dicai/<scope>/<provenance>/requests/`. Re-entering the same induction
+reuses those validated responses, including work completed before an interrupted
+pair, abstraction or reconstruction stage. Metadata reports request cache hits
+and model requests before retries. Credentials, transport errors and budget
+limits remain errors and are not hidden by formatting recovery.
+
 Chat request files use role sections:
 
 ```text
