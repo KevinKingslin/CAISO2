@@ -62,6 +62,32 @@ Keep credentials, deployments, backend choices and service URLs in `.env`.
 Prompt text is under [`caiso/prompts`](../caiso/prompts/README.md). `prompt_tips`
 remains a method parameter with its existing values.
 
+To reuse the current system's saved validation score during block acceptance,
+set this override in an experiment:
+
+```yaml
+method:
+  block_optimization:
+    reevaluate_current: false
+```
+
+The default `true` evaluates current and candidate systems on each acceptance
+comparison. With `false`, the initial baseline is still evaluated once and every
+candidate is evaluated normally. Accepted candidate scores become the saved
+current score; rejections retain the previous score, including after resume.
+For 25 questions and one pass, an acceptance comparison then uses 25 fresh
+system runs instead of 50. Attribution and diagnostic evaluations keep their
+own batches. Reuse retains a historical measurement of stochastic task outputs.
+
+The phase's `validation_metrics.json` marks current scores with `reused: true`
+and `source: saved_current_score`; no fresh current trajectories or coverage are
+invented. State/validation fingerprints are included. The CLI phase also says
+when it is reusing the score. Change to `true` to restore fresh comparisons.
+Start a new run when changing this protocol; checkpoint configuration/data
+fingerprints still guard resume compatibility.
+Existing checkpoints that omit this new key can resume with `true` when every
+other setting, data split, provider and library fingerprint matches.
+
 Each shipped experiment selects three dataset-specific expert profiles through
 `caiso.persona_catalog`: `personas/amazon`, `personas/hotpotqa`, or
 `personas/pubmedqa`. Edit the full profile text in

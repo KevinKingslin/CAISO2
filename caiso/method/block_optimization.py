@@ -36,19 +36,37 @@ def validate_candidate(
     *,
     on_evaluation=None,
     progress=None,
+    reevaluate_current=True,
+    current_score=None,
+    on_current_reuse=None,
 ):
-    a, current_trajectories = evaluate(
-        runtime,
-        current,
-        validation,
-        seeds,
-        trajectory_path,
-        progress=(lambda done, total: progress("Current system", done, total))
-        if progress
-        else None,
-    )
-    if on_evaluation:
-        on_evaluation("current", a, current_trajectories)
+    """Always evaluate the candidate; optionally reuse a matching saved current score.
+
+    The caller owns score/state/batch consistency. Algorithm uses its accepted
+    score on the fixed validation set; checkpoints enforce config/data identity.
+    Reuse emits no new current trajectories or coverage measurements.
+    """
+    if not isinstance(reevaluate_current, bool):
+        raise ValueError("reevaluate_current must be true or false")
+    if reevaluate_current:
+        a, current_trajectories = evaluate(
+            runtime,
+            current,
+            validation,
+            seeds,
+            trajectory_path,
+            progress=(lambda done, total: progress("Current system", done, total))
+            if progress
+            else None,
+        )
+        if on_evaluation:
+            on_evaluation("current", a, current_trajectories)
+    else:
+        if isinstance(current_score, bool) or not isinstance(current_score, (int, float)) or not math.isfinite(current_score):
+            raise ValueError("Reusing current validation requires a finite saved current_score")
+        a = float(current_score)
+        if on_current_reuse:
+            on_current_reuse(a)
     b, candidate_trajectories = evaluate(
         runtime,
         candidate,

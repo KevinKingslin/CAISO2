@@ -260,6 +260,14 @@ method file. Candidates then use the system constitution directly, skipping
 block preference collection and induction. Validation still controls acceptance.
 The default is `true`; changing it requires a new run/output directory.
 
+`block_optimization.reevaluate_current` also defaults to `true`. Set it to `false`
+in the shared method file (or under an experiment's `method.block_optimization`)
+to reuse the saved current validation score during block acceptance. The initial
+baseline and all candidates are still evaluated. Reused scores are marked in the
+phase's validation metrics; this saves the current-system validation runs and
+changes how stochastic evaluations are compared. Start a new run after changing
+the setting.
+
 The original `scripts/configs/` files and `caiso/config/default.yaml` remain intact
 and supported by direct Python commands. Their reward-model/PPO parameters belong
 to the legacy OPTIMAS utilities and are unused by CAISO. CAISO weight optimization

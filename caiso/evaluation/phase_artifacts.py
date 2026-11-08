@@ -115,7 +115,8 @@ def save_validation(directory, label, result):
         if label == "candidate" and trace_path.exists()
         else []
     )
-    save_jsonl(trace_path, [*previous, *trajectories])
+    if "trajectories" in result:
+        save_jsonl(trace_path, [*previous, *trajectories])
     save_json(path, metrics)
 
 

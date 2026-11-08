@@ -3,6 +3,7 @@ import json
 import pytest
 
 from caiso.core.checkpoint import Checkpoint
+from caiso.core.serialization import digest
 from caiso.optim.optimizer import CaisoOptimizer
 from caiso.optimizers.joint_block_optimizer import JointBlockOptimizer
 from caiso.providers.base import ProviderRegistry
@@ -12,7 +13,8 @@ from tests.test_runtime import make_system
 
 
 @pytest.mark.parametrize("block_constitution_enabled,accept_update", [(True, True), (False, True), (False, False)])
-def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch, block_constitution_enabled, accept_update):
+@pytest.mark.parametrize("reevaluate_current", [True, False])
+def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch, block_constitution_enabled, accept_update, reevaluate_current):
     system = make_system()
     experiment = {
         "dataset": "pubmed",
@@ -30,7 +32,7 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch
                 "initial_preference_pairs": 1,
                 "attribution": {"bootstrap_samples": 10},
                 "block_constitution": {"enabled": block_constitution_enabled, "preference_pairs": 1},
-                "block_optimization": {"prompt_candidates": 1, "max_joint_candidates": 4},
+                "block_optimization": {"prompt_candidates": 1, "max_joint_candidates": 4, "reevaluate_current": reevaluate_current},
                 "dicai": {"clustering": {"min_clusters": 2, "max_clusters": 4}},
                 "reporting": {"cli": False, "capture_model_output": False},
             },
@@ -47,6 +49,15 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch
         return propose(self, state, members, constitution, examples, seed)
 
     monkeypatch.setattr(JointBlockOptimizer, "propose", observe_proposal)
+    from caiso.method import block_optimization
+    validation_calls = []
+    evaluate = block_optimization.evaluate
+
+    def observe_validation(*args, **kwargs):
+        validation_calls.append(args[1].fingerprint())
+        return evaluate(*args, **kwargs)
+
+    monkeypatch.setattr(block_optimization, "evaluate", observe_validation)
     if not block_constitution_enabled:
         def unexpected_block_induction(*args, **kwargs):
             pytest.fail("Disabled block constitution must skip preference collection and induction")
@@ -114,6 +125,16 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch
     validation = json.loads((tmp_path / "iterations/0001/05_block_optimization/validation_metrics.json").read_text())
     assert validation["current"]["score"] == (0 if accept_update else 1)
     assert validation["candidate"]["score"] == (1 if accept_update else 0)
+    assert validation["current"]["reused"] is not reevaluate_current
+    assert validation["candidate"]["reused"] is False
+    assert validation["current"]["trajectory_count"] == (1 if reevaluate_current else 0)
+    if not reevaluate_current:
+        assert "coverage" not in validation["current"]
+        assert validation["current"]["source"] == "saved_current_score"
+    assert len(validation_calls) == (2 if reevaluate_current else 1)
+    trajectories = (tmp_path / "iterations/0001/05_block_optimization/validation_trajectories.jsonl").read_text().splitlines()
+    assert len(trajectories) == (2 if reevaluate_current else 1)
+    assert checkpoint.current_score == 1
     import torch
 
     snapshot = tmp_path / "system.pth"
@@ -130,6 +151,15 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch
     assert configurations["current"]["transform"]["value"] == expected_config
     assert configurations["candidate"]["transform"]["value"] == "double"
     assert configurations["candidate_status"] == ("Accepted" if accept_update else "Rejected")
+    if reevaluate_current:
+        # A checkpoint predating this toggle used the same fresh-comparison
+        # behavior but did not have the new default key in its config hash.
+        legacy = {**optimizer.config, "block_optimization": {
+            key: value for key, value in optimizer.config["block_optimization"].items()
+            if key != "reevaluate_current"
+        }}
+        checkpoint.config_hash = digest(legacy)
+        checkpoint.save(tmp_path / "checkpoint")
     # Restore the accepted checkpoint onto a fresh copy of the benchmark system.
     fresh = make_system()
     restored = CaisoOptimizer(
@@ -146,3 +176,5 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch
     assert resumed.evaluate(Example(question="5", gd_answer="10" if accept_update else "5")) == 1
     assert resumed_metrics["completed_iterations"] == 1
     assert len(proposal_constitutions) == (2 if block_constitution_enabled else 1)
+    assert len(validation_calls) == (2 if reevaluate_current else 1)
+    assert Checkpoint.load(tmp_path / "checkpoint").config_hash == digest(restored.config)

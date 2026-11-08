@@ -260,8 +260,16 @@ class Algorithm:
         if resume:
             self.report.update("Loading saved checkpoint")
             cp = Checkpoint.load(resume)
-            if (cp.config_hash, cp.data_hash, cp.provider_hash, cp.library_hash) != (
-                config_hash,
+            compatible_config_hashes = {config_hash}
+            if cfg["block_optimization"].get("reevaluate_current", True):
+                # The old implicit behavior was true. Adding its explicit
+                # default must not break an otherwise identical saved run.
+                legacy_cfg = {**cfg, "block_optimization": {
+                    key: value for key, value in cfg["block_optimization"].items()
+                    if key != "reevaluate_current"
+                }}
+                compatible_config_hashes.add(digest(legacy_cfg))
+            if cp.config_hash not in compatible_config_hashes or (cp.data_hash, cp.provider_hash, cp.library_hash) != (
                 data_hash,
                 provider_hash,
                 library_hash,
@@ -629,6 +637,8 @@ class Algorithm:
                             )
                             self.report.update(
                                 "Validating block candidate on fixed validation batch"
+                                if cfg["block_optimization"].get("reevaluate_current", True)
+                                else "Validating block candidate; reusing saved current score"
                             )
                             updated, gate = validate_candidate(
                                 self.runtime,
@@ -637,6 +647,17 @@ class Algorithm:
                                 val,
                                 [seed],
                                 cfg["block_optimization"]["acceptance_epsilon"],
+                                reevaluate_current=cfg["block_optimization"].get("reevaluate_current", True),
+                                current_score=score,
+                                on_current_reuse=lambda value: self.report.save_phase(
+                                    "05_block_optimization",
+                                    current_validation={
+                                        "score": value, "seeds": [seed], "reused": True,
+                                        "source": "saved_current_score",
+                                        "state_fingerprint": current.fingerprint(),
+                                        "validation_fingerprint": digest([val, [seed]]),
+                                    },
+                                ),
                                 progress=lambda label, done, total: self.report.update(
                                     progress=f"{label} validation: {done}/{total} system runs"
                                 ),
@@ -647,6 +668,10 @@ class Algorithm:
                                             f"{label}_validation": {
                                                 "score": value,
                                                 "seeds": [seed],
+                                                "reused": False,
+                                                "source": "fresh_validation",
+                                                "state_fingerprint": (current if label == "current" else candidate).fingerprint(),
+                                                "validation_fingerprint": digest([validation, [seed]]),
                                                 "trajectories": trajectories,
                                                 "coverage": {
                                                     "requested": len(validation),

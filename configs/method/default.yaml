@@ -58,6 +58,7 @@ block_constitution:
   preference_pairs: 2
   score_tie_epsilon: 0.000001
 block_optimization:
+  reevaluate_current: true  # false: reuse the saved current validation score; candidates are always evaluated.
   max_joint_candidates: 16
   task_scoring:
     enabled: false  # true: run each complete candidate end to end on the training batch.
