@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from caiso.constitution.dicai.abstraction import abstract_clusters
+from caiso.constitution.dicai.atomicity import ensure_atomic
 from caiso.constitution.dicai.debate import debate
 from caiso.constitution.dicai.personas import assign_personas
 from caiso.constitution.dicai.reasoning_assembly import assemble
@@ -19,6 +20,7 @@ from caiso.method.block_selection import select_block
 from caiso.optimizers.prompt_optimizer import PromptOptimizer, PromptProposal
 from caiso.providers.base import ProviderRegistry
 from caiso.workflow_search.generator import WorkflowGenerator
+from tests.offline import atomicity_review_fixture
 
 PRINCIPLES = [
     "Select the trajectory where answer_generator uses the hint_generator's relevant evidence.",
@@ -42,6 +44,7 @@ class Recorder:
         )
         if schema is not None:
             values = {
+                "AtomicityReview": atomicity_review_fixture(messages) if schema.__name__ == "AtomicityReview" else {},
                 "Reasoning": {"reasoning": "The preferred trajectory preserves the evidence.", "dimensions": ["evidence support", "answer concision", "hint detail"], "questions": [{"select_prompt": p, "reason": "Discriminates the candidates."} for p in PRINCIPLES]},
                 "PromptProposal": {"prompt": f"Revised instruction {seed}"},
                 "BlockVote": {"block_id": "block-0", "brief_justification": "Improve this block."},
@@ -74,6 +77,25 @@ class Recorder:
         return validate(result) if validate else result
 
 
+class AtomicityRecorder(Recorder):
+    """Capture the complete check/revision requests for both repair modes."""
+    def __init__(self, kind):
+        super().__init__()
+        self.kind, self.first_review = kind, True
+
+    def complete(self, role, messages, *, seed, schema=None, validate=None, **kwargs):
+        self.calls.append({"role": role, "messages": deepcopy(messages), "seed": seed, "schema": schema.__name__})
+        if schema.__name__ == "AtomicityReview":
+            result = atomicity_review_fixture(messages)
+            if self.first_review:
+                result["assessments"][0].update(atomic=False, qualities=["hint detail", "answer concision"], reason="Hints may be detailed while the answer is verbose.")
+                self.first_review = False
+        else:
+            result = {"replacements": [{"index": 1, "principles": PRINCIPLES[1:] if self.kind == "debate" else [PRINCIPLES[1]]}]}
+        result = schema.model_validate(result)
+        return validate(result) if validate else result
+
+
 def capture_requests():
     recorder = Recorder()
     config = {
@@ -96,6 +118,13 @@ def capture_requests():
         debate(pair, catalog, recorder, "audit", 42, rounds=2, config=config)
         apply_constitution(recorder, "audit", pair, PRINCIPLES, seed=7)
         abstract_clusters(PRINCIPLES, [0, 0, 1], recorder, "audit", 42, config=config)
+
+    for kind in ("debate", "abstraction"):
+        revision = AtomicityRecorder(kind)
+        ensure_atomic([
+            "Select the trajectory where hint_generator provides detailed hints and answer_generator produces a concise answer."
+        ], revision, "audit", 42, kind=kind, context={"source": PRINCIPLES[1:]})
+        recorder.calls.extend(revision.calls)
 
     current = Configuration(kind=ConfigurationType.PROMPT, value="Original instruction {x}")
     component = Component(

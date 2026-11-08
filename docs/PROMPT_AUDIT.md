@@ -104,12 +104,45 @@ source-based trajectory adaptation, not a claim to reproduce every setting or
 published score of DICAI. Report the adapted prompts and resolved experiment
 settings in research.
 
-The protocol identifier is `democratic-icai-c8d5-source-trajectory-v3`.
+The protocol identifier is `democratic-icai-c8d5-source-trajectory-v4-atomicity`.
 Source, prompt and schema fingerprints invalidate earlier induction caches.
 Start a new optimization run: old checkpoints retain constitutions generated
 under their previous protocol. Successful requests within a matching induction
 are still recovered after interruption, including independent samples with
 identical messages and different seeds.
+
+## CAISO one-quality semantic check
+
+The 15 source-derived requests above are unchanged. Three complete CAISO-authored
+requests in `caiso/prompts/method/constitution_atomicity/` enforce the existing
+one-quality rule at runtime. Each changed chairperson list is reviewed for
+independently satisfiable requirements. Compound items receive bounded split
+revisions; unflagged items are preserved in Python. The repaired list is reviewed
+again before reconstruction or publication. A repeated verified list needs no
+new review. A failed revision retains the last verified working list; unverified
+seed-only lists cannot become settled output.
+
+Batched semantic review also checks all cluster abstractions. A compound
+abstraction is revised to a single shared quality, keeping one output per source
+cluster. If this fails, the failed clusters use existing, already checked medoid
+principles; individually verified abstractions remain. This fallback and the
+full review/revision traces are saved in constitution metadata. Clustering and
+the silhouette-selected k are unchanged. Semantic checking is model-based and
+fallible; it does not reject a principle merely for containing "and" or multiple
+component IDs.
+
+`dicai.atomicity.enabled: true`, `max_revisions: 2` and `batch_size: 20` are new
+defaults. Bounded review/revision batches avoid oversized replies when the
+constitution has many clusters. Setting
+`enabled: false` restores format/reconstruction-only validation for ablations.
+The existing induction model supplies all reviews and revisions, with ordinary
+rate limits, request checkpoints and model-call accounting. There is no new
+auditor deployment. Budget, service and content-filter errors retain their
+existing behavior. The original three-axis bias/spuriousness/harmfulness audit
+template remains unused. Tie labels and benchmark systems are unchanged.
+
+This semantic guard is a documented CAISO extension to the source DICAI runtime,
+not an original DICAI stage. Report the setting for research comparisons.
 
 ## Preserved history and runtime safeguards
 

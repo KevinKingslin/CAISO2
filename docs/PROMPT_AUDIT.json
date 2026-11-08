@@ -87,13 +87,16 @@
       "block_selection.request",
       "generator.request",
       "services.schema_message",
-      "providers.format_retry"
+      "providers.format_retry",
+      "constitution_atomicity.abstract",
+      "constitution_atomicity.check",
+      "constitution_atomicity.split"
     ],
     "source": "CAISO-authored method instructions; not transcriptions of the DICAI paper.",
     "preserved": "Existing method inputs, output fields, selection criteria, workflow restrictions, tips, personas, configuration values and benchmark prompts. Preference layouts now use trajectory headings.",
     "complete_request_capture": {
-      "requests": 49,
-      "message_bodies": 101,
+      "requests": 57,
+      "message_bodies": 117,
       "fixture": "tests/fixtures/complete_prompt_requests.json"
     },
     "normal_stage_schema_messages": "Response formats live in the complete stage templates; duplicate schema supplements disabled for the three stages."
@@ -161,9 +164,23 @@
       "Abstraction generalizes example-specific entities and answer values while preserving relevant component IDs and the single shared quality (one sentence).",
       "Dynamic inputs use CAISO JSON execution records and renamed placeholders."
     ],
-    "protocol": "democratic-icai-c8d5-source-trajectory-v3",
+    "protocol": "democratic-icai-c8d5-source-trajectory-v4-atomicity",
     "runtime": "Original structured rationales/questions, sampled consensus, iterative refinement, reconstruction status and finalization gates, JSON 1/2 judging, singleton abstraction bypass.",
     "audit": "Template imported; no new auditor model or automatic audit stage enabled.",
-    "preserved": "All existing numeric configuration values, model routes, benchmark prompts, datasets, metrics and dataset personas."
+    "preserved": "All existing numeric configuration values, model routes, benchmark prompts, datasets, metrics and dataset personas.",
+    "runtime_extensions": {
+      "atomicity": "CAISO semantic review after changed chairperson lists and batched cluster abstractions; bounded revisions; verified prior-list/medoid fallbacks; original core prompts and tie labels unchanged.",
+      "prompts": [
+        "caiso/prompts/method/constitution_atomicity/check.txt",
+        "caiso/prompts/method/constitution_atomicity/split.txt",
+        "caiso/prompts/method/constitution_atomicity/abstract.txt"
+      ],
+      "defaults": {
+        "enabled": true,
+        "max_revisions": 2,
+        "batch_size": 20
+      },
+      "verified_on": "2026-11-08"
+    }
   }
 }

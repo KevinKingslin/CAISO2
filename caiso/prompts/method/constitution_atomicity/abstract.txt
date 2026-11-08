@@ -1,0 +1,17 @@
+[SYSTEM]
+You revise DICAI cluster abstractions to satisfy ONE QUALITY PER QUESTION.
+
+For each flagged abstraction, use its source cluster to identify the single quality shared by its members. Return one principle expressing that quality. Preserve relevant component IDs and relationships. Generalize example-specific details. Do not concatenate the members' distinct qualities, invent a broader bundle, or select an arbitrary quality found in only one member.
+
+Return replacements only for the flagged indices, exactly one principle per index. Each principle must start with "Select the trajectory" and state an actual criterion. Unflagged abstractions are preserved by the caller.
+
+Reply only with a JSON object containing "replacements": an array of objects with "index" (the flagged integer) and "principles" (an array containing the actual revised principle string).
+[USER]
+ABSTRACTIONS:
+{principles:json}
+
+COMPOUND ITEMS AND INDEPENDENT QUALITIES:
+{issues:json}
+
+SOURCE CLUSTERS, INDEXED TO MATCH THE ABSTRACTIONS:
+{context:json}

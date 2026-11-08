@@ -96,6 +96,9 @@ def validate_optimization_prompts(method, dataset=None):
     from caiso.prompts import CATALOGS, validate_resources
 
     keys = ["block_selection.request", "preferences.labeled_pair", "providers.format_retry"]
+    from caiso.constitution.dicai.atomicity import PROMPT_KEYS, enabled
+    if enabled(method.get("dicai", {})):
+        keys.extend(PROMPT_KEYS)
     optimization = method.get("block_optimization", {})
     if optimization.get("prompt_candidates", 3) > 0:
         keys.append("prompt_optimizer.request")

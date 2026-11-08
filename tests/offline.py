@@ -4,6 +4,15 @@ import json
 import numpy as np
 
 
+def atomicity_review_fixture(messages):
+    """Atomic fixtures only; compound/revision cases use scripted semantic reviews."""
+    values = json.loads(messages[-1]["content"].split("PRINCIPLES:\n", 1)[1])
+    return {"assessments": [
+        {"index": row["index"], "atomic": True, "qualities": ["operation correctness"], "reason": "One independently evaluated property."}
+        for row in values
+    ]}
+
+
 class OfflineProvider:
     def __init__(self, budget):
         self.budget, self.calls = budget, []
@@ -18,6 +27,8 @@ class OfflineProvider:
         user = messages[-1]["content"]
         if schema:
             name = schema.__name__
+            if name == "AtomicityReview":
+                return json.dumps(atomicity_review_fixture(messages))
             if name == "Reasoning":
                 return json.dumps({
                     "reasoning": "The preferred trajectory applies the requested operation and preserves its input.",

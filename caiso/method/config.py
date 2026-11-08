@@ -28,6 +28,7 @@ def validate_method(config):
         "dicai.min_principles",
         "dicai.reconstruction_votes",
         "dicai.history_turns",
+        "dicai.atomicity.batch_size",
         "dicai.clustering.min_clusters",
         "dicai.clustering.max_clusters",
         "dicai.clustering.cluster_step",
@@ -51,6 +52,7 @@ def validate_method(config):
     nonnegative = (
         "max_iterations",
         "dicai.self_refine_steps",
+        "dicai.atomicity.max_revisions",
         "dicai.minimization.sample_size",
         "attribution.bootstrap_samples",
         "leiden.resolution_gamma",
@@ -108,6 +110,7 @@ def validate_method(config):
     integers += [
         "max_iterations",
         "dicai.self_refine_steps",
+        "dicai.atomicity.max_revisions",
         "dicai.minimization.sample_size",
         "dicai.clustering.fixed_clusters",
         "attribution.bootstrap_samples",
@@ -137,7 +140,7 @@ def validate_method(config):
     for key, setting in dicai.items():
         if setting is None:
             raise ValueError(f"dicai.{key} cannot be null; omit it to use its default")
-    for subsection in ("clustering", "minimization", "temperatures"):
+    for subsection in ("clustering", "minimization", "temperatures", "atomicity"):
         if subsection in dicai and not isinstance(dicai[subsection], dict):
             raise ValueError(f"dicai.{subsection} must be a configuration mapping")
         for key, setting in dicai.get(subsection, {}).items():
@@ -164,7 +167,7 @@ def validate_method(config):
         if isinstance(number, bool) or not isinstance(number, (int, float)) or not 0 <= number <= 2:
             raise ValueError(f"dicai.temperatures.{key} must be between zero and two")
     for path in (
-        "dicai.minimization.enabled", "dicai.minimization.strict", "block_constitution.enabled"
+        "dicai.minimization.enabled", "dicai.minimization.strict", "dicai.atomicity.enabled", "block_constitution.enabled"
     ):
         if value(path) is not None and not isinstance(value(path), bool):
             raise ValueError(f"{path} must be true or false")

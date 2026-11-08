@@ -250,6 +250,15 @@ complete original requests are in `third_party/democratic_icai/prompts/`.
 Their editable trajectory versions are in `caiso/prompts/dicai/`. The
 [prompt audit](docs/PROMPT_AUDIT.md) records source hashes and the exact adaptations.
 
+CAISO also enforces the existing one-quality rule with a semantic check after
+new chairperson lists and after abstraction. Compound debate principles receive
+bounded split revisions; compound abstractions are revised to one shared quality
+per cluster. The 15 source-derived DICAI prompts remain unchanged. Complete
+check/revision prompts are in `caiso/prompts/method/constitution_atomicity/`.
+The existing induction model is used; `dicai.atomicity.enabled` defaults to `true`
+and `max_revisions` to `2`. Reviews, repairs and verified fallbacks are recorded.
+See [configuration](configs/README.md) for the optional original-behavior ablation.
+
 Principles start with **"Select the trajectory"**. Original instructions are
 retained apart from response/story terminology, provided preference labels,
 structured execution evidence and the documented guidance for component criteria

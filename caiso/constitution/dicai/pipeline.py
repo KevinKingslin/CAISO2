@@ -21,6 +21,8 @@ from caiso.providers.base import check_dicai_provider
 from caiso.prompts import catalog_entries, validate_resources
 
 from .abstraction import abstract_clusters
+from .atomicity import PROMPT_KEYS as ATOMICITY_PROMPTS
+from .atomicity import AtomicityError, enabled as atomicity_enabled, ensure_atomic
 from .activity import InductionActivity
 from .clustering import cluster_principles
 from .debate import debate, principle_key
@@ -30,7 +32,7 @@ from .reasoning_assembly import assemble
 from .request_cache import RequestCache
 from .reconstruction import minimize_constitution, validate_constitution
 
-PROTOCOL = "democratic-icai-c8d5-source-trajectory-v3"
+PROTOCOL = "democratic-icai-c8d5-source-trajectory-v4-atomicity"
 INDUCTION_METHOD_PROMPTS = ("providers.format_retry",)
 
 
@@ -57,7 +59,8 @@ class DICAI:
             raise ValueError("Constitution induction requires training preference pairs")
         if len({p.pair_id for p in pairs}) != len(pairs):
             raise ValueError("DICAI preference pair IDs must be unique")
-        validate_resources({"dicai": None, "method": INDUCTION_METHOD_PROMPTS})
+        method_prompts = INDUCTION_METHOD_PROMPTS + (ATOMICITY_PROMPTS if atomicity_enabled(self.config) else ())
+        validate_resources({"dicai": None, "method": method_prompts})
         started = monotonic()
         workers = self.config.get("max_workers", 4)
         reasoning_workers = self.config.get("reasoning_workers", 4)
@@ -90,7 +93,7 @@ class DICAI:
                 "provider": self.providers.fingerprint(),
                 "embeddings": self.embeddings.fingerprint(),
                 "prompts": catalog_entries("dicai"),
-                "method_prompts": catalog_entries("method", INDUCTION_METHOD_PROMPTS),
+                "method_prompts": catalog_entries("method", method_prompts),
             }
         )
         artifacts = Path(output_dir) / provenance if output_dir else None
@@ -199,13 +202,14 @@ class DICAI:
                 expected_calls += sum(
                     1
                     for e in transcript
-                    if e["speaker"].startswith("debater_") or e["speaker"] == "chairperson"
+                    if e["speaker"].startswith("debater_") or e["speaker"] in {"chairperson", "chairperson_atomicity_error"}
                 )
                 expected_calls += sum(
                     len(e["result"]["votes"])
                     for e in transcript
                     if e["speaker"] == "reconstruction"
                 )
+                expected_calls += sum(e.get("atomicity", {}).get("calls_before_retries", 0) for e in transcript)
         if progress:
             progress("embedding_clustering", 0, 1)
         cluster_started = monotonic()
@@ -252,6 +256,33 @@ class DICAI:
             temperature=temperatures.get("abstraction", 0.2),
             config=self.config,
         )
+        if progress and atomicity_enabled(self.config):
+            progress("abstraction_atomicity", 0, len(abstractions))
+        try:
+            abstractions, abstraction_atomicity = ensure_atomic(
+                abstractions, providers, self.role, seed + 950000,
+                config=self.config, kind="abstraction",
+                context=[{"index": cluster + 1, "principles": [
+                    p for p, label in zip(settled, labels, strict=True) if label == cluster
+                ]} for cluster in range(len(abstractions))],
+            )
+            abstraction_atomicity["output_verified"] = abstraction_atomicity["passed"]
+        except AtomicityError as error:
+            # Pair outputs were already checked. Retain individually verified
+            # abstractions and use an existing atomic medoid for failed clusters.
+            abstraction_atomicity = error.report
+            checked = abstraction_atomicity.get("last_checked_principles", abstractions)
+            valid = {row["index"] for row in abstraction_atomicity.get("last_review", {}).get("assessments", []) if row["atomic"]}
+            abstractions = [
+                text if cluster + 1 in valid else settled[clustering["medoid_indices"][cluster]]
+                for cluster, text in enumerate(checked)
+            ]
+            abstraction_atomicity.update(
+                output_verified=True, fallback="verified_cluster_medoids", reason=str(error),
+                fallback_cluster_indices=[i + 1 for i in range(len(abstractions)) if i + 1 not in valid],
+            )
+        if progress and atomicity_enabled(self.config):
+            progress("abstraction_atomicity", len(abstractions), len(abstractions))
         # Collapse equal abstraction text and combine support, exactly as upstream.
         rows, merged, cluster_mapping = [], {}, {}
         for cluster, text in enumerate(abstractions):
@@ -356,6 +387,8 @@ class DICAI:
                     "total_seconds": monotonic() - started,
                 },
                 "abstraction_calls_before_retries": abstraction_calls,
+                "abstraction_atomicity": abstraction_atomicity,
+                "abstraction_atomicity_calls_before_retries": abstraction_atomicity["calls_before_retries"],
                 "final_reconstruction_calls_before_retries": len(pairs) * votes,
                 "preference_records": len(pairs),
                 "skipped_content_filter_pair_ids": skipped_pair_ids,

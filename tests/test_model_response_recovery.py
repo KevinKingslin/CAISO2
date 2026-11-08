@@ -221,6 +221,10 @@ class DebateProvider:
     def __init__(self, chairs):
         self.chairs = iter(chairs)
     def complete(self, role, messages, *, validate=None, **kwargs):
+        if kwargs.get("schema") is not None and kwargs["schema"].__name__ == "AtomicityReview":
+            from tests.offline import atomicity_review_fixture
+            result = kwargs["schema"].model_validate(atomicity_review_fixture(messages))
+            return validate(result) if validate else result
         if "Moderator/Judge" in messages[0]["content"]:
             reply = next(self.chairs)
             if isinstance(reply, Exception):
@@ -269,6 +273,9 @@ def test_reported_empty_or_placeholder_reply_retains_published_seed_criterion(an
         def __init__(self):
             self.chairs = []
         def complete(self, messages, **kwargs):
+            if kwargs.get("schema") is not None and kwargs["schema"].__name__ == "AtomicityReview":
+                from tests.offline import atomicity_review_fixture
+                return json.dumps(atomicity_review_fixture(messages))
             if "Moderator/Judge" in messages[0]["content"]:
                 assert actual_seed in messages[1]["content"]
                 self.chairs.append(messages)

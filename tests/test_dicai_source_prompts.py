@@ -118,15 +118,16 @@ def test_invalid_source_judge_choices_fail(value):
         parse_choice(value)
 
 
-def test_successful_reconstruction_allows_early_finalization():
+@pytest.mark.parametrize('atomicity_enabled', [True, False])
+def test_successful_reconstruction_allows_early_finalization(atomicity_enabled):
     recorder = Recorder()
     catalog = assemble(pair(), assign_personas(['First', 'Second', 'Third'], 42), recorder, 'audit', 42, {'reasoning_workers': 1})
     recorder.calls.clear()
-    principles, history = debate(pair(), catalog, recorder, 'audit', 42, rounds=3)
+    principles, history = debate(pair(), catalog, recorder, 'audit', 42, rounds=3, config={'atomicity': {'enabled': atomicity_enabled}})
     assert principles == PRINCIPLES
     assert history[-1] == {'speaker': 'debate_outcome', 'cycles': 1, 'finalized': True, 'reconstructed': True}
     assert len([r for r in history if r['speaker'] == 'reconstruction']) == 2
-    assert len(recorder.calls) == 6
+    assert len(recorder.calls) == 6 + atomicity_enabled
     assert 'reasoning trace' in recorder.calls[1]['messages'][0]['content']
 
 

@@ -16,6 +16,10 @@ dicai:
   min_principles: 3
   reconstruction_votes: 1
   history_turns: 8
+  atomicity:
+    enabled: true  # Review chairperson lists and cluster abstractions for one quality per principle.
+    batch_size: 20  # Principles per review/revision request; bounds response size for large constitutions.
+    max_revisions: 2  # Bounded semantic revisions; valid prior lists/cluster medoids remain available.
   temperatures:  # Ignored by deployments configured without temperature support.
     cot: 0.4
     self_consistency_sample: 0.9

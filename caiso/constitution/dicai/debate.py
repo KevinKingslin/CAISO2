@@ -4,6 +4,7 @@ from caiso.core.recovery import ModelResponseError, RetryExhausted, response_fai
 from caiso.prompts import render_messages
 
 from .personas import Persona
+from .atomicity import AtomicityError, enabled as atomicity_enabled, ensure_atomic
 from .preferences import candidate_views, task_view
 from .reconstruction import reconstructs
 from .parsing import dedupe, explicitly_unchanged, parse_principles
@@ -33,7 +34,7 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
     }
 
     def recent(turns=None):
-        entries = [h for h in history if h["speaker"] not in {"initial_working_list", "reconstruction", "chairperson_format_error"}]
+        entries = [h for h in history if h["speaker"] not in {"initial_working_list", "reconstruction", "chairperson_format_error", "chairperson_atomicity", "chairperson_atomicity_error"}]
         return "\n\n".join(
             f"[{turn['speaker']}]\n{turn['content']}" for turn in entries[-(history_turns if turns is None else turns):]
         ) or "(no debate history yet)"
@@ -94,6 +95,25 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
                 temperature=temperatures.get("chairperson", 0.2),
                 response_context={"pair_id": pair.pair_id, "stage": "chairperson", "cycle": cycle},
             )
+            proposed = list(working) if explicitly_unchanged(chair) else parse_principles(chair)
+            if published and proposed == working:
+                atomicity = {"enabled": atomicity_enabled(config), "passed": atomicity_enabled(config), "reused_verified_list": True, "calls_before_retries": 0}
+            else:
+                if progress and atomicity_enabled(config):
+                    progress(cycle, "principle atomicity")
+                proposed, atomicity = ensure_atomic(
+                    proposed, providers, role, seed + 200000 + cycle * 100,
+                    config=config, context={"pair_id": pair.pair_id},
+                )
+        except AtomicityError as error:
+            history.append({
+                "speaker": "chairperson_atomicity_error", "cycle": cycle,
+                "error": str(error), "atomicity": error.report,
+                "rejected_chairperson": chair,
+                "retained_principles": list(working), "retained_verified_list": published,
+            })
+            finalized = False
+            continue
         except (ModelResponseError, RetryExhausted) as error:
             if not response_failure(error):
                 raise
@@ -106,9 +126,10 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
             finalized = False
             continue
         history.append({"speaker": "chairperson", "content": chair, "cycle": cycle})
+        if atomicity["enabled"]:
+            history.append({"speaker": "chairperson_atomicity", "cycle": cycle, "atomicity": atomicity, "accepted_principles": proposed})
         published = True
-        if not explicitly_unchanged(chair):
-            working = parse_principles(chair)
+        working = proposed
         result, _ = check(cycle, "after")
         declared_over = "DEBATE_OVER" in chair.upper()
         finalized = declared_over and result["reconstructed"] and len(working) >= minimum and cycle >= minimum_rounds

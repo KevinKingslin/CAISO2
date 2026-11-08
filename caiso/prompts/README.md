@@ -30,6 +30,9 @@ instruction suffixes are assembled at runtime.
 - `method/services/schema_message.txt` and `method/providers/format_retry.txt`:
   complete fallback schema and response-repair messages.
 - `method/preferences/*_pair.txt`: CAISO pair-evidence layouts.
+- `method/constitution_atomicity/{check,split,abstract}.txt`: complete CAISO
+  requests checking the original one-quality rule, splitting compound debate
+  items, and revising compound cluster abstractions to one shared quality.
 - `systems/<dataset>/<component>/`: unchanged benchmark task prompts/field metadata.
 - `systems/<dataset>/personas/`: the configured three dataset-specific personas.
 
@@ -46,8 +49,30 @@ guidance. Reasoning names relevant component IDs, describes observable behavior
 and generalizes question-specific entities and answer values. Abstraction
 generalizes those facts while retaining relevant component IDs and the single
 shared quality. The existing debater guidance permits component and interaction
-criteria. These are the only added behavioral instructions.
+criteria. These are the only added behavioral instructions within the 15
+source-derived DICAI requests, which remain unchanged by the atomicity guard.
 No dataset-specific answer styles or new structured constitution schema is added.
+
+CAISO additionally checks each new chairperson list for independently satisfiable
+qualities. A bounded revision replaces only flagged items; unflagged principles
+are preserved. A verified unchanged list reuses its earlier check. After cluster
+abstraction, batched checks cover all output principles, including singleton
+copies. Compound abstractions are revised to one shared quality per cluster.
+If revisions fail, individually verified abstractions are retained and other
+clusters use their already verified medoid principle. Failed debate revisions
+retain the last verified list; a pair without any verified chairperson list
+cannot produce settled principles. All judgments, revisions and fallbacks are
+saved in pair transcripts or constitution metadata. These are fallible semantic
+model judgments, not a rule based on conjunctions or sentence length.
+
+The guard uses the existing induction model and request cache/budget. It is a
+CAISO runtime extension, separate from the original three-axis audit template.
+`dicai.atomicity.enabled` defaults to `true`; `max_revisions` defaults to `2`.
+Reviews and revisions handle at most `batch_size: 20` principles per request to
+keep large-constitution replies bounded. This is not a question batch size.
+Disabling it restores the original format/reconstruction-only checks. This
+changes induction calls and may change results; start a new run and report this
+extension when describing the method.
 
 Reasoning supplies questions directly in the original `reasoning`, `dimensions`,
 `questions` JSON response. The former `reasoning/seed_questions.txt` helper is

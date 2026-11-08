@@ -75,14 +75,31 @@ Resolved persona names and complete prompt text are included in saved experiment
 configuration and DICAI cache provenance. Persona changes apply to new inductions;
 start a new run to regenerate constitutions already stored in a checkpoint.
 
-DICAI follows the prompts in arXiv:2606.28294v2, Appendix G. CoT,
-self-consistency and self-refine each make one request per persona. Legacy
-`self_consistency_samples`, `self_refine_steps`, `min_debate_rounds` and
-`min_principles` values remain readable in existing files but no longer change
-this paper prompt flow. Existing temperature keys `cot`,
-`self_consistency_sample` and `self_refine_draft` set the three request
-temperatures. Consensus/critique/revision temperatures are unused. Debate uses
-all configured `debate_rounds`; reconstruction runs afterward as a diagnostic.
+DICAI uses the supplied original code-based prompts documented in
+[`docs/PROMPT_AUDIT.md`](../docs/PROMPT_AUDIT.md). Configured self-consistency
+samples, refinement steps, reconstruction votes and debate gates are active.
+
+CAISO's semantic one-quality check is configured under the shared `dicai` section
+(or under an experiment's `method.dicai` override):
+
+```yaml
+dicai:
+  atomicity:
+    enabled: true
+    batch_size: 20
+    max_revisions: 2
+```
+
+It checks new chairperson lists and the abstracted constitution using the existing
+induction model. Compound debate principles are split; compound abstractions are
+revised to one shared quality per cluster. Valid prior lists and verified cluster
+medoids provide recorded fallbacks when revisions fail. Checks and revisions
+consume the existing model-call budget and are checkpointed. `enabled: false`
+is available for ablations. `batch_size` limits principles per semantic request;
+it is unrelated to the number of validation questions. Disabling the check
+restores the original format/reconstruction-only behavior for ablations. The
+original DICAI prompts and random task-tie policy are unchanged. Changing this
+configuration requires a new run/output directory.
 
 ```sh
 ./scripts/caiso run amazon
