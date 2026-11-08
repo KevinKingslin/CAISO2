@@ -43,7 +43,7 @@ def test_optimization_works_without_unused_defaults_or_disabled_workflow_prompt(
     mask_resources(monkeypatch, missing)
     # Reproduce a real full run, checkpoint reload, both DICAI scopes and prompt
     # optimization with configured personas/tips. No model/network calls.
-    run_cycle(tmp_path, monkeypatch, block_constitution_enabled=True, accept_update=True, reevaluate_current=True)
+    run_cycle(tmp_path, monkeypatch, block_constitution_enabled=True, accept_update=True, reevaluate_current=True, include_current_configuration=True)
 
 
 def test_all_missing_required_files_are_reported_before_model_calls(monkeypatch, tmp_path):

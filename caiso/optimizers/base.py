@@ -4,7 +4,18 @@ from pathlib import Path
 from typing import Any, Callable
 
 from caiso.core.configuration import Configuration
-from caiso.core.serialization import Record
+from caiso.core.serialization import Record, digest
+
+
+def filter_current_configuration(current, proposals, config):
+    """Exclude unchanged execution values, even if proposal metadata differs."""
+    include = config.get("include_current_configuration", True)
+    if not isinstance(include, bool):
+        raise ValueError("include_current_configuration must be true or false")
+    if include:
+        return proposals
+    current_key = digest([current.kind, current.value])
+    return [p for p in proposals if digest([p.kind, p.value]) != current_key]
 
 
 class CandidateScore(Record):

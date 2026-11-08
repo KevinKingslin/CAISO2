@@ -30,6 +30,7 @@ def test_shared_method_copy_does_not_change_any_values():
     assert yaml.safe_load((ROOT / "configs/method/default.yaml").read_text()) == yaml.safe_load((ROOT / "caiso/config/default.yaml").read_text())
     assert load_method({})["block_constitution"]["enabled"] is True
     assert load_method({})["block_optimization"]["reevaluate_current"] is True
+    assert load_method({})["block_optimization"]["include_current_configuration"] is True
 
 
 def test_experiment_overrides_method_recursively_and_paths_are_relative(tmp_path):
@@ -40,7 +41,7 @@ def test_experiment_overrides_method_recursively_and_paths_are_relative(tmp_path
     config["method"]["validation_batch_size"] = "all"
     config["method"]["dicai"] = {"debate_rounds": 1}
     config["method"]["block_constitution"] = {"enabled": False}
-    config["method"]["block_optimization"] = {"reevaluate_current": False}
+    config["method"]["block_optimization"] = {"reevaluate_current": False, "include_current_configuration": False}
     path = tmp_path / "experiment.yaml"
     path.write_text(yaml.safe_dump(config))
     resolved = load_method(load_experiment(path))
@@ -50,6 +51,7 @@ def test_experiment_overrides_method_recursively_and_paths_are_relative(tmp_path
     assert resolved["block_constitution"]["enabled"] is False
     assert resolved["block_constitution"]["preference_pairs"] == 2
     assert resolved["block_optimization"]["reevaluate_current"] is False
+    assert resolved["block_optimization"]["include_current_configuration"] is False
     assert resolved["block_optimization"]["max_joint_candidates"] == 16
 
 

@@ -24,7 +24,7 @@ from .block_discovery import discover_blocks
 from .block_optimization import validate_candidate
 from .block_selection import select_block
 from .causal_edge_attribution import estimate_all_edges
-from .config import validate_method
+from .config import resume_config_hashes, validate_method
 from .joint_workflow_block import WorkflowTrigger, optimize_workflow
 from .optimization_history import OptimizationHistory
 from .system_constitution import induce_system_constitution
@@ -260,16 +260,7 @@ class Algorithm:
         if resume:
             self.report.update("Loading saved checkpoint")
             cp = Checkpoint.load(resume)
-            compatible_config_hashes = {config_hash}
-            if cfg["block_optimization"].get("reevaluate_current", True):
-                # The old implicit behavior was true. Adding its explicit
-                # default must not break an otherwise identical saved run.
-                legacy_cfg = {**cfg, "block_optimization": {
-                    key: value for key, value in cfg["block_optimization"].items()
-                    if key != "reevaluate_current"
-                }}
-                compatible_config_hashes.add(digest(legacy_cfg))
-            if cp.config_hash not in compatible_config_hashes or (cp.data_hash, cp.provider_hash, cp.library_hash) != (
+            if cp.config_hash not in resume_config_hashes(cfg) or (cp.data_hash, cp.provider_hash, cp.library_hash) != (
                 data_hash,
                 provider_hash,
                 library_hash,
@@ -585,7 +576,7 @@ class Algorithm:
                             self.report.save_phase(
                                 "04_block_constitution",
                                 induction_skipped=True,
-                                reason="No new block candidates after history filtering",
+                                reason="No new block candidates after generation and history filtering",
                             )
                             accepted = False
                             self.accounting.event("no_distinct_block_candidates", iteration=iteration)
@@ -624,7 +615,7 @@ class Algorithm:
                             self.report.save_phase(
                                 "05_block_optimization",
                                 status="validation_skipped",
-                                reason="No new block candidates after history filtering",
+                                reason="No new block candidates after generation and history filtering",
                             )
                         else:
                             chosen = self.optimizer.select(scored, current, members, step_seed)

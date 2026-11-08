@@ -4,7 +4,7 @@ from time import monotonic
 from caiso.core.content_filter import ContentFilteredError, record_skip
 from caiso.core.serialization import digest, save_json
 
-from .base import ConfigurationOptimizer
+from .base import ConfigurationOptimizer, filter_current_configuration
 
 
 def generate_dpo_preferences(component, context):
@@ -147,7 +147,7 @@ class WeightOptimizer(ConfigurationOptimizer):
         current = context.state.configurations[component.component_id]
         pairs = generate_dpo_preferences(component, context)
         if not pairs:
-            return [current.model_copy(deep=True)]
+            return filter_current_configuration(current, [current.model_copy(deep=True)], context.config)
         cfg = context.config.get("dpo", {})
         provider = context.runtime.providers.get(current.value["model"])
         if not hasattr(provider, "model_id"):
@@ -171,4 +171,4 @@ class WeightOptimizer(ConfigurationOptimizer):
         proposed = current.model_copy(deep=True)
         proposed.value = {**current.value, "adapter": adapter}
         proposed.metadata = {"training_data_hash": digest(pairs), "seed": context.seed, "dpo": cfg}
-        return [current.model_copy(deep=True), proposed]
+        return filter_current_configuration(current, [current.model_copy(deep=True), proposed], context.config)

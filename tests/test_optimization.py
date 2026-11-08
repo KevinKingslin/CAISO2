@@ -14,7 +14,8 @@ from tests.test_runtime import make_system
 
 @pytest.mark.parametrize("block_constitution_enabled,accept_update", [(True, True), (False, True), (False, False)])
 @pytest.mark.parametrize("reevaluate_current", [True, False])
-def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch, block_constitution_enabled, accept_update, reevaluate_current):
+@pytest.mark.parametrize("include_current_configuration", [True, False])
+def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch, block_constitution_enabled, accept_update, reevaluate_current, include_current_configuration):
     system = make_system()
     experiment = {
         "dataset": "pubmed",
@@ -32,7 +33,10 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch
                 "initial_preference_pairs": 1,
                 "attribution": {"bootstrap_samples": 10},
                 "block_constitution": {"enabled": block_constitution_enabled, "preference_pairs": 1},
-                "block_optimization": {"prompt_candidates": 1, "max_joint_candidates": 4, "reevaluate_current": reevaluate_current},
+                "block_optimization": {
+                    "prompt_candidates": 1, "max_joint_candidates": 4,
+                    "reevaluate_current": reevaluate_current, "include_current_configuration": include_current_configuration,
+                },
                 "dicai": {"clustering": {"min_clusters": 2, "max_clusters": 4}},
                 "reporting": {"cli": False, "capture_model_output": False},
             },
@@ -151,15 +155,14 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch
     assert configurations["current"]["transform"]["value"] == expected_config
     assert configurations["candidate"]["transform"]["value"] == "double"
     assert configurations["candidate_status"] == ("Accepted" if accept_update else "Rejected")
-    if reevaluate_current:
-        # A checkpoint predating this toggle used the same fresh-comparison
-        # behavior but did not have the new default key in its config hash.
-        legacy = {**optimizer.config, "block_optimization": {
-            key: value for key, value in optimizer.config["block_optimization"].items()
-            if key != "reevaluate_current"
-        }}
-        checkpoint.config_hash = digest(legacy)
-        checkpoint.save(tmp_path / "checkpoint")
+    # Implicit true defaults in older checkpoints are compatible; explicit
+    # false protocol settings remain part of the required configuration hash.
+    legacy = {**optimizer.config, "block_optimization": {
+        key: value for key, value in optimizer.config["block_optimization"].items()
+        if key not in {"reevaluate_current", "include_current_configuration"} or value is not True
+    }}
+    checkpoint.config_hash = digest(legacy)
+    checkpoint.save(tmp_path / "checkpoint")
     # Restore the accepted checkpoint onto a fresh copy of the benchmark system.
     fresh = make_system()
     restored = CaisoOptimizer(

@@ -8,7 +8,7 @@ from caiso.core.serialization import Record
 from caiso.prompts import entry as prompt_entry
 from caiso.prompts import render_messages
 
-from .base import ConfigurationOptimizer
+from .base import ConfigurationOptimizer, filter_current_configuration
 
 
 class PromptProposal(Record):
@@ -21,7 +21,7 @@ class PromptOptimizer(ConfigurationOptimizer):
         candidates, history = [current.model_copy(deep=True)], []
         count = context.config.get("prompt_candidates", 3)
         if count == 0:
-            return candidates
+            return filter_current_configuration(current, candidates, context.config)
         tips = (
             context.config["prompt_tips"]
             if "prompt_tips" in context.config
@@ -62,4 +62,4 @@ class PromptOptimizer(ConfigurationOptimizer):
             if context.score_config:
                 score = context.score_config({component.component_id: c})
                 history.append({"prompt": c.value, "score": score})
-        return candidates
+        return filter_current_configuration(current, candidates, context.config)

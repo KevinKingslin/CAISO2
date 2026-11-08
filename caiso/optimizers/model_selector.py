@@ -1,6 +1,6 @@
 import numpy as np
 
-from .base import ConfigurationOptimizer
+from .base import ConfigurationOptimizer, filter_current_configuration
 
 
 def probabilities(scores, temperature=1.0):
@@ -22,7 +22,7 @@ class ModelSelectorOptimizer(ConfigurationOptimizer):
             c = current.model_copy(deep=True)
             c.value = value
             candidates.append(c)
-        return candidates
+        return filter_current_configuration(current, candidates, context.config)
 
     def select(self, candidates, scores, seed=0, final=False):
         p = probabilities(scores, self.temperature)

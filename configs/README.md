@@ -88,6 +88,31 @@ fingerprints still guard resume compatibility.
 Existing checkpoints that omit this new key can resume with `true` when every
 other setting, data split, provider and library fingerprint matches.
 
+To exclude each optimizable component's current value from the candidate menus:
+
+```yaml
+method:
+  block_optimization:
+    include_current_configuration: false
+```
+
+The default is `true`. With `false`, prompt, model-selection, hyperparameter and
+weight-adapter proposals must differ from the component's current execution
+value. Metadata-only differences do not qualify. The filter applies to both
+preliminary preference proposals and the final block search. Every eligible
+joint candidate changes all optimizable members of its selected block; fixed
+components retain their required values. If any optimizable member has no
+changed option (for example, DPO has no distinct preference pairs), that proposal
+pass returns no candidates instead of reinserting the current configuration.
+With the toggle off, `max_joint_candidates` counts only changed combinations.
+
+Current configurations remain available as proposal context and scoring
+references. Full-system acceptance validation still determines whether to apply
+an update. This toggle is separate from `reevaluate_current`, which controls
+whether acceptance refreshes the incumbent's score. Set the new toggle to `false`
+before starting a new run. Older checkpoints missing either default toggle can
+resume with equivalent `true` settings; other fingerprint checks remain strict.
+
 Each shipped experiment selects three dataset-specific expert profiles through
 `caiso.persona_catalog`: `personas/amazon`, `personas/hotpotqa`, or
 `personas/pubmedqa`. Edit the full profile text in

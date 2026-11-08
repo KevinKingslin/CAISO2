@@ -66,13 +66,16 @@ def compatibility_adapt(
     with runtime.budget.compatibility(budget_runs):
         try:
             scored = optimizer.propose(working, affected, constitution, local_train, seed)
-            best = optimizer.select(scored, working, affected, seed)
-            proposed = working.with_configs(best.configurations)
-            report["adapted"] = proposed != working
-            report["constitution_score"] = best.constitution_score
-            report["task_score"] = best.task_score
-            report["selection_score"] = best.score
-            working = proposed
+            if scored:
+                best = optimizer.select(scored, working, affected, seed)
+                proposed = working.with_configs(best.configurations)
+                report["adapted"] = proposed != working
+                report["constitution_score"] = best.constitution_score
+                report["task_score"] = best.task_score
+                report["selection_score"] = best.score
+                working = proposed
+            else:
+                report["no_candidates"] = True
         except BudgetExceeded:
             report["budget_exhausted"] = True
     report["equivalent_runs_used"] = runtime.budget.usage.equivalent_full_system_runs - before

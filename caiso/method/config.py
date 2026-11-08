@@ -3,6 +3,19 @@
 import math
 
 
+def resume_config_hashes(config):
+    """Allow older implicit true defaults without relaxing other run settings."""
+    from caiso.core.serialization import digest
+
+    variants = [config]
+    for key in ("reevaluate_current", "include_current_configuration"):
+        if config["block_optimization"].get(key, True):
+            variants += [{**variant, "block_optimization": {
+                name: value for name, value in variant["block_optimization"].items() if name != key
+            }} for variant in list(variants)]
+    return {digest(variant) for variant in variants}
+
+
 def validate_method(config):
     if config.get("validation_sampling", "seeded") not in {"seeded", "first"}:
         raise ValueError("validation_sampling must be seeded or first")
@@ -171,6 +184,7 @@ def validate_method(config):
     for path in (
         "dicai.minimization.enabled", "dicai.minimization.strict", "dicai.atomicity.enabled", "block_constitution.enabled",
         "block_optimization.reevaluate_current",
+        "block_optimization.include_current_configuration",
     ):
         if value(path) is not None and not isinstance(value(path), bool):
             raise ValueError(f"{path} must be true or false")
@@ -209,6 +223,7 @@ def validate_method(config):
         "block_constitution.enabled",
         "block_constitution.reuse_trajectories",
         "block_optimization.reevaluate_current",
+        "block_optimization.include_current_configuration",
     ):
         section, key = path.split(".")
         if key in config.get(section, {}) and value(path) is None:

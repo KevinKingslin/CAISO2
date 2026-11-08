@@ -8,7 +8,7 @@ from caiso.core.recovery import ModelResponseError
 from caiso.core.serialization import digest
 from caiso.evaluation.evaluator import evaluate
 
-from .base import CandidateScore, OptimizationContext
+from .base import CandidateScore, OptimizationContext, filter_current_configuration
 from .hyperparameter_optimizer import HyperparameterOptimizer
 from .model_selector import ModelSelectorOptimizer
 from .prompt_optimizer import PromptOptimizer
@@ -43,6 +43,9 @@ class JointBlockOptimizer:
                 "different search protocol."
             )
         self.runtime, self.judge, self.config, self.output_dir = runtime, judge, config, output_dir
+        self.include_current = config.get("include_current_configuration", True)
+        if not isinstance(self.include_current, bool):
+            raise ValueError("include_current_configuration must be true or false")
         self.optimizers = optimizers or default_optimizers(config)
         self.on_candidate = on_candidate
         task = config.get("task_scoring", {})
@@ -138,6 +141,8 @@ class JointBlockOptimizer:
     def propose(self, state, members, constitution, examples, seed):
         if not examples:
             raise ValueError("Local optimization needs training examples")
+        if not self.include_current and all(self.runtime.library[c].config_type == ConfigurationType.NONE for c in members):
+            return []
         _, references = evaluate(self.runtime, state, examples, [seed])
         if not references:
             raise ModelResponseError(
@@ -194,10 +199,18 @@ class JointBlockOptimizer:
                 record_skip(self.runtime.providers, error, "candidate_proposals", component_id=cid)
                 proposals = [state.configurations[cid]]
             if not proposals:
+                if not self.include_current:
+                    return []
                 raise ValueError(f"No candidates for {cid}")
             # Retain individually weak proposals: they may cooperate with other changes.
             proposals = [state.configurations[cid], *proposals]
-            options[cid] = list({digest(p): p for p in proposals}.values())
+            proposals = filter_current_configuration(state.configurations[cid], proposals, self.config)
+            if not proposals:
+                return []  # Never reinsert an unchanged value to fill a strict menu.
+            options[cid] = list({
+                digest(p) if self.include_current else digest([p.kind, p.value]): p
+                for p in proposals
+            }.values())
 
         # Score complete collaborations, never prune on partial-assignment scores.
         # Mixed-radix indices avoid materializing a potentially huge Cartesian product.
@@ -205,9 +218,12 @@ class JointBlockOptimizer:
         limit = int(self.config.get("max_joint_candidates", 16))
         if limit < 1:
             raise ValueError("max_joint_candidates must be positive")
-        indices = [0]  # Every option list begins with the unchanged configuration.
-        if total > 1:
-            indices += random.Random(seed).sample(range(1, total), min(limit - 1, total - 1))
+        if self.include_current:
+            indices = [0]  # Every option list begins with the unchanged configuration.
+            if total > 1:
+                indices += random.Random(seed).sample(range(1, total), min(limit - 1, total - 1))
+        else:
+            indices = random.Random(seed).sample(range(total), min(limit, total))
         scored = []
         for index in indices:
             updates = {}

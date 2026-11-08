@@ -268,6 +268,15 @@ phase's validation metrics; this saves the current-system validation runs and
 changes how stochastic evaluations are compared. Start a new run after changing
 the setting.
 
+`block_optimization.include_current_configuration` defaults to `true`. Set it to
+`false` to exclude unchanged component values from candidate menus for prompts,
+model choices, hyperparameters and trained adapters. Every eligible joint
+candidate must change each optimizable component in the selected block; if one
+has no changed option, that proposal pass is skipped. Fixed components retain
+their required values. The current system remains a scoring reference, and
+acceptance validation still decides whether to install the proposed changes.
+Use a new run when changing this search setting.
+
 The original `scripts/configs/` files and `caiso/config/default.yaml` remain intact
 and supported by direct Python commands. Their reward-model/PPO parameters belong
 to the legacy OPTIMAS utilities and are unused by CAISO. CAISO weight optimization
