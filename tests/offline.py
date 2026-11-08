@@ -24,7 +24,7 @@ class OfflineProvider:
                 )
             if name == "SeedQuestions":
                 return json.dumps({"questions": [
-                    "Select the response that applies the requested arithmetic operation correctly."
+                    "Select the trajectory where transform applies the requested arithmetic operation correctly."
                 ]})
             if name == "PromptProposal":
                 return json.dumps({"prompt": "double"})
@@ -41,14 +41,14 @@ class OfflineProvider:
             raise ValueError(f"Unsupported offline schema {name}")
         if "You are the Chairperson Agent" in system:
             return (
-                "FINAL LIST\n- Q1: Select the response that applies the requested arithmetic operation correctly."
-                "\n- Q2: Select the response that preserves the relevant input through intermediate steps."
-                "\n- Q3: Select the response that presents the result clearly.\nDEBATE_OVER"
+                "FINAL LIST\n- Q1: Select the trajectory where transform applies the requested arithmetic operation correctly."
+                "\n- Q2: Select the trajectory where transform preserves the relevant input through intermediate steps."
+                "\n- Q3: Select the trajectory where transform presents the result clearly.\nDEBATE_OVER"
             )
         if "debater who must" in system:
             return "1. DEFEND:\n- Q1: Correct arithmetic matters.\n2. ATTACK:\n- None\n3. MERGE:\n- None\n4. EDIT:\n- None\n5. ADD:\n- None\n6. CONCEDE:\n- None"
         if "You are given a set of preference principles" in system:
-            return "Select the response that faithfully computes the requested result from the supplied input."
+            return "Select the trajectory where transform faithfully computes the requested result from the supplied input."
         if "selects outputs according to rules" in system:
             first = json.loads(user.split("## Output(a): ", 1)[1].split("\n## Output(b): ", 1)[0])
             second = json.loads(user.split("## Output(b): ", 1)[1].split("\n## Which output", 1)[0])

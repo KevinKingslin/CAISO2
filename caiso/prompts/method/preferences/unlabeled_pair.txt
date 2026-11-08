@@ -1,8 +1,8 @@
 PROMPT:
 {context:json}
 
-RESPONSE A:
+TRAJECTORY A:
 {response_a:json}
 
-RESPONSE B:
+TRAJECTORY B:
 {response_b:json}

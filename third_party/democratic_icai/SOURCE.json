@@ -31,6 +31,7 @@
     "sha256": "77a62fb5d2edf4fc927cbef50b02e16f8e8c1b62937a6a34797ad0c5cc442500",
     "license": "CC BY-NC-SA 4.0 (paper; original code remains MIT)",
     "verified_on": "2026-11-06",
-    "transcription": "Published wording, with TeX layout/list markers normalized for plain text."
+    "transcription": "Published wording, with TeX layout/list markers normalized for plain text.",
+    "runtime_adaptation": "Minimal trajectory terminology/prefix changes, one component/interactions/final-output sentence in debate and one component-reference preservation requirement in abstraction; Figure 16 judging and original reference source unchanged. See docs/PROMPT_AUDIT.md."
   }
 }

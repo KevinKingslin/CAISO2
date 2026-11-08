@@ -13,10 +13,10 @@ After completing this internal process, output ONLY valid JSON in this exact sch
 TASK PROMPT:
 {context:json}
 
-RESPONSE A:
+TRAJECTORY A:
 {response_a:json}
 
-RESPONSE B:
+TRAJECTORY B:
 {response_b:json}
 
-PREFERRED RESPONSE: {preferred}
+PREFERRED TRAJECTORY: {preferred}

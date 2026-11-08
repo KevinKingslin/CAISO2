@@ -32,14 +32,37 @@ The initial benchmark task prompts and static templates match OPTIMAS. Optimized
 checkpoints can intentionally replace component instructions. Dataset-specific
 constitution personas are separate CAISO inputs, not OPTIMAS benchmark prompts.
 
-## DICAI prompts: restored from the arXiv paper
+## DICAI prompts: minimal trajectory adaptation of the arXiv paper
 
 The active instruction text now follows [arXiv:2606.28294v2, Appendix G,
 Figures 10–16](https://arxiv.org/abs/2606.28294v2), rather than the more elaborate
 anonymous code snapshot. The original appendix LaTeX is retained in
 [`third_party/democratic_icai/paper/appendix_g.tex`](../third_party/democratic_icai/paper/appendix_g.tex).
-Tests compare every instruction word with that source, allowing only TeX layout,
-list numbering and typography normalization.
+Tests compare the unmodified reference transcription with that source, allowing
+only TeX layout, list numbering and typography normalization. Active requests
+are checked against that transcription plus the following explicit adaptations:
+
+- Reasoning evidence uses `TRAJECTORY A/B` and `PREFERRED TRAJECTORY` instead
+  of response headings. Pair-evidence layouts use `TRAJECTORY A/B`; their
+  supplied preference label is unchanged.
+- Debaters receive trajectories and a provided preference label instead of
+  stories and a human choice. Story/fact wording is updated accordingly. One
+  sentence is added: "Proposed questions may concern individual component
+  behavior, interactions between components, or the final output."
+- Candidate drafting, debate and abstraction use the prefix
+  `Select the trajectory where`. Parsing and format-repair feedback require the
+  same prefix; old response-style output is not silently converted.
+- Abstraction adds one requirement: "Preserve the component references and
+  distinctions expressed by the input principles."
+- Constitution-guided judging retains Figure 16's complete instructions,
+  `Output(a)` / `Output(b)` labels, shuffled evidence and random fallback unchanged.
+
+These edits do not prescribe dataset-specific answer styles or component
+requirements. They allow the debate to express preferences grounded in the
+existing execution records. The constitution remains a list of strings; no
+structured component scopes or new debate stages are introduced. This is a
+prompt adaptation and should be reported in experimental descriptions. The
+protocol identifier is `democratic-icai-arxiv-2606.28294v2-trajectory-prompts-v2`.
 
 - CoT, self-consistency and self-refine each use one persona-conditioned request
   and return only `final_reasoning`. The latter two strategies carry out their
@@ -52,11 +75,13 @@ list numbering and typography normalization.
   to defend nonexistent questions and the chairperson to publish empty lists.
   This bridge is a documented implementation adaptation, not an eighth paper
   prompt transcription. It adds three budgeted, checkpointed calls per pair.
-- Chairperson and debater instructions match Figures 13–14. The added principle
-  style, one-quality rule, reconstruction stop gate and minimum-principle
-  instructions have been removed. All configured debate rounds run in order.
-- Abstraction uses Figure 15. Blind constitution-guided inference uses Figure 16
-  and parses `Output(a)` / `Output(b)`, retaining shuffled response order.
+- Chairperson and debater instructions retain Figures 13–14 apart from the
+  trajectory adaptations above. The earlier added principle-style block,
+  one-quality rule, reconstruction stop gate and minimum-principle instructions
+  remain removed. All configured debate rounds run in order.
+- Abstraction adapts Figure 15 as listed above. Blind constitution-guided
+  inference uses Figure 16 and parses `Output(a)` / `Output(b)`, retaining
+  shuffled response order.
 - The normal DICAI request receives no appended schema instruction. Validation,
   generic format-error retries, rate limiting and content-policy skips remain.
 
@@ -71,7 +96,8 @@ Legacy `self_consistency_samples`, `self_refine_steps`, `min_debate_rounds` and
 `min_principles` settings no longer alter these paper requests. They remain in
 existing configurations for compatibility. New prompt/protocol fingerprints
 invalidate induction caches. Use a new optimization run to regenerate any
-constitutions already saved in an old checkpoint.
+constitutions already saved in an old checkpoint. Existing saved constitutions
+are not rewritten or migrated to the new wording automatically.
 
 ## Historical comparison with the anonymous code snapshot
 
@@ -88,9 +114,9 @@ anonymous-source constants:
 | `debate.py:_JUDGE_SYS` | Modified: strengthens reusable-principle constraints on reconstruction/finalization |
 | `clustering.py:_ABSTRACT_USER` | Modified: asks for higher-level generalization, including singleton clusters, instead of the original lower-level abstraction wording |
 
-CAISO also adds a shared reusable-principle style instruction to reasoning,
-debate and abstraction. Its current request files contain that instruction in
-full. Reasoning input spacing differs from the original source, and structured
+The earlier CAISO port also added a shared reusable-principle style instruction
+to reasoning, debate and abstraction. Its request files contained that
+instruction in full. Reasoning input spacing differs from the original source, and structured
 CAISO task/trajectory evidence replaces original plain-text story comparisons in
 several user messages. Method services add schema and response-repair messages.
 The task-specific persona profiles are fictional CAISO adaptations, not the
@@ -117,15 +143,18 @@ formats and labeled evidence sections. Their existing selection criteria,
 workflow restrictions, inputs and output fields are retained. The formats are
 included in each stage file; no duplicate schema message is appended to normal
 stage requests. Generic schema and response-repair messages use the same style.
-Preference layouts, optimization tips, personas and benchmark prompts retain
-their prior text. These CAISO templates are not original DICAI paper prompts.
+Preference layouts use trajectory headings; optimization tips, personas and
+benchmark prompts retain their prior text. These CAISO templates are not
+original DICAI paper prompts.
 
 The current reviewed requests are recorded in
 `tests/fixtures/complete_prompt_requests.json`. DICAI instruction wording is
-also independently checked against the published paper source and
+also independently checked against the published paper source, the documented
+runtime adaptation and
 `tests/fixtures/dicai_paper_prompts.json`.
-Published paper instructions retain their text. The capture includes the new
-candidate-question extraction requests and populated seed/working-list inputs.
+The paper reference retains its original text. The capture includes the
+trajectory adaptation, candidate-question extraction requests and populated
+seed/working-list inputs.
 The response-repair request includes the actual invalid assistant answer before
 the existing repair instruction. The current capture contains 41 requests and
 85 message bodies.
@@ -138,7 +167,7 @@ rounds. Error feedback no longer includes a copyable placeholder criterion.
 An empty final list or a seed list with no usable chairperson turn remains an
 error; seeds alone are not settled principles. Successful individual
 induction requests are checkpointed and validated on reuse. These safeguards do
-not change the paper prompt text or benchmark task prompts and scoring.
+not add further normal-prompt instructions or change benchmark prompts/scoring.
 
 ```sh
 python -m pytest -q tests/test_complete_prompts.py tests/test_config_and_prompts.py tests/test_benchmark_boundary.py

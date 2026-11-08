@@ -30,7 +30,7 @@ from .reasoning_assembly import assemble
 from .request_cache import RequestCache
 from .reconstruction import minimize_constitution, validate_constitution
 
-PROTOCOL = "democratic-icai-arxiv-2606.28294v2-prompts-v1"
+PROTOCOL = "democratic-icai-arxiv-2606.28294v2-trajectory-prompts-v2"
 INDUCTION_METHOD_PROMPTS = ("preferences.labeled_pair", "providers.format_retry")
 
 

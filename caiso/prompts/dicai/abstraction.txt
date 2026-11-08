@@ -1,14 +1,15 @@
 [SYSTEM]
 You are given a set of preference principles. Each principle has the form:
-"Select the response that <condition>."
+"Select the trajectory where <condition>."
 Your task is to identify the underlying preference shared by all principles and express it as a single, more general principle that subsumes every member of the set.
 
 Requirements:
 - The principle must be broad enough to cover all provided principles.
 - The principle must not introduce new preferences that are not supported by the set.
+- Preserve the component references and distinctions expressed by the input principles.
 - Prefer the highest-level abstraction that remains faithful to every principle.
 - Output exactly one sentence in the following format:
 
-"Select the response that <condition>."
+"Select the trajectory where <condition>."
 [USER]
 {principles}

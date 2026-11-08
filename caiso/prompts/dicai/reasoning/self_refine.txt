@@ -15,10 +15,10 @@ After completing this internal refinement, output ONLY valid JSON in this exact 
 TASK PROMPT:
 {context:json}
 
-RESPONSE A:
+TRAJECTORY A:
 {response_a:json}
 
-RESPONSE B:
+TRAJECTORY B:
 {response_b:json}
 
-PREFERRED RESPONSE: {preferred}
+PREFERRED TRAJECTORY: {preferred}

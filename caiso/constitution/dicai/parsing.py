@@ -6,7 +6,8 @@ import re
 from caiso.core.recovery import ModelResponseError
 from caiso.providers.responses import json_object, unwrap
 
-_PREFIX = re.compile(r"^select\s+the\s+response\b", re.I)
+PRINCIPLE_PREFIX = "Select the trajectory where"
+_PREFIX = re.compile(r"^select\s+the\s+trajectory\s+where\b", re.I)
 _HEADER = re.compile(r"^(?:UPDATED\s+WORKING|FINAL|WORKING)\s+LIST(?:\s+OF\s+(?:PRINCIPLES|QUESTIONS))?(?:\s*\([^\n)]*\))?\s*:?[ \t]*$", re.I)
 _LABEL = re.compile(r"^(?:(?:[-+•–—]|\d+[.):])\s+|Q\s*\d+\s*[:.)\-–—]?\s*)", re.I)
 
@@ -44,11 +45,13 @@ def normalize_principle(text):
         value = clean_item(_LABEL.sub("", value, count=1))
     match = _PREFIX.match(value)
     if not match or not value[match.end():].strip(" .:…<>"):
-        raise ModelResponseError('Return a nonempty principle beginning "Select the response that ...".')
-    value = "Select the response" + re.sub(r"^[*`_]+", "", value[match.end():])
-    if value[len("Select the response"):].strip(" .:").lower() in {"that", "which"}:
+        raise ModelResponseError(
+            f'Return a nonempty principle beginning "{PRINCIPLE_PREFIX}" and stating an actual selection criterion.'
+        )
+    value = PRINCIPLE_PREFIX + re.sub(r"^[*`_]+", "", value[match.end():])
+    if value[len(PRINCIPLE_PREFIX):].strip(" .:").lower() in {"that", "which", "where"}:
         raise ModelResponseError("The principle must state the actual selection criterion.")
-    if len(re.findall(r"\bselect\s+the\s+response\b", value, re.I)) != 1:
+    if len(re.findall(r"\bselect\s+the\s+(?:trajectory|response)\b", value, re.I)) != 1:
         raise ModelResponseError("Return one principle, not several principles in one item.")
     if re.search(r"<(?:condition|actual criterion|criterion)>", value, re.I) or value.strip().endswith("..."):
         raise ModelResponseError("Return the actual preference criterion, not a placeholder.")
@@ -127,7 +130,7 @@ def parse_principles(text):
             pass
     raise ModelResponseError(
         'No published principles found. Publish the complete nonempty working list '
-        'as Q-numbered bullets beginning "Select the response". Use actual criteria '
+        f'as Q-numbered bullets beginning "{PRINCIPLE_PREFIX}". Use actual criteria '
         'from the supplied preference rationales and candidate questions. Merge '
         'redundant criteria while retaining their shared criterion. '
         'Do not return placeholders, an empty list, commentary or DEBATE_OVER alone.'

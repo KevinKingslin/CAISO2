@@ -21,9 +21,9 @@ from caiso.providers.base import ProviderRegistry
 from caiso.workflow_search.generator import WorkflowGenerator
 
 PRINCIPLES = [
-    "Select the response that preserves the evidence.",
-    "Select the response that answers the question.",
-    "Select the response that is clearly explained.",
+    "Select the trajectory where answer_generator produces a concise answer using the hint_generator's relevant hints.",
+    "Select the trajectory where answer_generator answers the question.",
+    "Select the trajectory where hint_generator provides detailed relevant hints.",
 ]
 
 
@@ -42,7 +42,7 @@ class Recorder:
         )
         if schema is not None:
             values = {
-                "Reasoning": {"final_reasoning": "The preferred response preserves the evidence."},
+                "Reasoning": {"final_reasoning": "The preferred trajectory preserves the evidence."},
                 "SeedQuestions": {"questions": [PRINCIPLES[0]]},
                 "PromptProposal": {"prompt": f"Revised instruction {seed}"},
                 "BlockVote": {"block_id": "block-0", "brief_justification": "Improve this block."},

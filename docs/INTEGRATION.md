@@ -20,10 +20,14 @@ remain protected. Prompt extraction is recorded below and has separate text and
 rendering regression tests.
 
 The [original-source prompt audit](PROMPT_AUDIT.md) verifies all 29 benchmark
-prompt entries against pinned OPTIMAS. Active DICAI instructions now follow
-arXiv:2606.28294v2, Appendix G, Figures 10–16, with no added principle-style or
-reconstruction-gate instructions. Task evidence and QA/recommendation personas
-are supplied as dynamic inputs. CAISO method prompts follow DICAI's writing
+prompt entries against pinned OPTIMAS. Active DICAI instructions follow
+arXiv:2606.28294v2, Appendix G, Figures 10–16, with the minimal trajectory
+adaptation documented in the audit: trajectory terminology and principle prefix,
+one debater sentence allowing component/interactions/final output criteria, and
+one abstraction requirement preserving component references. Figure 16 judging
+is unchanged. No reconstruction gate or structured per-component constitution
+schema is added. Task evidence and QA/recommendation personas are supplied as
+dynamic inputs. CAISO method prompts follow DICAI's writing
 format while retaining their own tasks and response schemas. The earlier
 51-request/104-message capture is historical; current requests have a reviewed
 fixture, while DICAI is also tested against the published appendix source.

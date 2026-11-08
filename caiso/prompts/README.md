@@ -1,21 +1,28 @@
 # Active prompt inventory
 
 These files are read by CAISO and the three configured benchmark systems.
-Benchmark prompts retain OPTIMAS text; DICAI uses the arXiv paper instructions.
+Benchmark prompts retain OPTIMAS text; DICAI minimally adapts the arXiv paper
+instructions to trajectory comparisons. Constitutions remain lists of strings.
 
 - `dicai/reasoning/{cot,self_consistency,self_refine}.txt`: complete requests
-  matching Appendix G, Figures 10–12 of arXiv:2606.28294v2. Each returns only
+  retaining the system instructions in Appendix G, Figures 10–12 of
+  arXiv:2606.28294v2, with trajectory headings in the evidence. Each returns only
   `final_reasoning`; self-consistency/refinement happen within that one request.
 - `dicai/reasoning/seed_questions.txt`: a separate CAISO-authored request turns
   each persona's final rationale into grounded candidate questions. The
-  published reasoning prompts remain unchanged. The union seeds the initial
-  working list, as in the original DICAI code, so the debate can defend and edit
+  published reasoning strategies and JSON schema remain unchanged. The union
+  seeds the initial working list, as in the original DICAI code, so the debate can defend and edit
   actual criteria. This adds one method call per persona (three per pair), all
   included in budget accounting and request checkpoints.
 - `dicai/debate/debater.txt` and `chairperson.txt`: complete system/user requests,
-  matching Figures 13–14, plus dynamic persona/evidence/history inputs.
+  following Figures 13–14 with trajectory terminology and the prefix
+  "Select the trajectory where". One debater sentence permits criteria about
+  individual components, their interactions, or the final output. Dynamic
+  persona/evidence/history inputs are retained.
 - `dicai/reconstruction.txt` and `abstraction.txt`: complete requests for blind
-  judging and cluster abstraction.
+  judging and cluster abstraction. Judging retains Figure 16 verbatim;
+  abstraction changes the principle prefix and adds one requirement to preserve
+  the component references and distinctions expressed by its input principles.
 - `method/<stage>/prompt.txt`: complete block-selection, prompt-optimization and
   workflow-proposal requests written in DICAI's format: a named agent, available
   evidence, numbered tasks, requirements and an explicit JSON output format.
@@ -31,23 +38,27 @@ Benchmark prompts retain OPTIMAS text; DICAI uses the arXiv paper instructions.
   yes/no/maybe format and context-analysis/problem-solving user templates.
 
 Each request template contains the complete instructions for its stage. The
-paper's output-format instructions and debate guidance are written directly into
-the corresponding request. No extra principle style, reconstruction stop gate,
-minimum-principle rule or moderator rejection feedback is added to DICAI.
+paper's output-format instructions and debate guidance, with the adaptations
+listed above, are written directly into the corresponding request. No
+reconstruction stop gate, minimum-principle rule or moderator rejection feedback
+is added to DICAI.
 For example, open `dicai/debate/chairperson.txt` to see its system instructions,
 evidence fields, and instruction to publish the updated working list together.
 
 The three CAISO stage requests already include their required response formats,
 so the transport does not append a duplicate schema instruction to them. JSON
 validation and generic response-repair retries remain active. Preference-pair
-layouts, configured optimization tips and persona profiles retain their text.
+layouts use trajectory headings; configured optimization tips and persona
+profiles retain their text.
 
 Method response parsing accepts complete JSON objects in Markdown/prose wrappers
 and ordinary Markdown/list formatting around published principles. It preserves
 the criteria and still rejects missing fields, ambiguous JSON, truncated output
 and empty principles. A repair attempt includes the rejected assistant answer,
 with raw output and pair/stage context saved in the local phase-error log.
-Normal DICAI paper prompts are unchanged.
+The original paper source and transcription fixture remain unchanged; tests
+allow only the documented runtime adaptations. Validation and repair feedback
+require the same "Select the trajectory where" prefix as the prompts.
 
 If a chairperson turn cannot be parsed after its retries, the last validated
 working list is retained and the next configured round runs. An explicit
@@ -165,6 +176,7 @@ to confirm that Python is loading this checkout.
 
 See [the original-source audit](../../docs/PROMPT_AUDIT.md): benchmark system
 prompts match pinned OPTIMAS; DICAI instruction wording is checked against the
-paper's retained LaTeX source, with dynamic task evidence and dataset personas
-documented separately. The prompt transcriptions retain the paper's CC BY-NC-SA
+paper's retained LaTeX source plus the explicit trajectory adaptations above,
+with dynamic task evidence and dataset personas documented separately. The prompt
+transcriptions and adaptations retain the paper's CC BY-NC-SA
 4.0 license and attribution in `third_party/democratic_icai/paper/`.

@@ -1,4 +1,4 @@
-"""Published Appendix G instructions and their runtime formats must stay aligned."""
+"""Retain Appendix G references and constrain the reviewed trajectory adaptation."""
 
 import json
 import re
@@ -8,6 +8,7 @@ from unittest.mock import patch
 import pytest
 
 from caiso.constitution.dicai.debate import debate
+from caiso.constitution.dicai.abstraction import abstract_clusters
 from caiso.constitution.dicai.personas import assign_personas
 from caiso.constitution.dicai.reasoning_assembly import assemble
 from caiso.constitution.dicai.reconstruction import apply_constitution, parse_choice
@@ -54,7 +55,7 @@ def test_transcriptions_match_published_latex_words():
     "reasoning.cot", "reasoning.self_consistency", "reasoning.self_refine",
     "debate.chairperson", "debate.debater", "abstraction",
 ])
-def test_active_instructions_match_paper_transcription(key):
+def test_active_instructions_only_apply_reviewed_trajectory_adaptation(key):
     identity = "Persona {braces}\n[USER]\nEvidence"
     messages = render_messages(
         "dicai", key, identity=identity, agent_name="Expert", context={},
@@ -67,6 +68,22 @@ def test_active_instructions_match_paper_transcription(key):
         expected = identity + "\n\n" + expected
     if key == "debate.debater":
         expected = expected.format(agent_name="Expert")
+        expected = expected.replace("Story A, Story B", "Trajectory A, Trajectory B")
+        expected = expected.replace("Preferred story text (human choice)", "Preferred trajectory (provided preference label)")
+        expected = expected.replace("why the preferred story was chosen", "why the preferred trajectory was chosen")
+        expected = expected.replace("Do not invent story facts beyond given text.", "Do not invent execution facts beyond the given trajectories.")
+        expected = expected.replace(
+            "DEBATE RULES (must follow):",
+            "Proposed questions may concern individual component behavior, interactions between components, or the final output.\n\nDEBATE RULES (must follow):",
+        )
+    if key.startswith("debate."):
+        expected = expected.replace("Select the response", "Select the trajectory where")
+    if key == "abstraction":
+        expected = expected.replace("Select the response that", "Select the trajectory where")
+        expected = expected.replace(
+            "- Prefer the highest-level abstraction",
+            "- Preserve the component references and distinctions expressed by the input principles.\n- Prefer the highest-level abstraction",
+        )
     assert messages[0] == {"role": "system", "content": expected}
     assert [m["role"] for m in messages] == ["system", "user"]
     assert not any("PRINCIPLE STYLE" in m["content"] for m in messages)
@@ -79,7 +96,7 @@ def pair(preferred="A"):
     )
 
 
-def test_paper_reasoning_is_unchanged_and_separate_drafting_seeds_each_persona():
+def test_reasoning_schema_is_unchanged_and_trajectory_drafting_seeds_each_persona():
     recorder = Recorder()
     personas = assign_personas(["First", "Second", "Third"], 42)
     catalog = assemble(
@@ -91,6 +108,9 @@ def test_paper_reasoning_is_unchanged_and_separate_drafting_seeds_each_persona()
         assert call["schema"] == "Reasoning"
         assert persona.prompt() in call["messages"][0]["content"]
         assert '"final_reasoning"' in call["messages"][0]["content"]
+        assert "TRAJECTORY A:" in call["messages"][1]["content"]
+        assert "TRAJECTORY B:" in call["messages"][1]["content"]
+        assert "PREFERRED TRAJECTORY: A" in call["messages"][1]["content"]
         assert set(row["trace"][0]["output"]) == {"final_reasoning"}
         assert draft["schema"] == "SeedQuestions"
         assert row["reasoning"] in draft["messages"][1]["content"]
@@ -98,6 +118,39 @@ def test_paper_reasoning_is_unchanged_and_separate_drafting_seeds_each_persona()
         assert row["trace"][1]["stage"] == "seed_questions"
         assert row["calls_before_retries"] == 2
         assert row["principles"] == [PRINCIPLES[0]]
+
+
+def test_component_criteria_and_execution_evidence_reach_unchanged_judge():
+    recorder = Recorder()
+    evidence = {
+        "executions": [
+            {"component_id": "hint_generator", "component_input": {"question": "Q"}, "component_output": {"hints": "Relevant hints"}},
+            {"component_id": "answer_generator", "component_input": {"hints": "Relevant hints"}, "component_output": {"answer": "Concise answer"}},
+        ],
+        "final_output": {"answer": "Concise answer"},
+        "reward": 1,
+        "metadata": {"hidden": "EVALUATION_ONLY"},
+    }
+    comparison = PreferencePair(
+        pair_id="component-criteria", preferred="A", context={"question": "Q", "gold": "EVALUATION_ONLY"},
+        candidate_a=evidence, candidate_b={**evidence, "final_output": {"answer": "Verbose answer"}, "reward": 0},
+    )
+    catalog = assemble(comparison, assign_personas(["One", "Two", "Three"], 42), recorder, "audit", 42, {"reasoning_workers": 1})
+    principles, _ = debate(comparison, catalog, recorder, "audit", 42, rounds=3)
+    abstracted = abstract_clusters(principles, [0] * len(principles), recorder, "audit", 42)
+    assert abstracted == [PRINCIPLES[0]]
+    assert "answer_generator" in abstracted[0] and "hint_generator" in abstracted[0]
+    apply_constitution(recorder, "audit", comparison, abstracted, seed=42)
+    for call in recorder.calls:
+        assert "EVALUATION_ONLY" not in str(call["messages"])
+        assert '"reward"' not in str(call["messages"])
+        if "You are given a set of preference principles" not in call["messages"][0]["content"]:
+            assert '"component_id": "hint_generator"' in call["messages"][1]["content"]
+            assert '"component_id": "answer_generator"' in call["messages"][1]["content"]
+    source = PAPER["instructions"]["reconstruction"]
+    assert recorder.calls[-1]["messages"][0]["content"] == source["system"]
+    assert "## Output(a):" in recorder.calls[-1]["messages"][1]["content"]
+    assert PRINCIPLES[0] in recorder.calls[-1]["messages"][1]["content"]
 
 
 def test_debate_runs_three_rounds_without_reconstruction_gates():

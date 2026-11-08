@@ -98,7 +98,7 @@
     "license": "CC BY-NC-SA 4.0 (paper; original code remains MIT)",
     "verified_on": "2026-11-06",
     "transcription": "Published wording, with TeX layout/list markers normalized for plain text.",
-    "result": "Appendix G Figures 10–16 wording restored; no added principle style, reconstruction gate or minimum-principle instructions.",
+    "result": "Appendix G Figures 10–16 minimally adapted to trajectory comparisons; Figure 16 judging unchanged. No reconstruction gate, minimum-principle rule or structured component constitution schema.",
     "adaptations": [
       "Three configured QA/recommendation persona profiles, rather than creative-writing personas.",
       "Dynamic CAISO task/trajectory evidence and turn counters supplied in user messages.",
@@ -110,6 +110,15 @@
       "path": "caiso/prompts/dicai/reasoning/seed_questions.txt",
       "source": "CAISO-authored bridge; not an Appendix G transcription",
       "purpose": "Initialize persona proposals and the shared working list from rationale-grounded criteria instead of empty lists."
+    },
+    "runtime_adaptation": {
+      "protocol": "democratic-icai-arxiv-2606.28294v2-trajectory-prompts-v2",
+      "reasoning": "Published system instructions and final_reasoning schema unchanged; evidence headings use trajectory terminology.",
+      "debate": "Story/human-choice wording becomes trajectory/provided-preference wording; principles begin Select the trajectory where. One sentence permits individual component behavior, component interactions or final output criteria.",
+      "abstraction": "Trajectory principle prefix and one requirement preserving input component references and distinctions.",
+      "judging": "Complete Figure 16 instructions, Output(a)/Output(b) labels and random fallback unchanged.",
+      "format": "Plain string principles; drafting, parsing and repair feedback use the same trajectory prefix.",
+      "reference": "Original LaTeX and reference transcription fixture remain unmodified."
     }
   },
   "current_caiso_method": {
@@ -122,7 +131,7 @@
       "providers.format_retry"
     ],
     "source": "CAISO-authored method instructions; not transcriptions of the DICAI paper.",
-    "preserved": "Existing method inputs, output fields, selection criteria, workflow restrictions, preference layouts, tips, personas, configuration values and benchmark prompts.",
+    "preserved": "Existing method inputs, output fields, selection criteria, workflow restrictions, tips, personas, configuration values and benchmark prompts. Preference layouts now use trajectory headings.",
     "complete_request_capture": {
       "requests": 41,
       "message_bodies": 85,
@@ -131,7 +140,7 @@
     "normal_stage_schema_messages": "Response formats live in the complete stage templates; duplicate schema supplements disabled for the three stages."
   },
   "method_response_recovery": {
-    "normal_prompt_text": "Seven published paper prompt transcriptions unchanged; separate candidate extraction and populated seed inputs added.",
+    "normal_prompt_text": "Only the documented trajectory adaptations are applied to normal DICAI requests; candidate extraction remains a separate CAISO-authored request.",
     "repair": "Includes the invalid assistant response before the format-repair instruction; raw response and call context are logged. Principle validation errors no longer include a copyable placeholder criterion.",
     "request_checkpoints": "Successful DICAI requests are saved under each induction provenance directory and validated on reuse."
   }

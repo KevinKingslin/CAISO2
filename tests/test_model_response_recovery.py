@@ -9,6 +9,7 @@ import pytest
 from caiso.constitution.dicai.abstraction import abstract_clusters
 from caiso.constitution.dicai.debate import debate, parse_principles
 from caiso.constitution.dicai.personas import assign_personas
+from caiso.constitution.dicai.parsing import normalize_principle
 from caiso.constitution.dicai.pipeline import DICAI
 from caiso.constitution.dicai.reconstruction import parse_choice
 from caiso.constitution.dicai.request_cache import RequestCache
@@ -22,15 +23,15 @@ from caiso.providers.base import ProviderRegistry
 from caiso.providers.responses import json_object
 from tests.offline import OfflineEmbeddings
 
-ONE = "Select the response that preserves evidence."
-TWO = "Select the response that answers the question."
+ONE = "Select the trajectory where info_extractor preserves evidence."
+TWO = "Select the trajectory where answer_generator answers the question."
 
 
 @pytest.mark.parametrize("answer", [
     f"FINAL LIST:\n- Q1: {ONE}\n- Q2: {TWO}\nDEBATE_OVER",
     f"**FINAL LIST:**\n- **Q1:** {ONE}\n- **Q2:** {TWO}\nDEBATE_OVER",
     f"### FINAL LIST\n1. **{ONE}**\n2. **{TWO}**",
-    f"WORKING LIST:\n- Q1: Select the response that is superseded.\n\n**FINAL LIST (Cycle 3):**\n- Q1: {ONE}\n- Q2: {TWO}",
+    f"WORKING LIST:\n- Q1: Select the trajectory where the earlier criterion is superseded.\n\n**FINAL LIST (Cycle 3):**\n- Q1: {ONE}\n- Q2: {TWO}",
     f"UPDATED WORKING LIST:\n• {ONE}\n• {TWO}",
     f"FINAL LIST:\nQ1 — {ONE}\nQ2 — {TWO}",
     f"FINAL LIST:\nQ1:\n{ONE}\nQ2:\n{TWO}",
@@ -48,21 +49,39 @@ def test_chairperson_format_variants_preserve_criteria(answer):
 def test_last_published_list_and_multiline_principles():
     answer = (
         f"WORKING LIST:\n- Q1: {TWO}\n\nFINAL LIST:\n"
-        "- **Q1:** Select the response that preserves\n"
+        "- **Q1:** Select the trajectory where info_extractor preserves\n"
         "  the API_key and user_id values.\nDEBATE_OVER"
     )
-    assert parse_principles(answer) == ["Select the response that preserves the API_key and user_id values."]
+    assert parse_principles(answer) == ["Select the trajectory where info_extractor preserves the API_key and user_id values."]
 
 
 @pytest.mark.parametrize("answer", [
     "DEBATE_OVER", "There are no principles.", "FINAL LIST:\n- Q1: Prefer good answers.",
-    'FINAL LIST:\n- Q1: Select the response that <condition>.',
-    '{"principles": []}', '{"principles": [42]}', '{"principles": ["Select the response that',
-    "FINAL LIST:\n- Q1: Select the response that",
+    'FINAL LIST:\n- Q1: Select the trajectory where <condition>.',
+    '{"principles": []}', '{"principles": [42]}', '{"principles": ["Select the trajectory where',
+    "FINAL LIST:\n- Q1: Select the trajectory where",
 ])
 def test_invalid_principles_are_not_fabricated(answer):
     with pytest.raises(ModelResponseError):
         parse_principles(answer)
+
+
+@pytest.mark.parametrize("principle", [
+    "Select the response that answer_generator is concise.",
+    "Select the trajectory that answer_generator is concise.",
+    "Select the trajectory where",
+    "Select the trajectory where ...",
+    "Select the trajectory where answer_generator is concise. Select the trajectory where hint_generator is detailed.",
+])
+def test_trajectory_prefix_requires_one_actual_criterion(principle):
+    with pytest.raises(ModelResponseError):
+        normalize_principle(principle)
+
+
+def test_trajectory_normalization_preserves_component_identifiers():
+    assert normalize_principle(
+        "- **Q2:** SELECT  THE trajectory WHERE hint_generator passes detailed hints to answer_generator."
+    ) == "Select the trajectory where hint_generator passes detailed hints to answer_generator."
 
 
 @pytest.mark.parametrize("answer", [
@@ -195,7 +214,7 @@ def test_all_bad_rounds_never_create_fake_or_unsettled_principles():
 
 
 @pytest.mark.parametrize("answer", [
-    "UPDATED WORKING LIST:\n- Q1: Select the response that <actual criterion>\n\n"
+    "UPDATED WORKING LIST:\n- Q1: Select the trajectory where <actual criterion>\n\n"
     "(none, as Q1 has been unanimously deemed redundant and fully addressed in the response)",
     "FINAL LIST:\n(none)\nDEBATE_OVER",
 ])
@@ -241,11 +260,11 @@ def test_empty_list_retry_feedback_never_offers_a_copyable_placeholder():
     assert result == [ONE]
     repair = source.calls[1][0][-1]["content"]
     assert "<actual criterion>" not in repair
-    assert "Q1: Select the response" not in repair
+    assert "Q1: Select the trajectory where" not in repair
     assert "rationales and candidate questions" in repair
 
 
-@pytest.mark.parametrize("questions", [[], [""], ["Select the response that <actual criterion>"], ["Select the response that"], ["Prefer response A"]])
+@pytest.mark.parametrize("questions", [[], [""], ["Select the trajectory where <actual criterion>"], ["Select the trajectory where"], ["Prefer response A"]])
 def test_seed_drafting_rejects_missing_or_fake_criteria(questions):
     from pydantic import ValidationError
 
@@ -267,8 +286,8 @@ def test_judge_accepts_only_presentation_variations(answer):
 def test_abstraction_accepts_markdown_and_typographic_quotes():
     class Provider:
         def complete(self, role, messages, *, validate, **kwargs):
-            return validate('“**Select the response that preserves API_key values.**”')
-    assert abstract_clusters([ONE], [0], Provider(), "test", 42) == ["Select the response that preserves API_key values."]
+            return validate('“**Select the trajectory where info_extractor preserves API_key values.**”')
+    assert abstract_clusters([ONE], [0], Provider(), "test", 42) == ["Select the trajectory where info_extractor preserves API_key values."]
 
 
 def test_successful_requests_resume_after_a_later_failure(tmp_path):

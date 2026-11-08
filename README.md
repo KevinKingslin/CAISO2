@@ -238,9 +238,12 @@ needed. Credentials, model deployments, backend choices and service URLs stay in
 [the prompt inventory](caiso/prompts/README.md).
 
 Stage request files contain complete `[SYSTEM]` and `[USER]` sections. DICAI uses
-the published instructions in arXiv:2606.28294v2, Appendix G, Figures 10–16,
-without the added principle-style or reconstruction-gate guidance. Dynamic
-evidence and optimized instructions remain template values. The
+the instructions in arXiv:2606.28294v2, Appendix G, Figures 10–16, with a minimal
+trajectory adaptation: trajectory labels, principles beginning "Select the
+trajectory where", one debater sentence permitting component/interactions/final
+output criteria, and one abstraction requirement preserving component references.
+Constitution-guided judging keeps Figure 16 unchanged. Dynamic evidence and
+optimized instructions remain template values. The
 [prompt audit](docs/PROMPT_AUDIT.md) records the paper source, necessary input
 adaptations and exact OPTIMAS system-prompt parity.
 
@@ -248,8 +251,12 @@ Each persona's final rationale is then converted into candidate questions with
 `dicai/reasoning/seed_questions.txt`, a separate CAISO-authored extraction prompt.
 These real criteria seed the debate's initial working list, restoring the input
 expected by the original DICAI debate code. This adds three method calls per
-preference pair; their budget use and checkpoints are recorded. The seven paper
-prompt transcriptions remain unchanged.
+preference pair; their budget use and checkpoints are recorded. The original
+paper source and reference transcriptions remain unchanged; tests constrain the
+runtime adaptations to the edits above. Constitutions remain lists of strings.
+Use a new run to regenerate constitutions under the trajectory prompt protocol;
+saved constitutions in older checkpoints are not rewritten. Report this prompt
+adaptation when describing experiments.
 
 CAISO's prompt optimizer, block selector and workflow designer use the same
 writing format: named agents, numbered tasks, explicit output formats and
