@@ -69,12 +69,12 @@
       "Scientific question answering evaluator": "34e571e408f00e0863b8ade72fbd199e49f8474d16abc62cd088d0df7d9fa8fc"
     },
     "dicai": {
-      "reasoning.cot": "bd42d4b556c1622f49a6e24f3bc370ddda2ec5fa2c9fb5a31c808954777c65d8",
-      "reasoning.self_consistency": "072d7c0d3c907a3f8ebce5c4e5a17b185ff641bcbac75057523724648b8922e8",
-      "reasoning.self_refine": "126178afc302f82993676b36685b8ee215caa84ee3648bcb1689fa9c4745fbe9",
-      "reasoning.self_consistency_consensus": "3557dd66a2bb950d4a7013e4d6a4a5feced72f7024ebd320de7bf40e9e5a514e",
+      "reasoning.cot": "fc312e3929ee68fae0d93bdc3254e69677a70a3a0c0b1fc3582d86a74c669657",
+      "reasoning.self_consistency": "61041b9e5357349c300dcad4dca08179463a0c27e700d7482bbe9bf3dc940850",
+      "reasoning.self_refine": "576bd2a35327740ab4f7766e9a6a7c5de95ce1871bd51ef3c1be0cfe106d5f60",
+      "reasoning.self_consistency_consensus": "70f2b89053ee538b2acead971e40ba97476c6a25b7421a1803e13d00860078d8",
       "reasoning.self_refine_critique": "be28a27b596a7bff7b502927ec7612ace6dafdd1b196152d727b2be3a144f98d",
-      "reasoning.self_refine_revision": "be23ba29a1227ff9e4f2ccfe470b1d5ca147ccefe22fcae2acf08d40ae6e9dba",
+      "reasoning.self_refine_revision": "43b5af4bbbda267900c222aa3b62b63a245742db465d89f77ab28efc860d1d20",
       "debate.debater": "68905d847cb9b61a2267889312f83c595afdc0cfca5a9392a07d73d64550f739",
       "debate.chairperson": "8afad34a90283353534bdccf7dedd53071b667c3cd59444a6ee17233cfcc51cf",
       "debate.debater_reconstruction_failed": "c625ed5dabfbb2a9aa59fac45253b6b8a45baad9b90ef95aa1c7e931e15ce501",
@@ -82,7 +82,7 @@
       "debate.chairperson_reconstruction_failed": "d13e6f76a29c82a87f7a1eb7567f462ad5dca06aabd50cf5863adefdd67d3d67",
       "debate.chairperson_too_few": "d2fa674d061c18a0b36508842fd66367aeec8b97ebdfc9a5742474e493fc012f",
       "reconstruction": "fe92903a1f881efa92b1848e5e22695047732796f7da9792502df6581c4b193d",
-      "abstraction": "ae555278fcf3acfe4110e423c71c9878dba79ebdcb091569a81042d79f620ad3",
+      "abstraction": "06ab484f93230696e95c3b6dfde4779fab9e9e1a6076453852a3f928f09a983f",
       "audit": "d61523d9c77e3e58a8a9ea2b84fcb1ed2f0c7f92990d150f51cc655d98feebbf"
     }
   },

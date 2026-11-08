@@ -156,8 +156,9 @@
     "adaptations": [
       "Response/story terminology becomes trajectory terminology.",
       "Human-label wording becomes provided preference-label wording.",
+      "Reasoning names relevant component IDs and observable behavior, generalizing question-specific entities and answer values (two sentences).",
       "Debaters may discuss component behavior, interactions or final output (one sentence).",
-      "Abstraction preserves component references and distinctions (one sentence).",
+      "Abstraction generalizes example-specific entities and answer values while preserving relevant component IDs and the single shared quality (one sentence).",
       "Dynamic inputs use CAISO JSON execution records and renamed placeholders."
     ],
     "protocol": "democratic-icai-c8d5-source-trajectory-v3",

@@ -114,8 +114,15 @@ def trajectory_adaptation(key, original):
         text = text.replace(old, new)
     for old, new in [('responses', 'trajectories'), ('response', 'trajectory'), ('RESPONSE', 'TRAJECTORY'), ('stories', 'trajectories'), ('story', 'trajectory'), ('Story', 'Trajectory'), ('STORY', 'TRAJECTORY')]:
         text = re.sub(r'(?<![A-Za-z_])' + old + r'(?![A-Za-z_])', new, text)
+    if key.startswith('reasoning.') and key != 'reasoning.self_refine_critique':
+        text = text.replace(
+            'State the reason as something reusable, not a description of these exact texts.',
+            'State the reason as something reusable, not a description of these exact texts. '
+            'Where relevant, name the component IDs and describe observable behavior. '
+            'Generalize question-specific entities and answer values into reusable criteria.',
+        )
     if key.startswith('debate.debater'):
         text = text.replace('DEBATE RULES (must follow):', 'Proposed questions may concern individual component behavior, interactions between components, or the final output.\n\nDEBATE RULES (must follow):')
     if key == 'abstraction':
-        text = text.replace('\nCLUSTER:', '\nPreserve the component references and distinctions expressed by the input principles.\n\nCLUSTER:')
+        text = text.replace('\nCLUSTER:', '\nGeneralize example-specific entities and answer values while preserving relevant component IDs and the single quality shared by the principles.\n\nCLUSTER:')
     return text

@@ -53,11 +53,17 @@ permitted text adaptations are:
 3. Evidence fields contain CAISO's label-free structured execution records and
    use corresponding template placeholders. Gold, rewards and evaluation metadata
    remain hidden from the blind judge.
-4. Debaters receive the previously agreed single sentence: "Proposed questions
+4. The five requests using the original reusable-criterion reasoning instruction
+   append: "Where relevant, name the component IDs and describe observable
+   behavior. Generalize question-specific entities and answer values into reusable
+   criteria." This applies during CoT, sampling, consensus, drafting and revision;
+   the original critique request is retained.
+5. Debaters receive the previously agreed single sentence: "Proposed questions
    may concern individual component behavior, interactions between components,
    or the final output."
-5. Abstraction receives the previously agreed single sentence: "Preserve the
-   component references and distinctions expressed by the input principles."
+6. Abstraction receives: "Generalize example-specific entities and answer values
+   while preserving relevant component IDs and the single quality shared by the
+   principles."
 
 Each principle starts with `Select the trajectory`. Its following grammar is
 preserved: `that`, `where`, `which`, `with` and `in which` are all valid. Empty

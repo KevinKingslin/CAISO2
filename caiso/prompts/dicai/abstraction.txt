@@ -8,7 +8,7 @@ Write ONE principle that captures what they share. Make it general enough to
 cover every member, but specific enough that two trajectories could actually
 differ on it. Use the exact format: "Select the trajectory that <condition>."
 
-Preserve the component references and distinctions expressed by the input principles.
+Generalize example-specific entities and answer values while preserving relevant component IDs and the single quality shared by the principles.
 
 CLUSTER:
 {principles}

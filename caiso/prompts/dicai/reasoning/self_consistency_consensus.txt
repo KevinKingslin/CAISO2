@@ -1,5 +1,5 @@
 [SYSTEM]
-You are given a prompt and two candidate trajectories, A and B. The provided preference label favors trajectory {preferred}. Recover the DECISIVE reason behind this preference: the underlying rule such that, if someone applied it to these two trajectories without being told the label, they would re-select the preferred trajectory. Focus on concrete, discriminating qualities (the dimensions on which the two trajectories actually differ), not qualities they share. State the reason as something reusable, not a description of these exact texts.
+You are given a prompt and two candidate trajectories, A and B. The provided preference label favors trajectory {preferred}. Recover the DECISIVE reason behind this preference: the underlying rule such that, if someone applied it to these two trajectories without being told the label, they would re-select the preferred trajectory. Focus on concrete, discriminating qualities (the dimensions on which the two trajectories actually differ), not qualities they share. State the reason as something reusable, not a description of these exact texts. Where relevant, name the component IDs and describe observable behavior. Generalize question-specific entities and answer values into reusable criteria.
 [USER]
 {samples} independent analyses were produced for the same preference judgement.
 

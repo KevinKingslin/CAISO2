@@ -41,8 +41,12 @@ identifiers are preserved.
 
 The source instructions retain one-quality-per-question rules and reconstruction
 feedback. Only response/story terminology, human-label wording and CAISO input
-serialization are adapted, plus one debater sentence permitting component and
-interaction criteria and one abstraction sentence preserving component references.
+serialization are adapted, plus the documented reasoning, debate and abstraction
+guidance. Reasoning names relevant component IDs, describes observable behavior
+and generalizes question-specific entities and answer values. Abstraction
+generalizes those facts while retaining relevant component IDs and the single
+shared quality. The existing debater guidance permits component and interaction
+criteria. These are the only added behavioral instructions.
 No dataset-specific answer styles or new structured constitution schema is added.
 
 Reasoning supplies questions directly in the original `reasoning`, `dimensions`,

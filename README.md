@@ -246,9 +246,9 @@ Their editable trajectory versions are in `caiso/prompts/dicai/`. The
 
 Principles start with **"Select the trajectory"**. Original instructions are
 retained apart from response/story terminology, provided preference labels,
-structured execution evidence and the two agreed sentences about component
-criteria and preservation of component references. Constitutions remain lists
-of strings. No dataset-specific answer-style requirements are added.
+structured execution evidence and the documented guidance for component criteria
+and reusable principles. Constitutions remain lists of strings. No dataset-specific
+answer-style requirements are added.
 
 Reasoning returns the original `reasoning`, `dimensions`, and `questions` fields.
 CoT uses one request; self-consistency samples independent chains and synthesizes

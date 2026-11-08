@@ -13,8 +13,8 @@ CAISO's configured dataset personas remain the debate participants.
 
 The permitted adaptations are response/story terminology to trajectory
 terminology, human preference wording to provided preference labels, structured
-CAISO execution records as evidence, and the two previously agreed sentences
-about component criteria and preservation of component references. Each principle
+CAISO execution records as evidence, and the documented reasoning, debate and
+abstraction guidance for component criteria and reusable principles. Each principle
 starts with `Select the trajectory`; no particular following connector is required.
 
 The active source is the supplied code, which includes explicit sampled
