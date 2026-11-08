@@ -104,5 +104,14 @@ configuration requires a new run/output directory.
 ```sh
 ./scripts/caiso run amazon
 ./scripts/caiso evaluate amazon --unoptimized
+./scripts/caiso evaluate results/amazon-run --state current
 ./scripts/caiso run --config configs/experiments/amazon.yaml
 ```
+
+Run-directory evaluation supports `--state current`, `--state best` and
+`--state final`. The first two freeze a saved CAISO checkpoint and work while
+optimization is running. A checkpoint must already exist. With no flag, the CLI
+uses the final export if present, otherwise the current checkpoint. Checkpoint
+evaluations have separate `evaluation_current.json` / `evaluation_best.json`
+reports, with the evaluated iteration and state fingerprint. Each invocation's
+state/settings snapshot and logs are kept in its own internal evaluation folder.

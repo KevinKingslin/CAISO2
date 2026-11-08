@@ -3,6 +3,7 @@
 import hashlib
 import json
 from pathlib import Path
+from uuid import uuid4
 
 
 def dataset_label(config):
@@ -16,12 +17,12 @@ def optimization_output(config, method):
     return Path("results") / f"{dataset_label(config)}-{identifier}"
 
 
-def write_evaluation(directory, metrics, *, variant, split, state_source=None):
+def write_evaluation(directory, metrics, *, variant, split, state_source=None, state_snapshot=None):
     """Keep historical filenames without changing scoring or inventing seeds."""
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     stem = "evaluation" if split == "test" else "validation"
-    suffix = "_unoptimized" if variant == "unoptimized" else ""
+    suffix = "_" + variant if variant in {"unoptimized", "current", "best"} else ""
     path = directory / f"{stem}{suffix}.json"
     report = {
         **metrics,
@@ -39,6 +40,14 @@ def write_evaluation(directory, metrics, *, variant, split, state_source=None):
             )
         ],
     }
-    path.write_text(json.dumps(report, indent=2) + "\n")
+    if state_snapshot is not None:
+        report["state_snapshot"] = state_snapshot
+    from caiso.core.serialization import save_json
+    temporary = path.with_name(path.name + "." + uuid4().hex + ".tmp")
+    try:
+        save_json(temporary, report)
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
     print(f"Evaluation results: {path}")
     return path

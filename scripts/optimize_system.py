@@ -14,6 +14,7 @@ import yaml
 from caiso.core.serialization import save_json
 from caiso.integration.config import load_experiment, load_method, validate_optimization_prompts
 from caiso.integration.provenance import benchmark_manifest
+from caiso.integration.evaluation_snapshot import save_state_dict
 from scripts.results_layout import write_evaluation
 from caiso.providers.transport import configure_transport
 
@@ -77,11 +78,11 @@ def main(argv=None):
     # Test data stays separate.
     if config.get("system_state_dict_path"):
         system.load_state_dict(torch.load(config["system_state_dict_path"], weights_only=False))
-    torch.save(system.state_dict(), output / "initial_system.pth")
+    save_state_dict(system.state_dict(), output / "initial_system.pth")
     optimizer = CaisoOptimizer(system, trainset, valset, config, output)
     optimized, metrics = optimizer.optimize(resume=args.resume)
     save_json(output / "optimization_history.json", metrics)
-    torch.save(optimized.state_dict(), output / "final_optimized_system.pth")
+    save_state_dict(optimized.state_dict(), output / "final_optimized_system.pth")
     save_json(output / "final_adapter_state.json", optimizer._get_current_adapter_state())
     if not args.no_test and testset:
         optimized._caiso_eval_variant = "optimized"

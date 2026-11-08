@@ -2,8 +2,8 @@ import os
 import os.path as osp
 import sys
 import json
-from dataclasses import dataclass, field
-from typing import List, Optional
+from dataclasses import dataclass
+from typing import Optional
 
 import torch
 from dotenv import load_dotenv
@@ -11,12 +11,12 @@ from transformers import HfArgumentParser
 
 from examples.systems import registered_systems
 from examples.datasets import registered_datasets
-from caiso.optim.args import OptimasArguments
 from caiso.utils.logger import setup_logger
 from caiso.eval import eval_system
 from caiso.integration.config import load_experiment
 from caiso.providers.transport import configure_transport
 from pathlib import Path
+from caiso.integration.evaluation_snapshot import apply_snapshot, snapshot_models
 
 
 @dataclass
@@ -47,7 +47,7 @@ class ScriptArgs:
                 setattr(self, field_name, None)
 
 
-def main(argv=None, *, output_dir=None, results_dir=None):
+def main(argv=None, *, output_dir=None, results_dir=None, state_snapshot=None):
     parser = HfArgumentParser(ScriptArgs)
     argv = sys.argv[1:] if argv is None else argv
 
@@ -56,6 +56,8 @@ def main(argv=None, *, output_dir=None, results_dir=None):
         args = parser.parse_dict(yaml_config)[0]
     else:
         args = parser.parse_args_into_dataclasses(args=argv)[0]
+    if state_snapshot is not None and args.system_state_dict_path:
+        raise ValueError("Choose a CAISO snapshot or a .pth system state, not both")
 
     # Load environment variables
     load_dotenv(args.dotenv_path)
@@ -74,41 +76,46 @@ def main(argv=None, *, output_dir=None, results_dir=None):
     logger.info(f"Azure transport: {limits['requests_per_minute']} requests/minute, {limits['concurrency']} concurrent per deployment")
     logger.info(f"Parsed arguments:\n{json.dumps(vars(args), indent=2)}")
 
-    # Construct system
-    logger.info(f"Instantiating system: {args.system_name}")
-    system_kwargs = {
-        "log_dir": args.output_dir,
-        "max_sample_workers": args.max_sample_workers,
-        "max_eval_workers": args.max_eval_workers,
-    }
-    system = registered_systems[args.system_name](**system_kwargs)
-    system._caiso_skip_log = results_dir / ".internal/logs/skipped_examples.jsonl"
-    system._caiso_eval_split = args.split
-    system._caiso_eval_variant = "optimized" if args.system_state_dict_path else "unoptimized"
+    with snapshot_models(state_snapshot, args.system_name):
+        # Construct system
+        logger.info(f"Instantiating system: {args.system_name}")
+        system_kwargs = {
+            "log_dir": args.output_dir,
+            "max_sample_workers": args.max_sample_workers,
+            "max_eval_workers": args.max_eval_workers,
+        }
+        system = registered_systems[args.system_name](**system_kwargs)
+        system._caiso_skip_log = results_dir / ".internal/logs/skipped_examples.jsonl"
+        system._caiso_eval_split = args.split
+        system._caiso_eval_variant = "optimized" if args.system_state_dict_path else "unoptimized"
 
-    cur_system_state_dict = system.state_dict()
-    logger.info(f"Saving current system state.")
-    torch.save(cur_system_state_dict, osp.join(args.output_dir, "system_state_dict.pth.bak"))
+        if state_snapshot is not None:
+            apply_snapshot(system, state_snapshot)
+            system._caiso_eval_variant = state_snapshot.selection
 
-    # Load evaluation datasets
-    trainset, valset, testset = registered_datasets[args.dataset](**vars(args))
+        cur_system_state_dict = system.state_dict()
+        logger.info("Saving current system state.")
+        torch.save(cur_system_state_dict, osp.join(args.output_dir, "system_state_dict.pth.bak"))
 
-    # Restore state if specified
-    if args.system_state_dict_path:
-        logger.info(f"Loading system state dict from {args.system_state_dict_path}")
-        state_dict = torch.load(args.system_state_dict_path, weights_only=False)
-        system.load_state_dict(state_dict)
-        logger.info(f"Loaded state dict keys: {list(state_dict.keys())}")
+        # Load evaluation datasets
+        trainset, valset, testset = registered_datasets[args.dataset](**vars(args))
 
-    metrics_path = osp.join(args.output_dir, f"{args.split}_metrics.json")
-    dataset = valset if args.split == "val" else testset
-    metrics, preds = eval_system(system=system, testset=dataset, num_repeat=args.num_repeat)
+        # Restore state if specified
+        if args.system_state_dict_path:
+            logger.info(f"Loading system state dict from {args.system_state_dict_path}")
+            state_dict = torch.load(args.system_state_dict_path, weights_only=False)
+            system.load_state_dict(state_dict)
+            logger.info(f"Loaded state dict keys: {list(state_dict.keys())}")
 
-    with open(metrics_path, "w") as f:
-        json.dump(metrics, f, indent=2, sort_keys=True)
-    logger.info(f"Metrics written to {metrics_path}")
-    logger.info(f"Final metrics:\n{json.dumps(metrics, indent=2)}")
-    return metrics
+        metrics_path = osp.join(args.output_dir, f"{args.split}_metrics.json")
+        dataset = valset if args.split == "val" else testset
+        metrics, preds = eval_system(system=system, testset=dataset, num_repeat=args.num_repeat)
+
+        with open(metrics_path, "w") as f:
+            json.dump(metrics, f, indent=2, sort_keys=True)
+        logger.info(f"Metrics written to {metrics_path}")
+        logger.info(f"Final metrics:\n{json.dumps(metrics, indent=2)}")
+        return metrics
 
 
 if __name__ == "__main__":

@@ -163,8 +163,33 @@ To evaluate a completed optimization run, pass the actual run directory:
 ./scripts/caiso evaluate results/amazon-run --unoptimized
 ```
 
-The first command reads `experiment.json` and loads `final_optimized_system.pth`;
-it fails if that checkpoint is missing. The second constructs the initial system.
+The first command reads `experiment.json` and loads `final_optimized_system.pth`
+when available. Otherwise it evaluates the current saved CAISO checkpoint. The
+second constructs the initial system.
+
+You can evaluate an accepted system while optimization continues in another
+terminal:
+
+```sh
+./scripts/caiso evaluate results/hotpotqa-run --state current
+./scripts/caiso evaluate results/hotpotqa-run --state best --repeats 3
+```
+
+`current` loads the latest saved accepted state; `best` loads the checkpoint's
+best validation state. These flags always use the checkpoint, including when a
+previous final export exists during a resumed run. `--state final` requires the
+final `.pth` export. Before the first checkpoint is saved, wait for initialization
+or use `--unoptimized` explicitly.
+
+The evaluator freezes one checkpoint version before constructing the system. It
+prints and records the checkpoint iteration, validation score and state
+fingerprint. Later optimizer updates do not alter that evaluation. Reports are
+`evaluation_current.json` / `evaluation_best.json` (or `validation_current.json` /
+`validation_best.json` with `--split val`); the final `evaluation.json` is separate.
+Each invocation keeps its frozen state, original component settings and logs
+under `.internal/evaluation/<current-or-best>/<split>/<id>/`. Amazon snapshot
+evaluation reuses saved adapters under unique vLLM names, without recreating
+adapter files or replacing the optimizer's active registrations.
 Their reports are `evaluation.json` and `evaluation_unoptimized.json` at the run
 root. Automatic post-optimization evaluation also writes `evaluation.json`.
 The run contains `config.yaml`, `README.md`, `setup.json`, `run.json`, `history.csv`,

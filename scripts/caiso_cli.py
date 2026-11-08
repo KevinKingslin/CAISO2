@@ -3,6 +3,7 @@
 import argparse
 import json
 from pathlib import Path
+from uuid import uuid4
 
 from dotenv import load_dotenv
 
@@ -31,7 +32,10 @@ def parser():
         command.add_argument("--config", type=Path, help="Existing launcher YAML configuration")
         command.add_argument("--output", type=Path, help="Exact output directory")
         if name == "evaluate":
-            command.add_argument("--unoptimized", action="store_true", help="Evaluate the initial factory system")
+            state = command.add_mutually_exclusive_group()
+            state.add_argument("--unoptimized", action="store_true", help="Evaluate the initial factory system")
+            state.add_argument("--state", choices=("current", "best", "final"),
+                               help="Run state to evaluate; default: final export if present, otherwise current checkpoint")
             command.add_argument("--repeats", type=positive_int, help="Override the evaluation profile's repetition count")
             command.add_argument("--split", choices=("test", "val"), help="Default: the evaluation profile's split")
             command.add_argument(
@@ -90,11 +94,25 @@ def resolve(args):
             config["system_state_dict_path"] = None
         else:
             checkpoint = run / "final_optimized_system.pth"
-            if not checkpoint.is_file():
-                raise ValueError(f"Missing optimized checkpoint: {checkpoint}")
-            config["system_state_dict_path"] = str(checkpoint)
-        config["run_name"] = "unoptimized" if args.unoptimized else "optimized"
+            selection = args.state or ("final" if checkpoint.is_file() else "current")
+            if selection == "final":
+                if not checkpoint.is_file():
+                    raise ValueError(f"Missing optimized checkpoint: {checkpoint}")
+                config["system_state_dict_path"] = str(checkpoint)
+            else:
+                checkpoint = run / "checkpoint/checkpoint.json"
+                if not checkpoint.is_file():
+                    raise ValueError(
+                        f"Missing optimized checkpoint: {checkpoint}. No saved {selection} state is available yet; "
+                        "wait for initialization to finish or use --unoptimized explicitly."
+                    )
+                config["system_state_dict_path"] = None
+                config["caiso_checkpoint_path"] = str(checkpoint)
+                config["caiso_checkpoint_state"] = selection
+        config["run_name"] = "unoptimized" if args.unoptimized else config.get("caiso_checkpoint_state", "optimized")
     if args.command == "evaluate":
+        if args.state and not run:
+            raise ValueError("--state requires an optimization run directory")
         if args.unoptimized:
             config["system_state_dict_path"] = None
             config["run_name"] = "unoptimized"
@@ -140,20 +158,37 @@ def main(argv=None):
 
     from scripts.eval_system import main as evaluate
 
-    arguments = []
-    for key, value in config.items():
-        if value is not None:
-            arguments.extend((f"--{key}", str(value)))
+    snapshot = None
+    checkpoint_path = config.pop("caiso_checkpoint_path", None)
+    checkpoint_state = config.pop("caiso_checkpoint_state", None)
+    variant = checkpoint_state or ("optimized" if config.get("system_state_dict_path") else "unoptimized")
     output = args.output
-    variant = "optimized" if config.get("system_state_dict_path") else "unoptimized"
     if output is None:
         output = run if run else Path("results") / f"{dataset_label(config)}-{variant}"
     split = config.get("split", "test")
     raw_output = output / ".internal" / "evaluation" / variant / split
-    metrics = evaluate(arguments, output_dir=raw_output, results_dir=output)
+    if checkpoint_path:
+        from caiso.integration.evaluation_snapshot import freeze_checkpoint
+
+        raw_output /= uuid4().hex
+        try:
+            snapshot = freeze_checkpoint(checkpoint_path, checkpoint_state, raw_output)
+        except (ValueError, OSError) as error:
+            command_parser.error(f"Cannot load saved {checkpoint_state} system: {error}")
+        print(f"Evaluating {snapshot.selection} system from checkpoint iteration {snapshot.iteration} "
+              f"(validation score={snapshot.validation_score:.6f}, state={snapshot.state_fingerprint[:12]})")
+    arguments = []
+    for key, value in config.items():
+        if value is not None:
+            arguments.extend((f"--{key}", str(value)))
+    options = {"output_dir": raw_output, "results_dir": output}
+    if snapshot is not None:
+        options.update(state_snapshot=snapshot, results_dir=raw_output)
+    metrics = evaluate(arguments, **options)
     write_evaluation(
         output, metrics, variant=variant, split=split,
-        state_source=config.get("system_state_dict_path"),
+        state_source=raw_output / "state_snapshot.json" if snapshot else config.get("system_state_dict_path"),
+        state_snapshot=snapshot.provenance() if snapshot else None,
     )
     return metrics
 
