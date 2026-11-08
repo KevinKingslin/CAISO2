@@ -8,6 +8,7 @@ import pytest
 import yaml
 
 from caiso.integration.config import load_experiment, load_method
+from caiso.method.config import validate_method
 from caiso.prompts import catalog_entries, entry, render_messages
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +28,7 @@ def test_experiment_migration_keeps_all_effective_parameters(name, label):
 
 def test_shared_method_copy_does_not_change_any_values():
     assert yaml.safe_load((ROOT / "configs/method/default.yaml").read_text()) == yaml.safe_load((ROOT / "caiso/config/default.yaml").read_text())
+    assert load_method({})["block_constitution"]["enabled"] is True
 
 
 def test_experiment_overrides_method_recursively_and_paths_are_relative(tmp_path):
@@ -36,12 +38,21 @@ def test_experiment_overrides_method_recursively_and_paths_are_relative(tmp_path
     config["method_config"] = "method.yaml"
     config["method"]["validation_batch_size"] = "all"
     config["method"]["dicai"] = {"debate_rounds": 1}
+    config["method"]["block_constitution"] = {"enabled": False}
     path = tmp_path / "experiment.yaml"
     path.write_text(yaml.safe_dump(config))
     resolved = load_method(load_experiment(path))
     assert resolved["validation_batch_size"] == "all"
     assert resolved["dicai"]["debate_rounds"] == 1
     assert resolved["dicai"]["max_workers"] == 10
+    assert resolved["block_constitution"]["enabled"] is False
+    assert resolved["block_constitution"]["preference_pairs"] == 2
+
+
+@pytest.mark.parametrize("invalid", [None, 0, 1, "false", {}, []])
+def test_block_constitution_switch_requires_a_boolean(invalid):
+    with pytest.raises(ValueError, match=r"block_constitution.enabled"):
+        validate_method({"block_constitution": {"enabled": invalid}})
 
 
 def test_extracted_prompts_match_pre_extraction_text_and_rendering():

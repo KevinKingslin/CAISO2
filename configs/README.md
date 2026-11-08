@@ -40,6 +40,24 @@ For acceptance on the complete validation split, set
 released OPTIMAS-compatible prefix behavior. Changing the protocol or seed
 requires a new run; saved checkpoints verify their configuration and data hashes.
 
+To skip block constitution induction, add this override to an experiment:
+
+```yaml
+method:
+  block_constitution:
+    enabled: false
+```
+
+The default is `true`. With `false`, each iteration skips preliminary preference
+candidates, block preference collection, and block DICAI induction. It generates
+and scores candidates once using the system constitution, including preference
+labels used for DPO weight optimization. Full-system validation still decides
+whether to accept an update. The system constitution is still induced normally.
+The existing `04_block_constitution/status.json` records the skipped stage, and
+`05_block_optimization/status.json` records `constitution_source: system`.
+Use a new output directory when changing this setting; saved checkpoints require
+the same method configuration. Restore `true` to enable block induction again.
+
 Keep credentials, deployments, backend choices and service URLs in `.env`.
 Prompt text is under [`caiso/prompts`](../caiso/prompts/README.md). `prompt_tips`
 remains a method parameter with its existing values.

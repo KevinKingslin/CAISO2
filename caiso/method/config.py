@@ -6,6 +6,8 @@ import math
 def validate_method(config):
     if config.get("validation_sampling", "seeded") not in {"seeded", "first"}:
         raise ValueError("validation_sampling must be seeded or first")
+    if not isinstance(config.get("block_constitution", {}), dict):
+        raise ValueError("block_constitution must be a configuration mapping")
     recovery = config.get("error_handling", {})
     if not isinstance(recovery, dict):
         raise ValueError("error_handling must be a configuration mapping")
@@ -161,7 +163,9 @@ def validate_method(config):
     for key, number in config.get("dicai", {}).get("temperatures", {}).items():
         if isinstance(number, bool) or not isinstance(number, (int, float)) or not 0 <= number <= 2:
             raise ValueError(f"dicai.temperatures.{key} must be between zero and two")
-    for path in ("dicai.minimization.enabled", "dicai.minimization.strict"):
+    for path in (
+        "dicai.minimization.enabled", "dicai.minimization.strict", "block_constitution.enabled"
+    ):
         if value(path) is not None and not isinstance(value(path), bool):
             raise ValueError(f"{path} must be true or false")
     if value("attribution.baseline_policy") not in (None, "per_edge"):
@@ -196,6 +200,7 @@ def validate_method(config):
     for path in (
         "dicai.max_workers",
         "execution.max_workers",
+        "block_constitution.enabled",
         "block_constitution.reuse_trajectories",
     ):
         section, key = path.split(".")

@@ -52,9 +52,11 @@ class CaisoOptimizer:
         )
         self.validation = adapt_examples(system, validation, "validation")
         self.dicai = dicai or DICAI(providers, embeddings, personas, self.config["dicai"])
-        self.block_dicai = block_dicai or DICAI(
-            providers, embeddings, personas, self.config["dicai"], role="block_constitution"
-        )
+        self.block_dicai = None
+        if self.config["block_constitution"].get("enabled", True):
+            self.block_dicai = block_dicai or DICAI(
+                providers, embeddings, personas, self.config["dicai"], role="block_constitution"
+            )
 
     def optimize(self, resume=None):
         self.output.mkdir(parents=True, exist_ok=True)

@@ -49,6 +49,7 @@ leiden:
 block_selection:
   model_role: block_selection
 block_constitution:
+  enabled: true  # false: optimize directly with the system constitution; skip block induction.
   reuse_trajectories: true  # Reuse identical state/example/seed executions within this stage.
   preference_pairs: 2
   score_tie_epsilon: 0.000001

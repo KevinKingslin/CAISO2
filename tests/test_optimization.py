@@ -1,14 +1,18 @@
 import json
 
+import pytest
+
 from caiso.core.checkpoint import Checkpoint
 from caiso.optim.optimizer import CaisoOptimizer
+from caiso.optimizers.joint_block_optimizer import JointBlockOptimizer
 from caiso.providers.base import ProviderRegistry
 from caiso.wrappers.example import Example
 from tests.offline import OfflineEmbeddings, OfflineProvider
 from tests.test_runtime import make_system
 
 
-def test_complete_caiso_cycle_on_original_system_interface(tmp_path):
+@pytest.mark.parametrize("block_constitution_enabled,accept_update", [(True, True), (False, True), (False, False)])
+def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch, block_constitution_enabled, accept_update):
     system = make_system()
     experiment = {
         "dataset": "pubmed",
@@ -25,7 +29,7 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path):
             "method": {
                 "initial_preference_pairs": 1,
                 "attribution": {"bootstrap_samples": 10},
-                "block_constitution": {"preference_pairs": 1},
+                "block_constitution": {"enabled": block_constitution_enabled, "preference_pairs": 1},
                 "block_optimization": {"prompt_candidates": 1, "max_joint_candidates": 4},
                 "dicai": {"clustering": {"min_clusters": 2, "max_clusters": 4}},
                 "reporting": {"cli": False, "capture_model_output": False},
@@ -35,6 +39,20 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path):
     # CaisoOptimizer creates its budget; fixtures adopt it before any call.
     provider = OfflineProvider(None)
     embeddings = OfflineEmbeddings(None)
+    proposal_constitutions = []
+    propose = JointBlockOptimizer.propose
+
+    def observe_proposal(self, state, members, constitution, examples, seed):
+        proposal_constitutions.append(constitution)
+        return propose(self, state, members, constitution, examples, seed)
+
+    monkeypatch.setattr(JointBlockOptimizer, "propose", observe_proposal)
+    if not block_constitution_enabled:
+        def unexpected_block_induction(*args, **kwargs):
+            pytest.fail("Disabled block constitution must skip preference collection and induction")
+
+        monkeypatch.setattr("caiso.method.algorithm.build_block_preferences", unexpected_block_induction)
+        monkeypatch.setattr("caiso.method.algorithm.induce_block_constitution", unexpected_block_induction)
     registry = ProviderRegistry(
         {"offline": provider},
         dict.fromkeys(
@@ -44,6 +62,8 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path):
                 "constitution_judge",
                 "block_selection",
                 "prompt_optimizer",
+            ] if block_constitution_enabled else [
+                "system_constitution", "constitution_judge", "block_selection", "prompt_optimizer",
             ],
             "offline",
         ),
@@ -51,7 +71,7 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path):
     optimizer = CaisoOptimizer(
         system,
         [Example(question="1", gd_answer="2")],
-        [Example(question="2", gd_answer="4")],
+        [Example(question="2", gd_answer="4" if accept_update else "2")],
         experiment,
         tmp_path,
         providers=registry,
@@ -60,41 +80,62 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path):
     provider.budget = embeddings.budget = optimizer.budget
     result, metrics = optimizer.optimize()
     assert result is system
-    assert result.components["transform"].variable == "double"
+    expected_config = "double" if accept_update else "identity"
+    assert result.components["transform"].variable == expected_config
     assert metrics["validation_score"] == 1
     assert metrics["completed_iterations"] == 1
     profiles = optimizer.dicai.identities
     assert len(profiles) == 3
-    assert optimizer.block_dicai.identities == profiles
+    if block_constitution_enabled:
+        assert optimizer.block_dicai.identities == profiles
+    else:
+        assert optimizer.block_dicai is None
     for profile in profiles:
         assert any(profile["prompt_text"] in call[0][0]["content"] for call in provider.calls)
     saved_experiment = json.loads((tmp_path / "experiment.json").read_text())
     assert saved_experiment["caiso"]["personas"] == profiles
     checkpoint = Checkpoint.load(tmp_path / "checkpoint")
-    assert checkpoint.best.configurations["transform"].value == "double"
-    assert checkpoint.block_constitutions
+    assert checkpoint.best.configurations["transform"].value == expected_config
+    if block_constitution_enabled:
+        assert checkpoint.block_constitutions
+        assert len(proposal_constitutions) == 2
+        assert proposal_constitutions[1] == next(iter(checkpoint.block_constitutions.values()))
+    else:
+        assert checkpoint.block_constitutions == {}
+        assert proposal_constitutions == [checkpoint.system_constitution]
+        assert not (tmp_path / ".internal/dicai/blocks").exists()
+        skipped = json.loads((tmp_path / "iterations/0001/04_block_constitution/status.json").read_text())
+        assert skipped["induction_skipped"] is True
+        assert "enabled is false" in skipped["reason"]
+        for name in ("preliminary_candidates.json", "block_preferences.json", "block_constitution.json"):
+            assert not (tmp_path / "iterations/0001/04_block_constitution" / name).exists()
+    source = json.loads((tmp_path / "iterations/0001/05_block_optimization/status.json").read_text())
+    assert source["constitution_source"] == ("block" if block_constitution_enabled else "system")
+    validation = json.loads((tmp_path / "iterations/0001/05_block_optimization/validation_metrics.json").read_text())
+    assert validation["current"]["score"] == (0 if accept_update else 1)
+    assert validation["candidate"]["score"] == (1 if accept_update else 0)
     import torch
 
     snapshot = tmp_path / "system.pth"
     torch.save(result.state_dict(), snapshot)
     reloaded = make_system()
     reloaded.load_state_dict(torch.load(snapshot, weights_only=False))
-    assert reloaded.evaluate(Example(question="5", gd_answer="10")) == 1
+    assert reloaded.evaluate(Example(question="5", gd_answer="10" if accept_update else "5")) == 1
     assert (tmp_path / ".internal/dicai/system/silhouette.png").is_file()
     assert (tmp_path / "iterations/0001/01_attribution/edge_weights.json").is_file()
     assert (tmp_path / "iterations/0001/02_blocks/weighted_graph.graphml").is_file()
-    assert (tmp_path / "iterations/0001/04_block_constitution/silhouette.png").is_file()
+    assert (tmp_path / "iterations/0001/04_block_constitution/silhouette.png").is_file() == block_constitution_enabled
     configurations = json.loads((tmp_path / "iterations/0001/07_state/component_configurations.json").read_text())
     assert configurations["original"]["transform"]["value"] == "identity"
-    assert configurations["current"]["transform"]["value"] == "double"
+    assert configurations["current"]["transform"]["value"] == expected_config
     assert configurations["candidate"]["transform"]["value"] == "double"
-    assert configurations["candidate_status"] == "Accepted"
+    assert configurations["candidate_status"] == ("Accepted" if accept_update else "Rejected")
     # Restore the accepted checkpoint onto a fresh copy of the benchmark system.
     fresh = make_system()
     restored = CaisoOptimizer(
         fresh,
         [Example(question="1", gd_answer="2")],
-        [Example(question="2", gd_answer="4")],
+        [Example(question="2", gd_answer="4" if accept_update else "2")],
         experiment,
         tmp_path,
         providers=registry,
@@ -102,5 +143,6 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path):
     )
     provider.budget = embeddings.budget = restored.budget
     resumed, resumed_metrics = restored.optimize(resume=tmp_path / "checkpoint")
-    assert resumed.evaluate(Example(question="5", gd_answer="10")) == 1
+    assert resumed.evaluate(Example(question="5", gd_answer="10" if accept_update else "5")) == 1
     assert resumed_metrics["completed_iterations"] == 1
+    assert len(proposal_constitutions) == (2 if block_constitution_enabled else 1)

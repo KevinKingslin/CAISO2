@@ -468,111 +468,141 @@ class Algorithm:
                     )
                     self.report.save_phase("03_selection", selection=selection)
                     members = blocks[selection.selected]
+                    block_constitution_enabled = cfg["block_constitution"].get("enabled", True)
                     self.report.update(
-                        "Generating block preference candidates",
+                        "Generating block preference candidates"
+                        if block_constitution_enabled
+                        else "Using system constitution for block optimization",
                         phase_dir="04_block_constitution",
                         selected_block=selection.selected,
                         vote_fractions=selection.scores,
                     )
                     local_train = batch(train, cfg["training_batch_size"], step_seed)
                     val = validation_batch(validation, cfg, seed)  # fixed acceptance set
-                    # Seed proposals use Q_sys; optimization proposals later use the induced Q_B.
-                    preliminary = self.optimizer.propose(
-                        current, members, qsys, local_train, step_seed
-                    )
-                    self.report.configuration_state(status="Evaluated for preference generation")
-                    preliminary = optimization_history.filter_candidates(current, preliminary)
-                    self.report.save_phase(
-                        "04_block_constitution",
-                        preliminary_candidates=preliminary,
-                        members=members,
-                    )
-                    changed = [
-                        c.configurations
-                        for c in preliminary
-                        if current.with_configs(c.configurations) != current
-                    ]
-                    pair_configs = [
-                        ({n: current.configurations[n] for n in members}, c)
-                        for c in changed[: cfg["block_constitution"]["preference_pairs"]]
-                    ]
-                    gate = None
-                    if pair_configs:
-                        self.report.update("Building block preferences")
-                        preference_started = monotonic()
-                        preference_budget = self.runtime.budget.snapshot()
-                        preference_stats = {}
-                        pairs = build_block_preferences(
-                            self.runtime,
-                            current,
-                            members,
-                            pair_configs,
-                            local_train,
-                            [step_seed],
-                            qsys,
-                            self.judge,
-                            cfg["block_constitution"]["score_tie_epsilon"],
-                            reuse_trajectories=cfg["block_constitution"].get(
-                                "reuse_trajectories", False
-                            ),
-                            progress=lambda done, total: self.report.update(
-                                progress=f"Preference records: {done}/{total}"
-                            ),
-                            statistics=preference_stats,
+                    optimization_constitution = None
+                    if block_constitution_enabled:
+                        # Seed proposals use Q_sys; optimization proposals later use the induced Q_B.
+                        preliminary = self.optimizer.propose(
+                            current, members, qsys, local_train, step_seed
                         )
-                        preference_stats.update(
-                            seconds=monotonic() - preference_started,
-                            llm_calls=self.runtime.budget.snapshot().llm_calls
-                            - preference_budget.llm_calls,
-                        )
+                        self.report.configuration_state(status="Evaluated for preference generation")
+                        preliminary = optimization_history.filter_candidates(current, preliminary)
                         self.report.save_phase(
                             "04_block_constitution",
-                            preference_metrics=preference_stats,
-                            preferences=pairs,
+                            preliminary_candidates=preliminary,
+                            members=members,
                         )
-                        member_key = digest(sorted(members))[:16]
-                        self.report.update("Inducing block constitution")
-                        induction_budget = self.runtime.budget.snapshot()
-                        qb = induce_block_constitution(
-                            self.block_dicai,
-                            pairs,
-                            members,
-                            step_seed,
-                            cache_dir=self.output / ".internal/dicai/blocks",
-                            activity=self.report.induction_activity,
-                            progress=lambda stage, done, total: self.report.update(
-                                progress=f"{stage.replace('_', ' ')}: {done}/{total}"
-                            ),
-                        )
-                        induction_after = self.runtime.budget.snapshot()
-                        self.report.save_phase(
-                            "04_block_constitution",
-                            constitution=qb,
-                            induction_metrics={
-                                "preference_records": len(pairs),
-                                "llm_calls": induction_after.llm_calls - induction_budget.llm_calls,
-                                "embedding_calls": induction_after.embedding_calls
-                                - induction_budget.embedding_calls,
-                                "tokens": induction_after.tokens - induction_budget.tokens,
-                                "timings": qb.metadata.get("timings", {}),
-                                "max_workers": cfg["dicai"].get("max_workers", 4),
-                                "reasoning_workers": qb.metadata.get("reasoning_workers"),
-                                "concurrency": qb.metadata.get("concurrency", {}),
-                                "protocol": qb.metadata.get("protocol"),
-                                "reconstruction": qb.metadata.get("reconstruction", {}),
-                                "reused_pair_records": qb.metadata.get("reused_pair_records", 0),
-                            },
-                        )
-                        qblocks[member_key] = qb
+                        changed = [
+                            c.configurations
+                            for c in preliminary
+                            if current.with_configs(c.configurations) != current
+                        ]
+                        pair_configs = [
+                            ({n: current.configurations[n] for n in members}, c)
+                            for c in changed[: cfg["block_constitution"]["preference_pairs"]]
+                        ]
+                        gate = None
+                        if pair_configs:
+                            self.report.update("Building block preferences")
+                            preference_started = monotonic()
+                            preference_budget = self.runtime.budget.snapshot()
+                            preference_stats = {}
+                            pairs = build_block_preferences(
+                                self.runtime,
+                                current,
+                                members,
+                                pair_configs,
+                                local_train,
+                                [step_seed],
+                                qsys,
+                                self.judge,
+                                cfg["block_constitution"]["score_tie_epsilon"],
+                                reuse_trajectories=cfg["block_constitution"].get(
+                                    "reuse_trajectories", False
+                                ),
+                                progress=lambda done, total: self.report.update(
+                                    progress=f"Preference records: {done}/{total}"
+                                ),
+                                statistics=preference_stats,
+                            )
+                            preference_stats.update(
+                                seconds=monotonic() - preference_started,
+                                llm_calls=self.runtime.budget.snapshot().llm_calls
+                                - preference_budget.llm_calls,
+                            )
+                            self.report.save_phase(
+                                "04_block_constitution",
+                                preference_metrics=preference_stats,
+                                preferences=pairs,
+                            )
+                            member_key = digest(sorted(members))[:16]
+                            self.report.update("Inducing block constitution")
+                            induction_budget = self.runtime.budget.snapshot()
+                            qb = induce_block_constitution(
+                                self.block_dicai,
+                                pairs,
+                                members,
+                                step_seed,
+                                cache_dir=self.output / ".internal/dicai/blocks",
+                                activity=self.report.induction_activity,
+                                progress=lambda stage, done, total: self.report.update(
+                                    progress=f"{stage.replace('_', ' ')}: {done}/{total}"
+                                ),
+                            )
+                            induction_after = self.runtime.budget.snapshot()
+                            self.report.save_phase(
+                                "04_block_constitution",
+                                constitution=qb,
+                                induction_metrics={
+                                    "preference_records": len(pairs),
+                                    "llm_calls": induction_after.llm_calls - induction_budget.llm_calls,
+                                    "embedding_calls": induction_after.embedding_calls
+                                    - induction_budget.embedding_calls,
+                                    "tokens": induction_after.tokens - induction_budget.tokens,
+                                    "timings": qb.metadata.get("timings", {}),
+                                    "max_workers": cfg["dicai"].get("max_workers", 4),
+                                    "reasoning_workers": qb.metadata.get("reasoning_workers"),
+                                    "concurrency": qb.metadata.get("concurrency", {}),
+                                    "protocol": qb.metadata.get("protocol"),
+                                    "reconstruction": qb.metadata.get("reconstruction", {}),
+                                    "reused_pair_records": qb.metadata.get("reused_pair_records", 0),
+                                },
+                            )
+                            qblocks[member_key] = qb
 
-                        accuracy = qb.metadata.get("reconstruction", {}).get("accuracy")
+                            optimization_constitution = qb
+                        else:
+                            self.report.configuration_state(clear_candidate=True, status="No new candidate")
+                            optimization_history.record_no_candidate(iteration, current, members)
+                            self.report.save_phase(
+                                "04_block_constitution",
+                                induction_skipped=True,
+                                reason="No new block candidates after history filtering",
+                            )
+                            accepted = False
+                            self.accounting.event("no_distinct_block_candidates", iteration=iteration)
+                    else:
+                        optimization_constitution = qsys
+                        self.report.save_phase(
+                            "04_block_constitution",
+                            members=members,
+                            induction_skipped=True,
+                            reason="block_constitution.enabled is false; using the system constitution",
+                        )
+                    if optimization_constitution is not None:
+                        accuracy = optimization_constitution.metadata.get("reconstruction", {}).get("accuracy")
                         self.report.update(
                             "Optimizing selected block configurations",
                             phase_dir="05_block_optimization",
                             constitution_reconstruction_accuracy=accuracy,
+                            constitution_source="block" if block_constitution_enabled else "system",
+                        )
+                        self.report.save_phase(
+                            "05_block_optimization",
+                            constitution_source="block" if block_constitution_enabled else "system",
                         )
                         scored = self.optimizer.propose(
-                            current, members, qb, local_train, step_seed + 10000
+                            current, members, optimization_constitution, local_train, step_seed + 10000
                         )
                         self.report.configuration_state(status="Local candidates evaluated")
                         scored = [
@@ -640,16 +670,6 @@ class Algorithm:
                             self.accounting.event(
                                 "block_acceptance", iteration=iteration, **gate.model_dump()
                             )
-                    else:
-                        self.report.configuration_state(clear_candidate=True, status="No new candidate")
-                        optimization_history.record_no_candidate(iteration, current, members)
-                        self.report.save_phase(
-                            "04_block_constitution",
-                            induction_skipped=True,
-                            reason="No new block candidates after history filtering",
-                        )
-                        accepted = False
-                        self.accounting.event("no_distinct_block_candidates", iteration=iteration)
                     if score > best_score:
                         best, best_score = current.model_copy(deep=True), score
                     self.report.update(

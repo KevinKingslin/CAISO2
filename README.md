@@ -229,6 +229,12 @@ This example is an optional override, not a change to the shipped values. Select
 custom profiles with `./scripts/caiso run --config YOUR_EXPERIMENT.yaml` or
 `./scripts/caiso evaluate --config YOUR_EXPERIMENT.yaml`.
 
+To disable block constitution induction, set `method.block_constitution.enabled` to
+`false` in an experiment, or `block_constitution.enabled` to `false` in the shared
+method file. Candidates then use the system constitution directly, skipping
+block preference collection and induction. Validation still controls acceptance.
+The default is `true`; changing it requires a new run/output directory.
+
 The original `scripts/configs/` files and `caiso/config/default.yaml` remain intact
 and supported by direct Python commands. Their reward-model/PPO parameters belong
 to the legacy OPTIMAS utilities and are unused by CAISO. CAISO weight optimization
