@@ -58,7 +58,11 @@ and empty principles. A repair attempt includes the rejected assistant answer,
 with raw output and pair/stage context saved in the local phase-error log.
 The original paper source and transcription fixture remain unchanged; tests
 allow only the documented runtime adaptations. Validation and repair feedback
-require the same "Select the trajectory where" prefix as the prompts.
+request the same "Select the trajectory where" prefix as the prompts. Parsing
+requires "Select the trajectory" followed by an actual criterion. Equivalent
+wording such as "that", "which", "with" or "in which" is preserved, including
+component identifiers. These grammatical variations do not trigger retries;
+empty criteria, placeholders and bare A/B choices still fail.
 
 If a chairperson turn cannot be parsed after its retries, the last validated
 working list is retained and the next configured round runs. An explicit

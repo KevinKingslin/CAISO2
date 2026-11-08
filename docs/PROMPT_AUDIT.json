@@ -141,6 +141,7 @@
   },
   "method_response_recovery": {
     "normal_prompt_text": "Only the documented trajectory adaptations are applied to normal DICAI requests; candidate extraction remains a separate CAISO-authored request.",
+    "principle_wording": "Requires Select the trajectory followed by an actual criterion, preserving equivalent where/that/which/with/in which wording and component identifiers. Grammatical variations do not trigger retries; empty criteria, placeholders, bare A/B choices and old response-style prefixes remain invalid. Prompt text is unchanged.",
     "repair": "Includes the invalid assistant response before the format-repair instruction; raw response and call context are logged. Principle validation errors no longer include a copyable placeholder criterion.",
     "request_checkpoints": "Successful DICAI requests are saved under each induction provenance directory and validated on reuse."
   }

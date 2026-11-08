@@ -50,8 +50,11 @@ are checked against that transcription plus the following explicit adaptations:
   sentence is added: "Proposed questions may concern individual component
   behavior, interactions between components, or the final output."
 - Candidate drafting, debate and abstraction use the prefix
-  `Select the trajectory where`. Parsing and format-repair feedback require the
-  same prefix; old response-style output is not silently converted.
+  `Select the trajectory where`, as does format-repair feedback. Parsing also
+  requires `Select the trajectory` followed by an actual criterion, accepting
+  equivalent wording such as `that`, `which`, `with` or `in which` without
+  rewriting it or retrying valid questions. Empty criteria, placeholders and bare
+  A/B choices still fail. Old response-style output is not silently converted.
 - Abstraction adds one requirement: "Preserve the component references and
   distinctions expressed by the input principles."
 - Constitution-guided judging retains Figure 16's complete instructions,

@@ -68,9 +68,18 @@ def test_invalid_principles_are_not_fabricated(answer):
 
 @pytest.mark.parametrize("principle", [
     "Select the response that answer_generator is concise.",
-    "Select the trajectory that answer_generator is concise.",
+    "Select the trajectory",
     "Select the trajectory where",
+    "Select the trajectory that",
+    "Select the trajectory which",
+    "Select the trajectory with",
+    "Select the trajectory whose",
+    "Select the trajectory in which",
+    "Select the trajectory A",
+    "Select the trajectory B.",
     "Select the trajectory where ...",
+    "Select the trajectory that <condition>.",
+    "Select the trajectory which <actual criterion>.",
     "Select the trajectory where answer_generator is concise. Select the trajectory where hint_generator is detailed.",
 ])
 def test_trajectory_prefix_requires_one_actual_criterion(principle):
@@ -81,7 +90,36 @@ def test_trajectory_prefix_requires_one_actual_criterion(principle):
 def test_trajectory_normalization_preserves_component_identifiers():
     assert normalize_principle(
         "- **Q2:** SELECT  THE trajectory WHERE hint_generator passes detailed hints to answer_generator."
-    ) == "Select the trajectory where hint_generator passes detailed hints to answer_generator."
+    ) == "Select the trajectory WHERE hint_generator passes detailed hints to answer_generator."
+
+
+@pytest.mark.parametrize("original", [
+    "Select the trajectory where answer_generator uses evidence from info_extractor.",
+    "Select the trajectory that uses info_extractor's evidence in answer_generator's answer.",
+    "Select the trajectory which uses info_extractor's evidence in answer_generator's answer.",
+    "Select the trajectory with an answer_generator output supported by info_extractor's evidence.",
+    "Select the trajectory whose answer_generator uses evidence from info_extractor.",
+    "Select the trajectory in which answer_generator uses evidence from info_extractor.",
+])
+def test_trajectory_relative_clauses_preserve_the_actual_criterion(original):
+    assert normalize_principle(original) == original
+    assert parse_principles(f"| Question | Principle |\n|---|---|\n| Q1 | {original} |") == [original]
+
+
+def test_reported_seed_questions_accept_equivalent_wording_without_retries():
+    questions = [
+        "Select the trajectory where the retrieved evidence explicitly confirms the actress's involvement.",
+        "Select the trajectory that ensures the final answer is supported by accurate and verifiable information.",
+    ]
+    provider = SequenceProvider([json.dumps({"questions": questions})] * 3)
+    models = registry(provider)
+    events = []
+    models.recovery.on_error = events.append
+    result = models.complete("test", [{"role": "user", "content": "Draft candidate questions."}], seed=7143, schema=SeedQuestions)
+    assert result.questions == questions
+    assert len(provider.calls) == 1
+    assert events == []
+    assert parse_principles("FINAL LIST:\n" + "\n".join(f"- Q{i}: {p}" for i, p in enumerate(questions, 1))) == questions
 
 
 @pytest.mark.parametrize("answer", [
@@ -283,11 +321,16 @@ def test_judge_accepts_only_presentation_variations(answer):
     assert parse_choice(answer) in {"a", "b"}
 
 
-def test_abstraction_accepts_markdown_and_typographic_quotes():
+@pytest.mark.parametrize("principle", [
+    "Select the trajectory where info_extractor preserves API_key values.",
+    "Select the trajectory that preserves API_key values from info_extractor.",
+    "Select the trajectory which preserves API_key values from info_extractor.",
+])
+def test_abstraction_accepts_markdown_and_typographic_quotes(principle):
     class Provider:
         def complete(self, role, messages, *, validate, **kwargs):
-            return validate('“**Select the trajectory where info_extractor preserves API_key values.**”')
-    assert abstract_clusters([ONE], [0], Provider(), "test", 42) == ["Select the trajectory where info_extractor preserves API_key values."]
+            return validate(f'“**{principle}**”')
+    assert abstract_clusters([ONE], [0], Provider(), "test", 42) == [principle]
 
 
 def test_successful_requests_resume_after_a_later_failure(tmp_path):

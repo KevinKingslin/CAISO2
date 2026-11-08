@@ -7,7 +7,7 @@ from caiso.core.recovery import ModelResponseError
 from caiso.providers.responses import json_object, unwrap
 
 PRINCIPLE_PREFIX = "Select the trajectory where"
-_PREFIX = re.compile(r"^select\s+the\s+trajectory\s+where\b", re.I)
+_PREFIX = re.compile(r"^select\s+the\s+trajectory\b", re.I)
 _HEADER = re.compile(r"^(?:UPDATED\s+WORKING|FINAL|WORKING)\s+LIST(?:\s+OF\s+(?:PRINCIPLES|QUESTIONS))?(?:\s*\([^\n)]*\))?\s*:?[ \t]*$", re.I)
 _LABEL = re.compile(r"^(?:(?:[-+•–—]|\d+[.):])\s+|Q\s*\d+\s*[:.)\-–—]?\s*)", re.I)
 
@@ -48,8 +48,14 @@ def normalize_principle(text):
         raise ModelResponseError(
             f'Return a nonempty principle beginning "{PRINCIPLE_PREFIX}" and stating an actual selection criterion.'
         )
-    value = PRINCIPLE_PREFIX + re.sub(r"^[*`_]+", "", value[match.end():])
-    if value[len(PRINCIPLE_PREFIX):].strip(" .:").lower() in {"that", "which", "where"}:
+    # Only the selection target is structural. Preserve the condition's wording
+    # instead of rejecting English connectors such as "that", "which" or "with".
+    prefix = "Select the trajectory"
+    value = prefix + re.sub(r"^[*`_]+", "", value[match.end():])
+    if value[len(prefix):].strip(" .:").lower() in {
+        "that", "which", "where", "with", "whose", "in which", "for which",
+        "a", "b", "(a)", "(b)", "a or b", "output(a)", "output(b)",
+    }:
         raise ModelResponseError("The principle must state the actual selection criterion.")
     if len(re.findall(r"\bselect\s+the\s+(?:trajectory|response)\b", value, re.I)) != 1:
         raise ModelResponseError("Return one principle, not several principles in one item.")
