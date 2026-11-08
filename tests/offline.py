@@ -19,13 +19,15 @@ class OfflineProvider:
         if schema:
             name = schema.__name__
             if name == "Reasoning":
-                return json.dumps(
-                    {"final_reasoning": "The preferred candidate applies the requested transformation correctly."}
-                )
-            if name == "SeedQuestions":
-                return json.dumps({"questions": [
-                    "Select the trajectory where transform applies the requested arithmetic operation correctly."
-                ]})
+                return json.dumps({
+                    "reasoning": "The preferred trajectory applies the requested operation and preserves its input.",
+                    "dimensions": ["operation correctness", "input preservation"],
+                    "questions": [{"select_prompt": p, "reason": "Discriminates the requested operation."} for p in [
+                        "Select the trajectory that applies the requested arithmetic operation correctly.",
+                        "Select the trajectory where transform preserves the relevant input through intermediate steps.",
+                        "Select the trajectory where transform presents the result clearly.",
+                    ]],
+                })
             if name == "PromptProposal":
                 return json.dumps({"prompt": "double"})
             if name == "BlockVote":
@@ -39,7 +41,7 @@ class OfflineProvider:
                     }
                 )
             raise ValueError(f"Unsupported offline schema {name}")
-        if "You are the Chairperson Agent" in system:
+        if "You are the Moderator/Judge." in system:
             return (
                 "FINAL LIST\n- Q1: Select the trajectory where transform applies the requested arithmetic operation correctly."
                 "\n- Q2: Select the trajectory where transform preserves the relevant input through intermediate steps."
@@ -47,11 +49,11 @@ class OfflineProvider:
             )
         if "debater who must" in system:
             return "1. DEFEND:\n- Q1: Correct arithmetic matters.\n2. ATTACK:\n- None\n3. MERGE:\n- None\n4. EDIT:\n- None\n5. ADD:\n- None\n6. CONCEDE:\n- None"
-        if "You are given a set of preference principles" in system:
+        if "You abstract a cluster of preference principles" in system:
             return "Select the trajectory where transform faithfully computes the requested result from the supplied input."
-        if "selects outputs according to rules" in system:
-            first = json.loads(user.split("## Output(a): ", 1)[1].split("\n## Output(b): ", 1)[0])
-            second = json.loads(user.split("## Output(b): ", 1)[1].split("\n## Which output", 1)[0])
+        if "You are a preference judge." in system:
+            first = json.JSONDecoder().raw_decode(user.split("TRAJECTORY 1:\n", 1)[1])[0]
+            second = json.JSONDecoder().raw_decode(user.split("TRAJECTORY 2:\n", 1)[1])[0]
 
             def quality(value):
                 value = value.get("trajectory", value)
@@ -64,7 +66,9 @@ class OfflineProvider:
                     return int(value["answer"]) == 2 * int(value["input"])
                 return 0
 
-            return "Output(a)" if quality(first) >= quality(second) else "Output(b)"
+            return json.dumps({"choice": "1" if quality(first) >= quality(second) else "2", "reason": "Correct operation."})
+        if "strict reviewer of preference rationales" in system:
+            return "Retain only discriminating operation criteria."
         raise ValueError("Unrecognized offline prompt")
 
 

@@ -21,9 +21,9 @@ from caiso.providers.base import ProviderRegistry
 from caiso.workflow_search.generator import WorkflowGenerator
 
 PRINCIPLES = [
-    "Select the trajectory where answer_generator produces a concise answer using the hint_generator's relevant hints.",
-    "Select the trajectory where answer_generator answers the question.",
-    "Select the trajectory where hint_generator provides detailed relevant hints.",
+    "Select the trajectory where answer_generator uses the hint_generator's relevant evidence.",
+    "Select the trajectory where answer_generator produces a concise answer.",
+    "Select the trajectory where hint_generator provides detailed hints.",
 ]
 
 
@@ -42,8 +42,7 @@ class Recorder:
         )
         if schema is not None:
             values = {
-                "Reasoning": {"final_reasoning": "The preferred trajectory preserves the evidence."},
-                "SeedQuestions": {"questions": [PRINCIPLES[0]]},
+                "Reasoning": {"reasoning": "The preferred trajectory preserves the evidence.", "dimensions": ["evidence support", "answer concision", "hint detail"], "questions": [{"select_prompt": p, "reason": "Discriminates the candidates."} for p in PRINCIPLES]},
                 "PromptProposal": {"prompt": f"Revised instruction {seed}"},
                 "BlockVote": {"block_id": "block-0", "brief_justification": "Improve this block."},
                 "WorkflowProposal": {
@@ -56,7 +55,7 @@ class Recorder:
                 },
             }
             result = schema.model_validate(values[schema.__name__])
-        elif "You are the Chairperson Agent" in messages[0]["content"]:
+        elif "You are the Moderator/Judge." in messages[0]["content"]:
             result = (
                 "FINAL LIST\n"
                 + "\n".join(f"- Q{i}: {p}" for i, p in enumerate(PRINCIPLES, 1))
@@ -64,10 +63,12 @@ class Recorder:
             )
         elif "a debater who must" in messages[0]["content"]:
             result = "1. DEFEND:\n- Q1: Preserve the evidence."
-        elif "You are given a set of preference principles" in messages[0]["content"]:
+        elif "You abstract a cluster of preference principles" in messages[0]["content"]:
             result = PRINCIPLES[0]
-        elif "selects outputs according to rules" in messages[0]["content"]:
-            result = "Output(a)"
+        elif "You are a preference judge." in messages[0]["content"]:
+            result = '{"choice": "1", "reason": "The first trajectory satisfies the principles."}'
+        elif "strict reviewer of preference rationales" in messages[0]["content"]:
+            result = "Keep only discriminating evidence and answer criteria."
         else:
             raise AssertionError("Unexpected prompt in complete-message capture")
         return validate(result) if validate else result

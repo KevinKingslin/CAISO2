@@ -6,7 +6,7 @@ import re
 from caiso.core.recovery import ModelResponseError
 from caiso.providers.responses import json_object, unwrap
 
-PRINCIPLE_PREFIX = "Select the trajectory where"
+PRINCIPLE_PREFIX = "Select the trajectory"
 _PREFIX = re.compile(r"^select\s+the\s+trajectory\b", re.I)
 _HEADER = re.compile(r"^(?:UPDATED\s+WORKING|FINAL|WORKING)\s+LIST(?:\s+OF\s+(?:PRINCIPLES|QUESTIONS))?(?:\s*\([^\n)]*\))?\s*:?[ \t]*$", re.I)
 _LABEL = re.compile(r"^(?:(?:[-+•–—]|\d+[.):])\s+|Q\s*\d+\s*[:.)\-–—]?\s*)", re.I)

@@ -69,14 +69,21 @@
       "Scientific question answering evaluator": "34e571e408f00e0863b8ade72fbd199e49f8474d16abc62cd088d0df7d9fa8fc"
     },
     "dicai": {
-      "reasoning.cot": "825949e6780ef0fea8dc65309887213637dac721716b5d19697f3ad7e13b9816",
-      "reasoning.self_consistency": "6343aac72eb26fb21726e29ba06e53a14ef9796c087375516411269bed2a1c18",
-      "reasoning.self_refine": "a3bee8bb982c0a33adfce3f95a9550a441d21fd56cbc22c569f692290934542f",
-      "debate.debater": "7d0497846afaeaafcf82a806e5a6998e690e50c8b13e74042353ccfeaa20cae5",
-      "debate.chairperson": "7c6f5299b5cc74eb9a69027c673f5040cc4de5df821722f14a82b84e8bc2f310",
-      "reconstruction": "bd04736e4b37a896d399308b8a78fa057cd7676661bc19387c4ef5d37a01e6a6",
-      "abstraction": "fa8e9c92d17c1487aff420ea38156e86f111f283a99fb308ac5a0fc18e308797",
-      "reasoning.seed_questions": "c3f8b8fac94c50877cda54d6b1bddeaddd0307bed7585838d94f5212b7a32340"
+      "reasoning.cot": "bd42d4b556c1622f49a6e24f3bc370ddda2ec5fa2c9fb5a31c808954777c65d8",
+      "reasoning.self_consistency": "072d7c0d3c907a3f8ebce5c4e5a17b185ff641bcbac75057523724648b8922e8",
+      "reasoning.self_refine": "126178afc302f82993676b36685b8ee215caa84ee3648bcb1689fa9c4745fbe9",
+      "reasoning.self_consistency_consensus": "3557dd66a2bb950d4a7013e4d6a4a5feced72f7024ebd320de7bf40e9e5a514e",
+      "reasoning.self_refine_critique": "be28a27b596a7bff7b502927ec7612ace6dafdd1b196152d727b2be3a144f98d",
+      "reasoning.self_refine_revision": "be23ba29a1227ff9e4f2ccfe470b1d5ca147ccefe22fcae2acf08d40ae6e9dba",
+      "debate.debater": "68905d847cb9b61a2267889312f83c595afdc0cfca5a9392a07d73d64550f739",
+      "debate.chairperson": "8afad34a90283353534bdccf7dedd53071b667c3cd59444a6ee17233cfcc51cf",
+      "debate.debater_reconstruction_failed": "c625ed5dabfbb2a9aa59fac45253b6b8a45baad9b90ef95aa1c7e931e15ce501",
+      "debate.debater_too_few": "562c74fffdd0d3a17d311097d3d5ad93b7af603b25eeae8d71744bc6d60438a2",
+      "debate.chairperson_reconstruction_failed": "d13e6f76a29c82a87f7a1eb7567f462ad5dca06aabd50cf5863adefdd67d3d67",
+      "debate.chairperson_too_few": "d2fa674d061c18a0b36508842fd66367aeec8b97ebdfc9a5742474e493fc012f",
+      "reconstruction": "fe92903a1f881efa92b1848e5e22695047732796f7da9792502df6581c4b193d",
+      "abstraction": "ae555278fcf3acfe4110e423c71c9878dba79ebdcb091569a81042d79f620ad3",
+      "audit": "d61523d9c77e3e58a8a9ea2b84fcb1ed2f0c7f92990d150f51cc655d98feebbf"
     }
   },
   "rendered": {

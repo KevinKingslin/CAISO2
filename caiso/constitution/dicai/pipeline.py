@@ -30,8 +30,8 @@ from .reasoning_assembly import assemble
 from .request_cache import RequestCache
 from .reconstruction import minimize_constitution, validate_constitution
 
-PROTOCOL = "democratic-icai-arxiv-2606.28294v2-trajectory-prompts-v2"
-INDUCTION_METHOD_PROMPTS = ("preferences.labeled_pair", "providers.format_retry")
+PROTOCOL = "democratic-icai-c8d5-source-trajectory-v3"
+INDUCTION_METHOD_PROMPTS = ("providers.format_retry",)
 
 
 def implementation_fingerprint():
@@ -238,7 +238,7 @@ class DICAI:
                     temporary.replace(latest)
         cluster_seconds = monotonic() - cluster_started
         abstract_started = monotonic()
-        abstraction_calls = len(set(labels))
+        abstraction_calls = sum(list(labels).count(label) > 1 for label in set(labels))
         abstractions = abstract_clusters(
             settled,
             labels,
@@ -342,7 +342,7 @@ class DICAI:
                 "principle_pair_ids": origins,
                 "reasoning_catalogues": catalogues,
                 "debate_transcripts": transcripts,
-                "source": "DICAI arXiv:2606.28294v2 Appendix G; third_party/democratic_icai/SOURCE.json",
+                "source": "User-supplied Democratic-ICAI-C8D5; third_party/democratic_icai/PROMPTS.json",
                 "protocol": PROTOCOL,
                 "provenance": provenance,
                 "implementation_fingerprint": implementation,

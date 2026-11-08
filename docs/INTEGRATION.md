@@ -20,17 +20,23 @@ remain protected. Prompt extraction is recorded below and has separate text and
 rendering regression tests.
 
 The [original-source prompt audit](PROMPT_AUDIT.md) verifies all 29 benchmark
-prompt entries against pinned OPTIMAS. Active DICAI instructions follow
-arXiv:2606.28294v2, Appendix G, Figures 10–16, with the minimal trajectory
-adaptation documented in the audit: trajectory terminology and principle prefix,
-one debater sentence allowing component/interactions/final output criteria, and
-one abstraction requirement preserving component references. Figure 16 judging
-is unchanged. No reconstruction gate or structured per-component constitution
-schema is added. Task evidence and QA/recommendation personas are supplied as
-dynamic inputs. CAISO method prompts follow DICAI's writing
-format while retaining their own tasks and response schemas. The earlier
-51-request/104-message capture is historical; current requests have a reviewed
-fixture, while DICAI is also tested against the published appendix source.
+prompt entries against pinned OPTIMAS. Active DICAI requests now follow the
+user-supplied `Democratic-ICAI-C8D5` source preserved byte for byte under
+`third_party/democratic_icai/original/`. All 15 original complete requests and
+their trajectory versions have recorded hashes. Independent AST-based tests
+reconstruct the original requests and allow only the documented trajectory
+adaptations. The earlier paper-prompt protocol is retained as a historical
+reference.
+
+The source's structured reasoning/questions, sampled consensus, iterative
+refinement and reconstruction-gated debate are wired into CAISO's existing
+providers and recovery layer. Numeric configurations, benchmark systems, datasets,
+metrics, model routes and the three dataset personas are retained. Original
+creative-writing persona constants are preserved as references. The external
+audit template is imported without enabling a new optimization stage or model.
+The source's best-effort result at the round cap remains explicitly marked as
+unfinalized if the reconstruction/minimum-question gates fail. Existing robust
+format validation still requires at least one usable chairperson turn.
 
 ## Ten explicit upstream exceptions
 

@@ -1,0 +1,19 @@
+[SYSTEM]
+You are a strict reviewer of preference rationales.
+[USER]
+PROMPT:
+{context:json}
+
+TRAJECTORY A:
+{response_a:json}
+
+TRAJECTORY B:
+{response_b:json}
+
+PREFERRED: {preferred}
+
+DRAFT RATIONALE:
+{reasoning}
+DRAFT DIMENSIONS: {dimensions}
+
+List concrete weaknesses: vague claims, points that are not discriminating (true of both trajectories), and missing high-tension differences. Be brief.

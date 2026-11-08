@@ -14,7 +14,7 @@
     "reasoning.py": "5c46b03ee7eded7da0de3562d3e3f3fa667098c502d95a3f106a3a2686676163",
     "run_pipeline.py": "d1acf4600580422d8234f566a09ccaa1d590510f42947ef006d167e6992212f2"
   },
-  "active_prompt_source": {
+  "previous_paper_prompt_source": {
     "title": "Democratic ICAI: Debating Our Way to Steering Principles from Preferences",
     "arxiv": "2606.28294v2",
     "url": "https://arxiv.org/abs/2606.28294v2",
@@ -33,5 +33,22 @@
     "verified_on": "2026-11-06",
     "transcription": "Published wording, with TeX layout/list markers normalized for plain text.",
     "runtime_adaptation": "Minimal trajectory terminology/prefix changes, one component/interactions/final-output sentence in debate and one component-reference preservation requirement in abstraction; Figure 16 judging and original reference source unchanged. See docs/PROMPT_AUDIT.md."
+  },
+  "active_prompt_source": {
+    "source": "User-supplied Democratic-ICAI-C8D5 code",
+    "source_directory": "/Users/kevinkingslin/Downloads/Democratic-ICAI-C8D5",
+    "snapshot": "third_party/democratic_icai/original",
+    "manifest": "third_party/democratic_icai/PROMPTS.json",
+    "license": "MIT",
+    "request_count": 15,
+    "principle_prefix": "Select the trajectory",
+    "adaptations": [
+      "Response/story terminology becomes trajectory terminology.",
+      "Human-label wording becomes provided preference-label wording.",
+      "Debaters may discuss component behavior, interactions or final output (one sentence).",
+      "Abstraction preserves component references and distinctions (one sentence).",
+      "Dynamic inputs use CAISO JSON execution records and renamed placeholders."
+    ],
+    "protocol": "democratic-icai-c8d5-source-trajectory-v3"
   }
 }

@@ -1,15 +1,16 @@
 [SYSTEM]
-You are given a set of preference principles. Each principle has the form:
-"Select the trajectory where <condition>."
-Your task is to identify the underlying preference shared by all principles and express it as a single, more general principle that subsumes every member of the set.
-
-Requirements:
-- The principle must be broad enough to cover all provided principles.
-- The principle must not introduce new preferences that are not supported by the set.
-- Preserve the component references and distinctions expressed by the input principles.
-- Prefer the highest-level abstraction that remains faithful to every principle.
-- Output exactly one sentence in the following format:
-
-"Select the trajectory where <condition>."
+You abstract a cluster of preference principles into one principle.
 [USER]
+You are given a cluster of preference principles that all express the same
+underlying rule. Each has the form "Select the trajectory that <condition>".
+
+Write ONE principle that captures what they share. Make it general enough to
+cover every member, but specific enough that two trajectories could actually
+differ on it. Use the exact format: "Select the trajectory that <condition>."
+
+Preserve the component references and distinctions expressed by the input principles.
+
+CLUSTER:
 {principles}
+
+Reply with only the principle.

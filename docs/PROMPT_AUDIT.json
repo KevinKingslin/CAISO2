@@ -80,7 +80,31 @@
     "result": "exact UTF-8 and role match"
   },
   "historical_scope": "Pre-paper-prompt migration. DICAI pre-consolidation and request-parity findings describe the historical baseline, not current DICAI requests.",
-  "current_dicai": {
+  "current_caiso_method": {
+    "style": "Named agents, numbered tasks, requirements, explicit JSON response formats and labeled user evidence, following DICAI formatting.",
+    "templates": [
+      "prompt_optimizer.request",
+      "block_selection.request",
+      "generator.request",
+      "services.schema_message",
+      "providers.format_retry"
+    ],
+    "source": "CAISO-authored method instructions; not transcriptions of the DICAI paper.",
+    "preserved": "Existing method inputs, output fields, selection criteria, workflow restrictions, tips, personas, configuration values and benchmark prompts. Preference layouts now use trajectory headings.",
+    "complete_request_capture": {
+      "requests": 49,
+      "message_bodies": 101,
+      "fixture": "tests/fixtures/complete_prompt_requests.json"
+    },
+    "normal_stage_schema_messages": "Response formats live in the complete stage templates; duplicate schema supplements disabled for the three stages."
+  },
+  "method_response_recovery": {
+    "normal_prompt_text": "Original code-based complete requests with the documented minimal trajectory adaptations; no separate seed-drafting prompt.",
+    "principle_wording": "Requires Select the trajectory followed by an actual criterion, preserving equivalent where/that/which/with/in which wording and component identifiers. Grammatical variations do not trigger retries; empty criteria, placeholders, bare A/B choices and old response-style prefixes remain invalid. Prompt text is unchanged.",
+    "repair": "Includes the invalid assistant response before the format-repair instruction; raw response and call context are logged. Principle validation errors no longer include a copyable placeholder criterion.",
+    "request_checkpoints": "Successful DICAI requests are saved under each induction provenance directory and validated on reuse."
+  },
+  "previous_paper_protocol": {
     "title": "Democratic ICAI: Debating Our Way to Steering Principles from Preferences",
     "arxiv": "2606.28294v2",
     "url": "https://arxiv.org/abs/2606.28294v2",
@@ -121,28 +145,24 @@
       "reference": "Original LaTeX and reference transcription fixture remain unmodified."
     }
   },
-  "current_caiso_method": {
-    "style": "Named agents, numbered tasks, requirements, explicit JSON response formats and labeled user evidence, following DICAI formatting.",
-    "templates": [
-      "prompt_optimizer.request",
-      "block_selection.request",
-      "generator.request",
-      "services.schema_message",
-      "providers.format_retry"
+  "current_dicai": {
+    "source": "User-supplied original Democratic-ICAI-C8D5 code",
+    "snapshot": "third_party/democratic_icai/original",
+    "manifest": "third_party/democratic_icai/PROMPTS.json",
+    "source_files": 8,
+    "complete_requests": 15,
+    "license": "MIT",
+    "principle_prefix": "Select the trajectory",
+    "adaptations": [
+      "Response/story terminology becomes trajectory terminology.",
+      "Human-label wording becomes provided preference-label wording.",
+      "Debaters may discuss component behavior, interactions or final output (one sentence).",
+      "Abstraction preserves component references and distinctions (one sentence).",
+      "Dynamic inputs use CAISO JSON execution records and renamed placeholders."
     ],
-    "source": "CAISO-authored method instructions; not transcriptions of the DICAI paper.",
-    "preserved": "Existing method inputs, output fields, selection criteria, workflow restrictions, tips, personas, configuration values and benchmark prompts. Preference layouts now use trajectory headings.",
-    "complete_request_capture": {
-      "requests": 41,
-      "message_bodies": 85,
-      "fixture": "tests/fixtures/complete_prompt_requests.json"
-    },
-    "normal_stage_schema_messages": "Response formats live in the complete stage templates; duplicate schema supplements disabled for the three stages."
-  },
-  "method_response_recovery": {
-    "normal_prompt_text": "Only the documented trajectory adaptations are applied to normal DICAI requests; candidate extraction remains a separate CAISO-authored request.",
-    "principle_wording": "Requires Select the trajectory followed by an actual criterion, preserving equivalent where/that/which/with/in which wording and component identifiers. Grammatical variations do not trigger retries; empty criteria, placeholders, bare A/B choices and old response-style prefixes remain invalid. Prompt text is unchanged.",
-    "repair": "Includes the invalid assistant response before the format-repair instruction; raw response and call context are logged. Principle validation errors no longer include a copyable placeholder criterion.",
-    "request_checkpoints": "Successful DICAI requests are saved under each induction provenance directory and validated on reuse."
+    "protocol": "democratic-icai-c8d5-source-trajectory-v3",
+    "runtime": "Original structured rationales/questions, sampled consensus, iterative refinement, reconstruction status and finalization gates, JSON 1/2 judging, singleton abstraction bypass.",
+    "audit": "Template imported; no new auditor model or automatic audit stage enabled.",
+    "preserved": "All existing numeric configuration values, model routes, benchmark prompts, datasets, metrics and dataset personas."
   }
 }

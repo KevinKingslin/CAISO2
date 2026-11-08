@@ -237,26 +237,36 @@ needed. Credentials, model deployments, backend choices and service URLs stay in
 `.env`. See [the configuration guide](configs/README.md) and
 [the prompt inventory](caiso/prompts/README.md).
 
-Stage request files contain complete `[SYSTEM]` and `[USER]` sections. DICAI uses
-the instructions in arXiv:2606.28294v2, Appendix G, Figures 10–16, with a minimal
-trajectory adaptation: trajectory labels, principles beginning "Select the
-trajectory where", one debater sentence permitting component/interactions/final
-output criteria, and one abstraction requirement preserving component references.
-Constitution-guided judging keeps Figure 16 unchanged. Dynamic evidence and
-optimized instructions remain template values. The
-[prompt audit](docs/PROMPT_AUDIT.md) records the paper source, necessary input
-adaptations and exact OPTIMAS system-prompt parity.
+Stage request files contain complete `[SYSTEM]` and `[USER]` sections. Active
+DICAI prompts come from the user-supplied `Democratic-ICAI-C8D5` code. Its eight
+original files are preserved in `third_party/democratic_icai/original/`; all 15
+complete original requests are in `third_party/democratic_icai/prompts/`.
+Their editable trajectory versions are in `caiso/prompts/dicai/`. The
+[prompt audit](docs/PROMPT_AUDIT.md) records source hashes and the exact adaptations.
 
-Each persona's final rationale is then converted into candidate questions with
-`dicai/reasoning/seed_questions.txt`, a separate CAISO-authored extraction prompt.
-These real criteria seed the debate's initial working list, restoring the input
-expected by the original DICAI debate code. This adds three method calls per
-preference pair; their budget use and checkpoints are recorded. The original
-paper source and reference transcriptions remain unchanged; tests constrain the
-runtime adaptations to the edits above. Constitutions remain lists of strings.
-Use a new run to regenerate constitutions under the trajectory prompt protocol;
-saved constitutions in older checkpoints are not rewritten. Report this prompt
-adaptation when describing experiments.
+Principles start with **"Select the trajectory"**. Original instructions are
+retained apart from response/story terminology, provided preference labels,
+structured execution evidence and the two agreed sentences about component
+criteria and preservation of component references. Constitutions remain lists
+of strings. No dataset-specific answer-style requirements are added.
+
+Reasoning returns the original `reasoning`, `dimensions`, and `questions` fields.
+CoT uses one request; self-consistency samples independent chains and synthesizes
+recurring dimensions; self-refinement alternates critique and revision. The
+existing settings control these stages. The separate CAISO seed-drafting call
+has been removed because the original rationales already supply questions.
+Debate retains the source's one-quality rules, reconstruction feedback and
+finalization gates. The blind judge uses the original JSON choice `1` / `2`
+format, adapted to trajectory evidence. Singleton clusters retain their principle
+without an abstraction call, as in the source.
+
+The audit prompt is included as a complete template; no new auditor model or
+automatic audit stage is enabled. Dataset personas, model routes, transport
+limits and all existing numeric configuration values are retained. The paper
+Appendix G transcriptions remain historical references, not active prompts.
+Start a new optimization run after this migration: prompt schemas, call counts
+and reconstruction behavior differ, and old checkpoints retain old constitutions.
+Document this trajectory adaptation and the resolved configuration in research.
 
 CAISO's prompt optimizer, block selector and workflow designer use the same
 writing format: named agents, numbered tasks, explicit output formats and

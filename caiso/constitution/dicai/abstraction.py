@@ -26,6 +26,8 @@ def abstract_clusters(
 
     def abstract_cluster(cluster):
         members = [p for p, label in zip(principles, labels, strict=True) if label == cluster]
+        if len(members) == 1:
+            return valid_principle(members[0])
         return providers.complete(
             role,
             render_messages(

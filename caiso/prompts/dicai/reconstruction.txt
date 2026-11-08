@@ -1,11 +1,16 @@
 [SYSTEM]
-You are a helpful instruction-following assistant that selects outputs according to rules.
+You are a preference judge. You are given a set of principles and two trajectories to the same prompt. Decide which trajectory the principles favour, using the principles as your ONLY criteria. You are not told which trajectory the provided preference label favors; judge solely from the principles.
 [USER]
-Select the output (a) or (b) according to the following rules (if they apply):
+PROMPT:
+{context:json}
+
+PRINCIPLES:
 {constitution}
-You MUST follow the rules above if they apply. Select the output randomly if they do not apply.
-Your answer should ONLY contain: Output(a) or Output(b).
-## Task: Now the task — do not explain your answer, just say Output(a) or Output(b).
-## Output(a): {response_1:json}
-## Output(b): {response_2:json}
-## Which output should be selected according to the rules above, Output(a) or Output(b)?
+
+TRAJECTORY 1:
+{response_1:json}
+
+TRAJECTORY 2:
+{response_2:json}
+
+Which trajectory do the principles favour? Reply with JSON only: {{"choice": "1" | "2", "reason": "<one sentence>"}}.

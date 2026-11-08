@@ -1,28 +1,26 @@
-"""Constitution-guided judging from arXiv:2606.28294v2, Figure 16.
+"""Constitution-guided judging from the user-supplied original DICAI code.
 
 MIT attribution: third_party/democratic_icai. Gold labels are used only after
 inference, never in the blind judge's messages.
 """
 
 import random
-import re
 from collections import Counter
 
 from caiso.core.content_filter import ContentFilteredError, record_skip
 from caiso.core.parallel import ordered_map
 from caiso.core.recovery import ModelResponseError
 from caiso.prompts import render_messages
-from caiso.providers.responses import unwrap
+from caiso.providers.responses import json_object
 
-from .preferences import candidate_views
+from .preferences import candidate_views, task_view
 
 
 def parse_choice(text):
-    value = unwrap(text).strip().strip('"\'`*“”‘’ ')
-    match = re.fullmatch(r"Output\s*\(\s*([ab])\s*\)[.!]?", value, re.I)
-    if not match:
-        raise ModelResponseError("Constitution judge must return Output(a) or Output(b)")
-    return match.group(1).lower()
+    value = json_object(text).get("choice")
+    if isinstance(value, bool) or str(value) not in {"1", "2"}:
+        raise ModelResponseError('Constitution judge must return JSON with choice "1" or "2"')
+    return str(value)
 
 
 def apply_constitution(providers, role, pair, principles, seed=0, temperature=0.0):
@@ -32,15 +30,17 @@ def apply_constitution(providers, role, pair, principles, seed=0, temperature=0.
     response = providers.complete(
         role,
         render_messages(
-            "dicai", "reconstruction", constitution="\n".join(principles),
+            "dicai", "reconstruction", constitution="\n".join("- " + p for p in principles) or "(no principles)",
+            context=task_view(pair.context),
             response_1=first, response_2=second,
         ),
         seed=seed,
         validate=lambda text: (parse_choice(text), text)[1],
         response_context={"pair_id": pair.pair_id, "stage": "reconstruction"},
-        temperature=temperature,
+        temperature=temperature, response_format={"type": "json_object"},
+        include_schema_instruction=False,
     )
-    choice = ("B" if swapped else "A") if parse_choice(response) == "a" else ("A" if swapped else "B")
+    choice = ("B" if swapped else "A") if parse_choice(response) == "1" else ("A" if swapped else "B")
     return choice, {"predicted": choice, "response": response, "swapped": swapped}
 
 

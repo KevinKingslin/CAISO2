@@ -13,7 +13,7 @@ from caiso.constitution.dicai.parsing import normalize_principle
 from caiso.constitution.dicai.pipeline import DICAI
 from caiso.constitution.dicai.reconstruction import parse_choice
 from caiso.constitution.dicai.request_cache import RequestCache
-from caiso.constitution.dicai.reasoning_assembly import SeedQuestions, assemble
+from caiso.constitution.dicai.reasoning_assembly import Reasoning, assemble
 from caiso.constitution.models import PreferencePair
 from caiso.core.budget import BudgetExceeded
 from caiso.core.recovery import ModelResponseError, RetryExhausted, TransportExhausted, TransportRequestError
@@ -111,12 +111,12 @@ def test_reported_seed_questions_accept_equivalent_wording_without_retries():
         "Select the trajectory where the retrieved evidence explicitly confirms the actress's involvement.",
         "Select the trajectory that ensures the final answer is supported by accurate and verifiable information.",
     ]
-    provider = SequenceProvider([json.dumps({"questions": questions})] * 3)
+    provider = SequenceProvider([json.dumps({"reasoning": "The preferred trajectory uses supporting evidence.", "dimensions": ["evidence support"], "questions": questions})] * 3)
     models = registry(provider)
     events = []
     models.recovery.on_error = events.append
-    result = models.complete("test", [{"role": "user", "content": "Draft candidate questions."}], seed=7143, schema=SeedQuestions)
-    assert result.questions == questions
+    result = models.complete("test", [{"role": "user", "content": "Draft candidate questions."}], seed=7143, schema=Reasoning)
+    assert [q.select_prompt for q in result.questions] == questions
     assert len(provider.calls) == 1
     assert events == []
     assert parse_principles("FINAL LIST:\n" + "\n".join(f"- Q{i}: {p}" for i, p in enumerate(questions, 1))) == questions
@@ -221,16 +221,19 @@ class DebateProvider:
     def __init__(self, chairs):
         self.chairs = iter(chairs)
     def complete(self, role, messages, *, validate=None, **kwargs):
-        if "Chairperson Agent" in messages[0]["content"]:
+        if "Moderator/Judge" in messages[0]["content"]:
             reply = next(self.chairs)
             if isinstance(reply, Exception):
                 raise reply
             return validate(reply) if validate else reply
+        if "You are a preference judge." in messages[0]["content"]:
+            text = '{"choice": "1", "reason": "The first trajectory satisfies the criteria."}'
+            return validate(text) if validate else text
         return "5. ADD:\n- " + ONE
 
 
 def test_unchanged_finalization_retains_actual_validated_working_list():
-    principles, transcript = debate(pair(), catalog(), DebateProvider([f"UPDATED WORKING LIST:\n- **Q1:** {ONE}", "DEBATE_OVER"]), "test", 42, rounds=2)
+    principles, transcript = debate(pair(), catalog(), DebateProvider([f"UPDATED WORKING LIST:\n- **Q1:** {ONE}", "DEBATE_OVER"]), "test", 42, rounds=2, config={"min_principles": 1})
     assert principles == [ONE]
     assert transcript[-1]["finalized"] is True
 
@@ -266,13 +269,15 @@ def test_reported_empty_or_placeholder_reply_retains_published_seed_criterion(an
         def __init__(self):
             self.chairs = []
         def complete(self, messages, **kwargs):
-            if "Chairperson Agent" in messages[0]["content"]:
+            if "Moderator/Judge" in messages[0]["content"]:
                 assert actual_seed in messages[1]["content"]
                 self.chairs.append(messages)
                 if len(self.chairs) == 1:
                     return "UPDATED WORKING LIST:\n- Q1: " + actual_seed
                 return answer
-            assert "YOUR OWN PROPOSED QUESTION LIST:\n- " + actual_seed in messages[-1]["content"]
+            if "You are a preference judge." in messages[0]["content"]:
+                return '{"choice": "1", "reason": "Preserves the criteria."}'
+            assert "YOUR SEED QUESTIONS:\n- " + actual_seed in messages[0]["content"]
             return "1. DEFEND:\n- Q1: This criterion captures the supplied rationale."
 
     source = Provider()
@@ -307,7 +312,7 @@ def test_seed_drafting_rejects_missing_or_fake_criteria(questions):
     from pydantic import ValidationError
 
     with pytest.raises((ModelResponseError, ValidationError)):
-        SeedQuestions(questions=questions)
+        Reasoning(reasoning="Rationale", questions=questions)
 
 
 @pytest.mark.parametrize("error", [BudgetExceeded("cap"), TransportExhausted("quota"), TransportRequestError("auth")])
@@ -316,9 +321,9 @@ def test_chairperson_fallback_never_hides_service_or_budget_errors(error):
         debate(pair(), catalog(), DebateProvider([f"- Q1: {ONE}", error]), "test", 42, rounds=2)
 
 
-@pytest.mark.parametrize("answer", ['**Output(a)**', '```text\nOutput(b)\n```', 'output ( A ).'])
+@pytest.mark.parametrize("answer", ['{"choice": "1"}', '```json\n{"choice": "2"}\n```', '{"choice": 1}'])
 def test_judge_accepts_only_presentation_variations(answer):
-    assert parse_choice(answer) in {"a", "b"}
+    assert parse_choice(answer) in {"1", "2"}
 
 
 @pytest.mark.parametrize("principle", [
@@ -330,7 +335,7 @@ def test_abstraction_accepts_markdown_and_typographic_quotes(principle):
     class Provider:
         def complete(self, role, messages, *, validate, **kwargs):
             return validate(f'“**{principle}**”')
-    assert abstract_clusters([ONE], [0], Provider(), "test", 42) == [principle]
+    assert abstract_clusters([ONE, TWO], [0, 0], Provider(), "test", 42) == [principle]
 
 
 def test_successful_requests_resume_after_a_later_failure(tmp_path):
@@ -388,12 +393,12 @@ def test_real_induction_resumes_successful_calls_after_interruption(tmp_path):
     )
     with pytest.raises(BudgetExceeded):
         induction.induce([pair()], 42, output_dir=tmp_path)
-    earlier_messages = [messages for messages, _, _ in source.calls]
-    assert len(earlier_messages) == 4
+    earlier_requests = list(source.calls)
+    assert len(earlier_requests) == 4
     constitution = induction.induce([pair()], 42, output_dir=tmp_path)
     assert constitution.principles
     assert constitution.metadata["request_cache_hits"] >= 4
-    assert not any(messages in earlier_messages for messages, _, _ in source.calls[4:])
+    assert not any(request in earlier_requests for request in source.calls[4:])
     count = len(source.calls)
     cached = induction.induce([pair()], 42, output_dir=tmp_path)
     assert cached.principles == constitution.principles

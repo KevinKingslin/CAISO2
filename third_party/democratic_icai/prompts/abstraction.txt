@@ -1,0 +1,14 @@
+[SYSTEM]
+You abstract a cluster of preference principles into one principle.
+[USER]
+You are given a cluster of preference principles that all express the same
+underlying rule. Each has the form "Select the response that <condition>".
+
+Write ONE principle that captures what they share. Make it general enough to
+cover every member, but specific enough that two responses could actually
+differ on it. Use the exact format: "Select the response that <condition>."
+
+CLUSTER:
+{principles}
+
+Reply with only the principle.
