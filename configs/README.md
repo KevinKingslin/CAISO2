@@ -14,8 +14,24 @@
 - `method`: recursively overrides the shared method; unspecified nested fields keep
   their shared values.
 
-Values were copied without retuning. Original `scripts/configs/` files and packaged
-`caiso/config/default.yaml` remain unchanged and usable by the legacy launchers.
+Original `scripts/configs/` files remain usable by the legacy launchers. Shared
+and packaged method defaults use task-only candidate scoring:
+
+```yaml
+block_optimization:
+  task_scoring:
+    enabled: true
+    constitution_weight: 0.0
+    task_weight: 1.0
+```
+
+This uses the end-to-end training task metric for prompt feedback and candidate
+selection, skips candidate constitution judging, and records `constitution_score`
+as `null`. Constitution text still guides prompt generation and block selection;
+the fixed validation set remains the separate acceptance gate. A positive
+`constitution_weight` opts into mixed ranking with local constitution feedback;
+`enabled: false` restores constitution-only scoring.
+
 Reward-model/PPO settings in those files are unused by CAISO. Its existing DPO
 settings remain in the shared method file.
 

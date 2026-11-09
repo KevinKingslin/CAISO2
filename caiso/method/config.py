@@ -3,6 +3,29 @@
 import math
 
 
+def task_scoring_settings(config):
+    """Task-only candidate scoring is the default; retain explicit mixed/local modes."""
+    task = config.get("task_scoring", {})
+    if not isinstance(task, dict):
+        raise ValueError("task_scoring must be a configuration mapping")
+    enabled = task.get("enabled", True)
+    if not isinstance(enabled, bool):
+        raise ValueError("task_scoring.enabled must be true or false")
+    weights = []
+    for key, default in (("constitution_weight", 0), ("task_weight", 1)):
+        value = task.get(key, default)
+        if (
+            isinstance(value, bool) or not isinstance(value, (int, float))
+            or not math.isfinite(value) or value < 0 or (key == "task_weight" and value == 0)
+        ):
+            raise ValueError(
+                f"task_scoring.{key} must be finite and "
+                + ("positive" if key == "task_weight" else "nonnegative")
+            )
+        weights.append(float(value))
+    return enabled, *weights
+
+
 def resume_config_hashes(config):
     """Allow older implicit true defaults without relaxing other run settings."""
     from caiso.core.serialization import digest
@@ -31,6 +54,7 @@ def validate_method(config):
         raise ValueError("block_constitution must be a configuration mapping")
     if not isinstance(config.get("block_optimization", {}), dict):
         raise ValueError("block_optimization must be a configuration mapping")
+    task_scoring_settings(config.get("block_optimization", {}))
     if not isinstance(config.get("block_selection", {}), dict):
         raise ValueError("block_selection must be a configuration mapping")
     recovery = config.get("error_handling", {})

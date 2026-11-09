@@ -33,6 +33,9 @@ def test_shared_method_copy_does_not_change_any_values():
     assert load_method({})["block_optimization"]["include_current_configuration"] is True
     assert load_method({})["block_selection"]["use_history"] is True
     assert load_method({})["use_history"] is True
+    assert load_method({})["block_optimization"]["task_scoring"] == {
+        "enabled": True, "constitution_weight": 0.0, "task_weight": 1.0,
+    }
 
 
 def test_experiment_overrides_method_recursively_and_paths_are_relative(tmp_path):

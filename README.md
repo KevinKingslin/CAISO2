@@ -273,7 +273,7 @@ caiso/prompts/
   systems/pubmedqa/<component>/*.txt
 ```
 
-All current parameter values are retained. `method_config` is relative to the
+`method_config` is relative to the
 experiment file; the experiment's `method` mapping recursively overrides the
 shared method. `optimization` contains launch settings and `evaluation` contains
 the existing evaluation settings. For example, in a copy of an experiment:
@@ -286,10 +286,24 @@ method:
     max_joint_candidates: 3
     task_scoring:
       enabled: true
+      constitution_weight: 0.0
+      task_weight: 1.0
 ```
 
-This example is an optional override, not a change to the shipped values. Select
-custom profiles with `./scripts/caiso run --config YOUR_EXPERIMENT.yaml` or
+Candidate selection and prompt-generation feedback default to the end-to-end
+task metric on the training batch. With `constitution_weight: 0.0`, candidate
+constitution judging is skipped and `constitution_score` is recorded as `null`.
+The constitution still guides generation and block selection. Validation
+acceptance continues to use the separate, fixed validation set.
+
+Set a positive `constitution_weight` to opt into weighted task/constitution
+ranking; in that mode prompt feedback uses the local constitution score.
+Set `task_scoring.enabled: false` to use constitution-only scoring.
+Task scoring runs the full system for candidate feedback and can consume more
+evaluation budget than local block scoring. Scores for identical candidate states
+are reused within a proposal call.
+
+Select custom profiles with `./scripts/caiso run --config YOUR_EXPERIMENT.yaml` or
 `./scripts/caiso evaluate --config YOUR_EXPERIMENT.yaml`.
 
 `use_history` defaults to `true` in the shared method file. Set it to `false`, or

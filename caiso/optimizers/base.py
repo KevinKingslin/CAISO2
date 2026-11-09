@@ -20,7 +20,7 @@ def filter_current_configuration(current, proposals, config):
 
 class CandidateScore(Record):
     configurations: dict[str, Configuration]
-    constitution_score: float
+    constitution_score: float | None = None
     task_score: float | None = None
     score: float
 
@@ -45,7 +45,7 @@ class ConfigurationOptimizer(ABC):
 
     def score(self, component, candidates, context):
         if context.score_config is None:
-            raise ValueError("A whole-constitution scoring callback is required")
+            raise ValueError("A candidate-scoring callback is required")
         return [context.score_config({component.component_id: c}) for c in candidates]
 
     def select(self, candidates, scores, seed=0, final=False):

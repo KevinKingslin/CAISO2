@@ -64,9 +64,9 @@ block_optimization:
   reevaluate_current: true  # false: reuse the saved current validation score; candidates are always evaluated.
   max_joint_candidates: 16
   task_scoring:
-    enabled: false  # true: run each complete candidate end to end on the training batch.
-    constitution_weight: 1.0  # Combined score is the weighted average of both scores.
-    task_weight: 1.0  # Both weights must be positive when enabled; validation stays separate.
+    enabled: true  # Score candidates and prompt feedback end to end on the training batch.
+    constitution_weight: 0.0  # Zero skips candidate constitution judging; positive enables mixed ranking.
+    task_weight: 1.0  # Positive task weight; validation acceptance stays separate.
   acceptance_epsilon: 0.000001
   prompt_candidates: 3
   prompt_tips:

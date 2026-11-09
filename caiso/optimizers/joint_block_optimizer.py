@@ -7,6 +7,7 @@ from caiso.core.content_filter import ContentFilteredError, record_skip
 from caiso.core.recovery import ModelResponseError
 from caiso.core.serialization import digest
 from caiso.evaluation.evaluator import evaluate
+from caiso.method.config import task_scoring_settings
 
 from .base import CandidateScore, OptimizationContext, filter_current_configuration
 from .hyperparameter_optimizer import HyperparameterOptimizer
@@ -50,35 +51,26 @@ class JointBlockOptimizer:
             raise ValueError("include_current_configuration must be true or false")
         self.optimizers = optimizers or default_optimizers(config)
         self.on_candidate = on_candidate
-        task = config.get("task_scoring", {})
-        if not isinstance(task, dict):
-            raise ValueError("task_scoring must be a configuration mapping")
-        self.task_scoring = task.get("enabled", False)
-        if not isinstance(self.task_scoring, bool):
-            raise ValueError("task_scoring.enabled must be true or false")
-        self.constitution_weight = float(task.get("constitution_weight", 1))
-        self.task_weight = float(task.get("task_weight", 1))
-        if self.task_scoring and not all(
-            math.isfinite(w) and w > 0 for w in (self.constitution_weight, self.task_weight)
-        ):
-            raise ValueError(
-                "Enabled task_scoring requires finite positive weights for both scores"
-            )
+        self.task_scoring, self.constitution_weight, self.task_weight = task_scoring_settings(config)
+        self.constitution_scoring = not self.task_scoring or self.constitution_weight > 0
 
     def add_task_score(self, scored, state, examples, seed):
-        if not self.task_scoring:
+        if not self.task_scoring or scored.task_score is not None:
             return scored
         task_score, _ = evaluate(
             self.runtime, state.with_configs(scored.configurations), examples, [seed]
         )
+        selection_score = task_score
+        if self.constitution_scoring:
+            total = self.constitution_weight + self.task_weight
+            selection_score = (
+                self.constitution_weight / total * scored.constitution_score
+                + self.task_weight / total * task_score
+            )
         return scored.model_copy(
             update={
                 "task_score": task_score,
-                "score": (
-                    self.constitution_weight * scored.constitution_score
-                    + self.task_weight * task_score
-                )
-                / (self.constitution_weight + self.task_weight),
+                "score": selection_score,
             }
         )
 
@@ -97,6 +89,12 @@ class JointBlockOptimizer:
         candidate = state.with_configs(updates)
         if self.on_candidate:
             self.on_candidate(candidate.model_copy(deep=True))
+        if not self.constitution_scoring:
+            # Proposal feedback must use the same task metric as joint selection.
+            # Other components keep their accepted configurations during this run.
+            return self.add_task_score(
+                CandidateScore(configurations=updates, score=0.0), state, examples, seed
+            )
         members = list(members or updates)
 
         def run_block(current, reference):
@@ -151,7 +149,7 @@ class JointBlockOptimizer:
                 "No unfiltered training trajectories remain for local optimization"
             )
         baseline_outputs = []
-        for ref in references:
+        for ref in references if self.constitution_scoring else []:
             try:
                 baseline_outputs.append(self.runtime.execute_block(state, members, ref, seed))
             except ContentFilteredError as error:
@@ -161,8 +159,14 @@ class JointBlockOptimizer:
                 baseline_outputs.append(None)
         memo = {}
 
+        def candidate_key(updates):
+            return (
+                state.with_configs(updates).fingerprint()
+                if not self.constitution_scoring else digest(updates)
+            )
+
         def score(updates):
-            key = digest(updates)
+            key = candidate_key(updates)
             if key not in memo:
                 memo[key] = self.score_candidate(
                     state,
@@ -232,12 +236,14 @@ class JointBlockOptimizer:
             for cid, proposals in options.items():
                 index, digit = divmod(index, len(proposals))
                 updates[cid] = proposals[digit]
-            key = digest(updates)
+            key = candidate_key(updates)
             try:
                 score(updates)
-                # Only complete joint candidates receive end-to-end task evaluation.
-                # Prompt proposal/history callbacks above remain block-local.
-                completed = self.add_task_score(memo[key], state, examples, seed)
+                # Reuse task-only feedback scores when this exact configuration
+                # was already evaluated; mixed/local feedback remains block-local.
+                completed = self.add_task_score(
+                    memo[key].model_copy(update={"configurations": updates}), state, examples, seed
+                )
             except BudgetExceeded:
                 if not scored:
                     raise
