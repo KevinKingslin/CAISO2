@@ -446,11 +446,13 @@ class Algorithm:
                         [step_seed],
                         None,
                     )
+                    use_selection_history = cfg["block_selection"].get("use_history", True)
                     self.report.save_phase(
                         "03_selection",
                         diagnostic_trajectories=diagnostics,
                         system_constitution=qsys,
                         blocks=blocks,
+                        history_enabled=use_selection_history,
                     )
                     selection = select_block(
                         qsys,
@@ -461,8 +463,9 @@ class Algorithm:
                         step_seed,
                         role=cfg["block_selection"]["model_role"],
                         output=None,
-                        optimization_history=optimization_history.selection_summary(
-                            current, blocks
+                        optimization_history=(
+                            optimization_history.selection_summary(current, blocks)
+                            if use_selection_history else None
                         ),
                     )
                     self.report.save_phase("03_selection", selection=selection)

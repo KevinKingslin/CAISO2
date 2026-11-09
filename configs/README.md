@@ -40,6 +40,27 @@ For acceptance on the complete validation split, set
 released OPTIMAS-compatible prefix behavior. Changing the protocol or seed
 requires a new run; saved checkpoints verify their configuration and data hashes.
 
+To control whether the block-selection judge sees past optimization attempts:
+
+```yaml
+method:
+  block_selection:
+    use_history: false
+```
+
+The default is `true`. With `false`, selection receives an empty history object;
+its constitution, diagnostic trajectories and available blocks are unchanged.
+History summaries are not generated for the judge. Optimization attempts remain
+in checkpoints and continue to prevent repeating rejected candidates in the same
+system state. The setting controls block selection, independently of DICAI debate
+history or prompt-search feedback.
+
+`iterations/<iteration>/03_selection/status.json` records `history_enabled`;
+`block_selection.json` records the history actually supplied to the judge. Set `true`
+to enable history again. Use a new run when changing this setting. Older
+checkpoints that omit the key can resume with the equivalent `true` default when
+all other fingerprints match.
+
 To skip block constitution induction, add this override to an experiment:
 
 ```yaml

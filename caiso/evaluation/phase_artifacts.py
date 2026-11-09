@@ -63,7 +63,7 @@ PHASE_FILES = {
     },
 }
 
-STATUS_FIELDS = {"phase", "status", "progress", "induction_skipped", "reason", "induction_activity", "constitution_source"}
+STATUS_FIELDS = {"phase", "status", "progress", "induction_skipped", "reason", "induction_activity", "constitution_source", "history_enabled"}
 
 
 def edge_weight_csv(path, effects):

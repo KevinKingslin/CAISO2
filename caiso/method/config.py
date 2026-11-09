@@ -8,10 +8,14 @@ def resume_config_hashes(config):
     from caiso.core.serialization import digest
 
     variants = [config]
-    for key in ("reevaluate_current", "include_current_configuration"):
-        if config["block_optimization"].get(key, True):
-            variants += [{**variant, "block_optimization": {
-                name: value for name, value in variant["block_optimization"].items() if name != key
+    for section, key in (
+        ("block_optimization", "reevaluate_current"),
+        ("block_optimization", "include_current_configuration"),
+        ("block_selection", "use_history"),
+    ):
+        if config.get(section, {}).get(key) is True:
+            variants += [{**variant, section: {
+                name: value for name, value in variant[section].items() if name != key
             }} for variant in list(variants)]
     return {digest(variant) for variant in variants}
 
@@ -23,6 +27,8 @@ def validate_method(config):
         raise ValueError("block_constitution must be a configuration mapping")
     if not isinstance(config.get("block_optimization", {}), dict):
         raise ValueError("block_optimization must be a configuration mapping")
+    if not isinstance(config.get("block_selection", {}), dict):
+        raise ValueError("block_selection must be a configuration mapping")
     recovery = config.get("error_handling", {})
     if not isinstance(recovery, dict):
         raise ValueError("error_handling must be a configuration mapping")
@@ -185,6 +191,7 @@ def validate_method(config):
         "dicai.minimization.enabled", "dicai.minimization.strict", "dicai.atomicity.enabled", "block_constitution.enabled",
         "block_optimization.reevaluate_current",
         "block_optimization.include_current_configuration",
+        "block_selection.use_history",
     ):
         if value(path) is not None and not isinstance(value(path), bool):
             raise ValueError(f"{path} must be true or false")
@@ -224,6 +231,7 @@ def validate_method(config):
         "block_constitution.reuse_trajectories",
         "block_optimization.reevaluate_current",
         "block_optimization.include_current_configuration",
+        "block_selection.use_history",
     ):
         section, key = path.split(".")
         if key in config.get(section, {}) and value(path) is None:

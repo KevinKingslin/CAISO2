@@ -188,16 +188,19 @@ def test_candidate_toggle_requires_a_boolean(tmp_path, invalid):
         JointBlockOptimizer(None, None, {"include_current_configuration": invalid}, tmp_path)
 
 
-@pytest.mark.parametrize("include,reevaluate", list(product([True, False], repeat=2)))
-def test_resume_accepts_only_equivalent_missing_true_defaults(include, reevaluate):
-    cfg = {"seed": 42, "block_optimization": {"include_current_configuration": include, "reevaluate_current": reevaluate, "max_joint_candidates": 16}}
+@pytest.mark.parametrize("include,reevaluate,use_history", list(product([True, False], repeat=3)))
+def test_resume_accepts_only_equivalent_missing_true_defaults(include, reevaluate, use_history):
+    cfg = {"seed": 42, "block_optimization": {"include_current_configuration": include, "reevaluate_current": reevaluate, "max_joint_candidates": 16},
+           "block_selection": {"model_role": "block_selection", "use_history": use_history}}
     before = deepcopy(cfg)
     hashes = resume_config_hashes(cfg)
-    for missing in ([], ["reevaluate_current"], ["include_current_configuration"], ["reevaluate_current", "include_current_configuration"]):
+    paths = [("block_optimization", "reevaluate_current"), ("block_optimization", "include_current_configuration"), ("block_selection", "use_history")]
+    for omitted in product([True, False], repeat=len(paths)):
+        missing = [path for path, remove in zip(paths, omitted, strict=True) if remove]
         older = deepcopy(cfg)
-        for key in missing:
-            older["block_optimization"].pop(key)
-        assert (digest(older) in hashes) == all(cfg["block_optimization"][key] for key in missing)
+        for section, key in missing:
+            older[section].pop(key)
+        assert (digest(older) in hashes) == all(cfg[section][key] for section, key in missing)
     changed = deepcopy(cfg)
     changed["seed"] = 43
     assert digest(changed) not in hashes

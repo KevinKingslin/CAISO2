@@ -254,6 +254,13 @@ This example is an optional override, not a change to the shipped values. Select
 custom profiles with `./scripts/caiso run --config YOUR_EXPERIMENT.yaml` or
 `./scripts/caiso evaluate --config YOUR_EXPERIMENT.yaml`.
 
+`block_selection.use_history` defaults to `true`. Set it to `false` in the shared
+method file, or under an experiment's `method.block_selection`, to withhold past
+optimization attempts from the block-selection judge. Checkpoint history and
+rejected-candidate filtering keep their existing behavior. The selection phase
+records `history_enabled` and the supplied history. Start a new run when changing
+the setting.
+
 To disable block constitution induction, set `method.block_constitution.enabled` to
 `false` in an experiment, or `block_constitution.enabled` to `false` in the shared
 method file. Candidates then use the system constitution directly, skipping

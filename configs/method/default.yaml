@@ -52,6 +52,7 @@ leiden:
   n_iterations: -1  # -1 runs Leiden until convergence; positive values cap passes.
 block_selection:
   model_role: block_selection
+  use_history: true  # false: omit past optimization attempts from the block-selection judge.
 block_constitution:
   enabled: true  # false: optimize directly with the system constitution; skip block induction.
   reuse_trajectories: true  # Reuse identical state/example/seed executions within this stage.
