@@ -9,11 +9,15 @@
   the current workflow, and constitution-guided trajectory diagnosis selects
   a deficient block.
   (2) Full-system comparisons of block configurations provide preferences for
-  a local constitution, which guides joint block optimization.
+  a local constitution. Component-specific optimizers generate alternative
+  prompts, preference-trained weights, or sampled model and parameter
+  configurations. These proposals are combined within the selected block,
+  ranked or filtered using its constitution, and accepted only when they
+  improve end-to-end performance.
   (3) After $K$ accepted block updates or a performance plateau, a workflow
-  generator proposes one structural modification and briefly adapts affected
-  blocks. Both block and workflow updates require an end-to-end validation
-  improvement. Optimization repeats on the accepted system until the budget
+  generator uses the current DAG, fixed component library, and system
+  constitution to propose one structural modification, followed by brief
+  adaptation of affected blocks. Optimization repeats until the budget
   is exhausted; an accepted structural change also refreshes the system
   constitution. Graphs and partitions are illustrative.}
   \label{fig:caiso-overview}

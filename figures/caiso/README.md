@@ -41,10 +41,18 @@ discussing constitution induction.
   diagram follows the latter, more specific rule. The paper should reconcile
   that wording.
 
-To keep the overview readable, details such as the LLM initializations,
-per-optimizer algorithms, sampling budgets, and batch aggregation belong in
-the method text. The diagram preserves the global acceptance rules, rather
-than suggesting that better local scores alone justify an update.
+The figure emphasizes candidate generation: alternative prompts from prompt
+search, weights trained using constitution-labeled preferences and DPO, and
+sampled model or parameter updates. Component proposals are combined within
+the selected block and ranked or filtered jointly using its constitution.
+The workflow generator uses the current DAG, the system constitution, and the
+fixed component library to propose one structural edit.
+
+The workflow validation stage is omitted from the visualization at the user's
+request. This is a presentation change; the source proposal still evaluates
+workflow candidates globally before acceptance. The block validation gate
+remains visible. Detailed sampling budgets and batch aggregation belong in
+the method text.
 
 ## Rebuild
 

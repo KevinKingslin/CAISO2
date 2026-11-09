@@ -25,7 +25,7 @@ c.setAuthor('CAISO')
 c.scale(SCALE, SCALE)
 svg = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">',
        '<title>Compound AI System Optimization</title>',
-       '<desc>System constitution guides causal block discovery, block optimization, and workflow adaptation. Global validation gates both updates; optimization repeats until the budget is exhausted.</desc>']
+       '<desc>System constitution guides causal block discovery, component-specific candidate generation and joint block optimization, and single-edit workflow generation with compatibility adaptation.</desc>']
 
 def rect(x,y,w,h,fill='white',stroke=INK,r=10,lw=1.5,dash=False):
     c.setFillColor(fill); c.setStrokeColor(stroke); c.setLineWidth(lw)
@@ -122,41 +122,44 @@ text(194,609,'Q_sys + complete execution trajectories',16)
 rect(40,625,308,47,'#FFFFFF',INK,9)
 text(194,654,'Select the most deficient block B*',17,True)
 
-# Panel 2: locally attached labels from global outcomes, local principles, gate.
-text(600,222,'Compare two block configurations',19,True)
-for xx,label in [(450,'Candidate A'),(610,'Candidate B')]:
-    rect(xx,240,140,62,'#FFF8EC',INK,8)
-    text(xx+70,265,label,17,True)
-    text(xx+70,287,'Full-system run',16)
-arrow([(520,303),(520,321),(600,321),(600,337)])
-arrow([(680,303),(680,321),(600,321)])
-lines(600,359,['Rank complete trajectories','Task metric + Q_sys'],18,24)
-arrow([(600,393),(600,418)])
-document(451,438,None,accent='#A36C32',w=34,h=48)
-text(627,449,'Induce block constitution Q_B',18,True)
-text(622,474,'From globally labeled preferences',16)
-arrow([(600,492),(600,515)])
-lines(600,538,['Optimize the selected block jointly','Prompts / weights / models / parameters'],17,24,bold=False)
-arrow([(600,579),(600,602)])
+# Panel 2: global preference induction, then explicit candidate generation.
+text(600,220,'Induce block constitution Q_B',19,True)
+lines(600,245,['Two block configurations: full-system runs',
+               'Rank trajectories using task metric + Q_sys',
+               'Induce local principles from preferences'],16,22)
+arrow([(600,299),(600,319)])
+text(600,342,'Generate component candidates',18,True)
+rows=[('Prompt search','Generate alternative prompts'),
+      ('Weight optimization','Judge with Q_B; train with DPO'),
+      ('Model / parameter search','Score options; sample update')]
+for yy,(title,detail) in zip((356,420,484),rows):
+    rect(446,yy,308,55,'#FFF8EC',INK,8,1.2)
+    text(600,yy+22,title,17,True)
+    text(600,yy+43,detail,16)
+arrow([(600,540),(600,559)])
+text(600,579,'Combine proposals within B*',18,True)
+text(600,599,'Rank / filter jointly using Q_B',16)
 rect(446,610,308,62,'#FFFFFF',INK,9)
 text(600,635,'Global validation gate',19,True)
 text(600,658,'Accept only an end-to-end improvement',16)
 
-# Panel 3: conditional topology search, adaptation, acceptance and refresh.
+# Panel 3: emphasize generator inputs and edits; workflow validation is omitted.
 rect(852,210,308,68,'#F3FAF1',INK,9)
 text(1006,236,'Trigger workflow search',19,True)
 text(1006,261,'K accepted block updates OR plateau',16)
 arrow([(1006,279),(1006,301)])
-text(1006,325,'Propose one DAG modification',19,True)
-graph(926,352,'modified')
-text(1006,454,'Add / remove / reconnect / reorder',16)
-text(1006,477,'Use only the fixed component library',16)
-arrow([(1006,490),(1006,514)])
-lines(1006,537,['Adapt affected blocks briefly','Fixed compatibility-adaptation budget'],17,24)
-arrow([(1006,578),(1006,601)])
+text(1006,325,'Workflow generator',20,True)
+text(1006,351,'Llama 3.1 8B + Q_sys',18)
+text(1006,377,'Inputs: current DAG + component library',16)
+arrow([(1006,390),(1006,414)])
+text(1006,437,'Generate one structural edit',19,True)
+graph(926,466,'modified')
+text(1006,566,'Add / remove / reconnect / reorder',16)
+text(1006,589,'Preserve a DAG; use library components',16)
+arrow([(1006,598),(1006,609)])
 rect(852,610,308,62,'#FFFFFF',INK,9)
-text(1006,635,'Global validation gate',19,True)
-text(1006,658,'Accept only an end-to-end improvement',16)
+text(1006,635,'Adapt affected blocks',19,True)
+text(1006,658,'Small, fixed adaptation budget',16)
 
 # Stage-to-stage flow; the panels are architectural stages, not graph nodes.
 arrow([(374,401),(420,401)],INK,2)
@@ -166,7 +169,7 @@ arrow([(780,401),(826,401)],INK,2)
 arrow([(1006,692),(1006,718),(194,718),(194,695)],INK,1.8)
 rect(320,701,575,33,'white','white',0,0)
 text(607,724,'Repeat attribution and block discovery on the accepted system',17,True)
-text(600,752,'Accepted structure: refresh Q_sys. Rejected candidate: retain current system. Stop at budget exhaustion.',16)
+text(600,752,'Refresh Q_sys after an accepted structural change. Continue until the optimization budget is exhausted.',16)
 text(600,778,'Output: optimized workflow and component configurations S* = (G*, v*)',19,True)
 
 svg.append('</svg>')
