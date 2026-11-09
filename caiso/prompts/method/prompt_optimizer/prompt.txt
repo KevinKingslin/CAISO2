@@ -13,6 +13,12 @@ Your job:
 2. Use the examples and previous candidate scores to identify an improvement.
 3. Apply the optimization tip and propose one improved instruction.
 
+Propose a concrete change to the component's behavior, supported by the
+examples and constitution. Specify what it should do differently;
+paraphrasing the current instruction is insufficient. Preserve its task
+and input/output interface. Use previous candidate scores to refine
+successful strategies or explore a different strategy.
+
 IMPORTANT:
 Output ONLY valid JSON in this exact schema (no markdown, no extra text):
 
