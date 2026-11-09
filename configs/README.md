@@ -104,7 +104,7 @@ Use a new run when changing the setting. Older checkpoints that omit the selecti
 key or include the removed top-level `true` default can resume when all other
 fingerprints match.
 
-To skip block constitution induction, add this override to an experiment:
+Block constitution induction is disabled by default:
 
 ```yaml
 method:
@@ -112,7 +112,7 @@ method:
     enabled: false
 ```
 
-The default is `true`. With `false`, each iteration skips preliminary preference
+With the default `false`, each iteration skips preliminary preference
 candidates, block preference collection, and block DICAI induction. It generates
 and scores candidates once using the system constitution, including preference
 labels used for DPO weight optimization. Full-system validation still decides
@@ -120,7 +120,7 @@ whether to accept an update. The system constitution is still induced normally.
 The existing `04_block_constitution/status.json` records the skipped stage, and
 `05_block_optimization/status.json` records `constitution_source: system`.
 Use a new output directory when changing this setting; saved checkpoints require
-the same method configuration. Restore `true` to enable block induction again.
+the same method configuration. Set `true` to opt into block-specific constitutions.
 
 Keep credentials, deployments, backend choices and service URLs in `.env`.
 Prompt text is under [`caiso/prompts`](../caiso/prompts/README.md). `prompt_tips`

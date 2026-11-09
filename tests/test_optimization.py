@@ -12,7 +12,9 @@ from tests.offline import OfflineEmbeddings, OfflineProvider
 from tests.test_runtime import make_system
 
 
-@pytest.mark.parametrize("block_constitution_enabled,accept_update", [(True, True), (False, True), (False, False)])
+@pytest.mark.parametrize("block_constitution_enabled,accept_update", [
+    (True, True), (False, True), (False, False), (None, True), (None, False),
+])
 @pytest.mark.parametrize("reevaluate_current", [True, False])
 @pytest.mark.parametrize("include_current_configuration", [True, False])
 def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch, block_constitution_enabled, accept_update, reevaluate_current, include_current_configuration):
@@ -42,6 +44,9 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch
             },
         },
     }
+    if block_constitution_enabled is None:
+        # An omitted override must use the default system constitution too.
+        experiment["caiso"]["method"].pop("block_constitution")
     # CaisoOptimizer creates its budget; fixtures adopt it before any call.
     provider = OfflineProvider(None)
     embeddings = OfflineEmbeddings(None)
@@ -149,7 +154,7 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch
     assert (tmp_path / ".internal/dicai/system/silhouette.png").is_file()
     assert (tmp_path / "iterations/0001/01_attribution/edge_weights.json").is_file()
     assert (tmp_path / "iterations/0001/02_blocks/weighted_graph.graphml").is_file()
-    assert (tmp_path / "iterations/0001/04_block_constitution/silhouette.png").is_file() == block_constitution_enabled
+    assert (tmp_path / "iterations/0001/04_block_constitution/silhouette.png").is_file() == bool(block_constitution_enabled)
     configurations = json.loads((tmp_path / "iterations/0001/07_state/component_configurations.json").read_text())
     assert configurations["original"]["transform"]["value"] == "identity"
     assert configurations["current"]["transform"]["value"] == expected_config

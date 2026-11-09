@@ -55,7 +55,7 @@ block_selection:
   model_role: block_selection
   use_history: true  # false: omit past optimization attempts from the block-selection judge.
 block_constitution:
-  enabled: true  # false: optimize directly with the system constitution; skip block induction.
+  enabled: false  # Use the system constitution for all block prompt optimization; true opts into block induction.
   reuse_trajectories: true  # Reuse identical state/example/seed executions within this stage.
   preference_pairs: 2
   score_tie_epsilon: 0.000001

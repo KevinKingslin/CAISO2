@@ -316,20 +316,23 @@ optimization attempts from block-selection requests only. This is the only
 history toggle; the duplicate top-level `use_history` setting has been removed.
 
 Prompt optimization always retains candidate instructions and task-score
-feedback within each proposal call. Rejected-candidate filtering, block preference
-generation, workflow performance feedback, and DICAI debate history remain enabled
-regardless of the selection-history setting. Phase status files record the
+feedback within each proposal call. Rejected-candidate filtering, workflow
+performance feedback, and DICAI debate history remain enabled regardless of the
+selection-history setting. Block preference generation also retains rejection
+filtering when enabled. Phase status files record the
 effective `history_enabled` setting for each stage. Logs and checkpoints continue
 to retain all optimization attempts. Start a new run when changing the setting;
 older checkpoints that omit the selection key or include the removed top-level
 `true` default remain compatible when all other settings match. Move any old
 top-level override into `block_selection.use_history` in your YAML.
 
-To disable block constitution induction, set `method.block_constitution.enabled` to
-`false` in an experiment, or `block_constitution.enabled` to `false` in the shared
-method file. Candidates then use the system constitution directly, skipping
-block preference collection and induction. Validation still controls acceptance.
-The default is `true`; changing it requires a new run/output directory.
+Block constitution induction is off by default (`block_constitution.enabled: false`).
+All block prompt optimization uses the system constitution directly,
+skipping preliminary preference candidates, block preference collection, and
+block induction. Task scores still drive candidate selection, and validation
+controls acceptance. Set `method.block_constitution.enabled: true` in an
+experiment to opt into block-specific constitutions. Changing this setting
+requires a new run/output directory.
 
 `block_optimization.reevaluate_current` also defaults to `true`. Set it to `false`
 in the shared method file (or under an experiment's `method.block_optimization`)

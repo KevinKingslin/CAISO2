@@ -28,7 +28,7 @@ def test_experiment_migration_keeps_all_effective_parameters(name, label):
 
 def test_shared_method_copy_does_not_change_any_values():
     assert yaml.safe_load((ROOT / "configs/method/default.yaml").read_text()) == yaml.safe_load((ROOT / "caiso/config/default.yaml").read_text())
-    assert load_method({})["block_constitution"]["enabled"] is True
+    assert load_method({})["block_constitution"]["enabled"] is False
     assert load_method({})["block_optimization"]["reevaluate_current"] is True
     assert load_method({})["block_optimization"]["include_current_configuration"] is True
     assert load_method({})["block_selection"]["use_history"] is True
@@ -46,7 +46,7 @@ def test_experiment_overrides_method_recursively_and_paths_are_relative(tmp_path
     config["method_config"] = "method.yaml"
     config["method"]["validation_batch_size"] = "all"
     config["method"]["dicai"] = {"debate_rounds": 1}
-    config["method"]["block_constitution"] = {"enabled": False}
+    config["method"]["block_constitution"] = {"enabled": True}
     config["method"]["block_selection"] = {"use_history": False}
     config["method"]["leiden"] = {"max_comm_size": 3}
     config["method"]["block_optimization"] = {"reevaluate_current": False, "include_current_configuration": False}
@@ -56,7 +56,7 @@ def test_experiment_overrides_method_recursively_and_paths_are_relative(tmp_path
     assert resolved["validation_batch_size"] == "all"
     assert resolved["dicai"]["debate_rounds"] == 1
     assert resolved["dicai"]["max_workers"] == 10
-    assert resolved["block_constitution"]["enabled"] is False
+    assert resolved["block_constitution"]["enabled"] is True
     assert resolved["block_constitution"]["preference_pairs"] == 2
     assert resolved["block_selection"]["use_history"] is False
     assert resolved["leiden"]["max_comm_size"] == 3

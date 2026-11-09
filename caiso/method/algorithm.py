@@ -472,7 +472,7 @@ class Algorithm:
                     )
                     self.report.save_phase("03_selection", selection=selection)
                     members = blocks[selection.selected]
-                    block_constitution_enabled = cfg["block_constitution"].get("enabled", True)
+                    block_constitution_enabled = cfg["block_constitution"].get("enabled", False)
                     self.report.update(
                         "Generating block preference candidates"
                         if block_constitution_enabled

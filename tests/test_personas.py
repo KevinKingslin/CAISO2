@@ -34,8 +34,11 @@ IDENTITIES = {
 
 
 @pytest.mark.parametrize("dataset", IDENTITIES)
-def test_three_dataset_personas_reach_both_constitution_scopes(dataset, tmp_path):
+@pytest.mark.parametrize("block_constitution_enabled", [True, False])
+def test_three_dataset_personas_reach_enabled_constitution_scopes(dataset, tmp_path, block_constitution_enabled):
     experiment = load_experiment(ROOT / f"configs/experiments/{dataset}.yaml")
+    if block_constitution_enabled:
+        experiment["caiso"]["method"]["block_constitution"] = {"enabled": True}
     profiles = experiment["caiso"]["personas"]
     assert [profile["identity"] for profile in profiles] == IDENTITIES[dataset]
     personas = assign_personas(profiles, seed=42)
@@ -60,7 +63,10 @@ def test_three_dataset_personas_reach_both_constitution_scopes(dataset, tmp_path
         embeddings=OfflineEmbeddings(None),
     )
     assert optimizer.dicai.identities == profiles
-    assert optimizer.block_dicai.identities == profiles
+    if block_constitution_enabled:
+        assert optimizer.block_dicai.identities == profiles
+    else:
+        assert optimizer.block_dicai is None
     assert optimizer.experiment["caiso"]["personas"] == profiles
 
 

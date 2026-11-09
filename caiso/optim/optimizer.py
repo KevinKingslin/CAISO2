@@ -53,7 +53,7 @@ class CaisoOptimizer:
         self.validation = adapt_examples(system, validation, "validation")
         self.dicai = dicai or DICAI(providers, embeddings, personas, self.config["dicai"])
         self.block_dicai = None
-        if self.config["block_constitution"].get("enabled", True):
+        if self.config["block_constitution"].get("enabled", False):
             self.block_dicai = block_dicai or DICAI(
                 providers, embeddings, personas, self.config["dicai"], role="block_constitution"
             )
