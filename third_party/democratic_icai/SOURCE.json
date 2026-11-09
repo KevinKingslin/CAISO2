@@ -45,11 +45,13 @@
     "adaptations": [
       "Response/story terminology becomes trajectory terminology.",
       "Human-label wording becomes provided preference-label wording.",
-      "Reasoning considers intermediate and final-output behavior; every question names exact component_id values and generalizes question-specific facts into reusable component behavior (three sentences and a component-ID question example).",
-      "Debaters may discuss component behavior, interactions or final output; every proposed question names exact component_id values, including the final-output producer (two sentences).",
-      "Chairpersons require component IDs in every question, including final-output producers, and preserve them when editing or merging (one updating bullet and component-ID list examples).",
-      "Abstraction generalizes example-specific facts into a single shared quality, naming the evaluated components using exact IDs from member principles (two sentences and a component-ID output format).",
-      "Dynamic inputs use CAISO JSON execution records and renamed placeholders."
+      "Reasoning considers intermediate and final-output behavior, names actual component IDs, and expresses proposed questions and dimensions as reusable qualities without sample-specific entity names or values.",
+      "Self-refinement critique flags sample-specific names or facts used as criteria or dimensions.",
+      "Debaters discuss component behavior, interactions or final output using actual component IDs and reconstruct preferences through reusable criteria without sample-specific entities.",
+      "Chairpersons preserve actual component IDs and reusable semantic-role criteria when editing or merging; reconstruction remains mandatory without overriding those requirements.",
+      "Abstraction preserves one shared quality, expresses sample-specific entities through semantic roles, and names evaluated components using actual IDs from the member principles.",
+      "Principle output examples omit literal component-ID placeholders and request actual IDs from executions or member principles.",
+      "Dynamic inputs use CAISO JSON execution records and renamed placeholders; raw evidence is preserved."
     ],
     "protocol": "democratic-icai-c8d5-source-trajectory-v4-atomicity",
     "runtime_extensions": {

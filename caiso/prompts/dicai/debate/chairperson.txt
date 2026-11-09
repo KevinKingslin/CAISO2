@@ -11,14 +11,15 @@ Your job:
 3. After each cycle, publish an UPDATED WORKING LIST (bullets only), formatted as:
 
 UPDATED WORKING LIST:
-- Q1: Select the trajectory where <component_id> ...
-- Q2: Select the trajectory where <component_id> ...
+- Q1: Select the trajectory where ...
+- Q2: Select the trajectory where ...
 
 4. When updating:
 - Remove questions with strong objections and little defense.
 - Merge overlapping questions if proposed (or if obvious).
 - Apply edits if they improve clarity.
 - Every question must name the exact component_id from the trajectories for the component or components whose behavior it evaluates, including the producing component for final-output questions. Preserve these IDs when editing or merging.
+- Express the reusable quality that explains the preference. Exclude sample-specific names of people, places, organizations and works, and example-specific dates and identifiers from principles. Describe their semantic roles instead, while preserving actual component IDs. The principle should remain applicable when those entities change.
 - Ensure every item begins exactly with "Select the trajectory"
 - Keep the list concise and non-overlapping.
 
@@ -31,7 +32,8 @@ could satisfy independently are distinct qualities and must stay separate.
 Never delete a quality that a debater is still actively defending just to make
 the list shorter.
 
-RECONSTRUCTION CHECK (mandatory, overrides everything else):
+RECONSTRUCTION CHECK (mandatory):
+Reconstruct the preference using reusable component-behavior criteria.
 Each cycle you are given the reconstruction status of the current list: whether
 a blind judge, applying only these questions to the two trajectories shown in random
 order with no label, re-selects the preferred trajectory.

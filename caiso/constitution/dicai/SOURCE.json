@@ -42,10 +42,13 @@
     "adaptations": [
       "Response/story terminology becomes trajectory terminology.",
       "Human-label wording becomes provided preference-label wording.",
-      "Reasoning names relevant component IDs and observable behavior, generalizing question-specific entities and answer values (two sentences).",
-      "Debaters may discuss component behavior, interactions or final output (one sentence).",
-      "Abstraction generalizes example-specific entities and answer values while preserving relevant component IDs and the single shared quality (one sentence).",
-      "Dynamic inputs use CAISO JSON execution records and renamed placeholders."
+      "Reasoning considers intermediate and final-output behavior, names actual component IDs, and expresses proposed questions and dimensions as reusable qualities without sample-specific entity names or values.",
+      "Self-refinement critique flags sample-specific names or facts used as criteria or dimensions.",
+      "Debaters discuss component behavior, interactions or final output using actual component IDs and reconstruct preferences through reusable criteria without sample-specific entities.",
+      "Chairpersons preserve actual component IDs and reusable semantic-role criteria when editing or merging; reconstruction remains mandatory without overriding those requirements.",
+      "Abstraction preserves one shared quality, expresses sample-specific entities through semantic roles, and names evaluated components using actual IDs from the member principles.",
+      "Principle output examples omit literal component-ID placeholders and request actual IDs from executions or member principles.",
+      "Dynamic inputs use CAISO JSON execution records and renamed placeholders; raw evidence is preserved."
     ],
     "protocol": "democratic-icai-c8d5-source-trajectory-v4-atomicity",
     "runtime_extensions": {

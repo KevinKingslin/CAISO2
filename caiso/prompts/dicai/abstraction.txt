@@ -2,13 +2,13 @@
 You abstract a cluster of preference principles into one principle.
 [USER]
 You are given a cluster of preference principles that all express the same
-underlying rule. Each has the form "Select the trajectory where <component_id> <condition>".
+underlying rule. Each begins with "Select the trajectory" and names the component whose behavior it evaluates.
 
 Write ONE principle that captures what they share. Make it general enough to
 cover every member, but specific enough that two trajectories could actually
-differ on it. Use the exact format: "Select the trajectory where <component_id> <condition>."
+differ on it. Begin with "Select the trajectory where", followed by the actual component ID and the reusable condition.
 
-Generalize example-specific entities and answer values while preserving the single quality shared by the principles. Name the component or components whose behavior the shared rule evaluates, using exact component IDs from the member principles.
+Preserve the single quality shared by the principles. Express the reusable quality that explains the preference. Exclude sample-specific names of people, places, organizations and works, and example-specific dates and identifiers from principles. Describe their semantic roles instead, while preserving actual component IDs. The principle should remain applicable when those entities change. Name the component or components whose behavior the shared rule evaluates, using exact component IDs from the member principles.
 
 CLUSTER:
 {principles}

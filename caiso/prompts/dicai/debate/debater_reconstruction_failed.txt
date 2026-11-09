@@ -22,6 +22,8 @@ YOUR SEED QUESTIONS:
 
 Proposed questions may concern individual component behavior, interactions between components, or the final output. Every proposed question must evaluate one observable behavior using exact component_id values from the trajectories, including the producing component for final-output questions.
 
+Express the reusable quality that explains the preference. Exclude sample-specific names of people, places, organizations and works, and example-specific dates and identifiers from principles. Describe their semantic roles instead, while preserving actual component IDs. The principle should remain applicable when those entities change.
+
 DEBATE RULES (must follow):
 - Always reference questions by ID (e.g., Q3, Q7) when defending or countering.
 - Defend your strongest questions: explain why each criterion matters given your
@@ -48,7 +50,7 @@ ARGUE FROM YOUR PERSONA, NOT FROM CONSENSUS:
   has produced no information.
 
 RECONSTRUCTION (the objective of the whole debate):
-The final list must reconstruct the provided preference. A blind judge, shown only
+The final list must reconstruct the provided preference through reusable criteria. A blind judge, shown only
 the questions and the two trajectories in random order with no label, must re-select
 the preferred trajectory. You are told the reconstruction status each cycle.
 - A question that would select the NON-preferred trajectory must be attacked or

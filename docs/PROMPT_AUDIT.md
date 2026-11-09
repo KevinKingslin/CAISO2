@@ -53,48 +53,58 @@ permitted text adaptations are:
 3. Evidence fields contain CAISO's label-free structured execution records and
    use corresponding template placeholders. Gold, rewards and evaluation metadata
    remain hidden from the blind judge.
-4. The five requests using the original reusable-criterion reasoning instruction
-   append: "Consider discriminating behavior in intermediate components as well
-   as the final output. Every question must evaluate one observable behavior of
-   named components, using exact component_id values from the trajectories;
-   final-output questions must name the producing component.
-   Generalize question-specific entities and answer values into reusable
-   criteria about component behavior." This applies during CoT, sampling,
-   consensus, drafting and revision; the original critique request is retained.
-5. Debaters receive: "Proposed questions may concern individual component
-   behavior, interactions between components, or the final output. Every proposed
-   question must evaluate one observable behavior using exact component_id values
-   from the trajectories, including the producing component for final-output
-   questions."
-6. All three chairperson variants add one updating rule: "Every question must
-   name the exact component_id from the trajectories for the component or
-   components whose behavior it evaluates, including the producing component for
-   final-output questions. Preserve these IDs when editing or merging."
-7. Abstraction receives: "Generalize example-specific entities and answer values
-   while preserving the single quality shared by the principles. Name the
-   component or components whose behavior the shared rule evaluates, using exact
-   component IDs from the member principles."
-8. The reasoning question examples, chairperson list examples and abstraction
-   output format explicitly include `<component_id>` after
-   `Select the trajectory where`.
+4. The five reusable-criterion reasoning requests consider discriminating
+   intermediate-component behavior as well as final outputs. Every question
+   names the responsible components using actual execution IDs, including the
+   final-output producer. The generalization rule below applies to proposed
+   questions and dimensions during CoT, sampling, consensus, drafting and revision.
+5. The self-refinement critique additionally flags sample-specific names or facts
+   used as criteria or dimensions and applies the same generalization rule.
+6. All three debater variants allow individual-component, interaction and
+   final-output criteria with actual component IDs. They include the
+   generalization rule and reconstruct the preference through reusable criteria.
+7. All three chairperson variants preserve actual component IDs when editing or
+   merging and include the generalization rule. Reconstruction remains mandatory;
+   its heading no longer says it overrides every other instruction. It explicitly
+   uses reusable component-behavior criteria. Its reconstruction, round and
+   minimum-question runtime gates remain unchanged.
+8. Abstraction preserves one shared quality, applies the generalization rule and
+   names evaluated components using actual IDs from the member principles.
+9. Reasoning and chairperson examples retain the trajectory prefix without a
+   literal component-ID token. Abstraction describes the actual ID and condition
+   in natural language. The `<component_id>` token was removed after a generated
+   principle copied it literally.
 
-The component-attribution wording was strengthened again on 2026-11-09 after a
-fresh run still produced generic principles. The earlier conditional wording
-applied only to questions the model treated as component-specific. The current
-instructions apply to every question, including the final-output producer, and
-carry component names through abstraction and the existing repair requests.
-Criteria remain grounded in the paired executions, with no quota of principles
-per component. The debate, reconstruction objective and one-quality rule retain
-their original structure.
-At the user's request, this remains a prompt-only correction: there is no new
-component-name validation gate, retry policy, model route or call stage. Prompt
-compliance and correct attribution are not guaranteed by the runtime checks.
+The generalization instruction is written inside each complete request:
+
+```text
+Express the reusable quality that explains the preference.
+Exclude sample-specific names of people, places, organizations and works,
+and example-specific dates and identifiers from principles.
+Describe their semantic roles instead, while preserving actual component IDs.
+The principle should remain applicable when those entities change.
+```
+
+The reasoning and critique versions scope the exclusion to proposed questions
+or criteria and dimensions. The instruction concerns generated rules; raw
+trajectories and supporting comparison evidence retain their facts. Criteria
+remain grounded in the paired executions, with no per-component quota. The
+debate structure, reconstruction objective and one-quality rule remain intact.
+
+This prompt-only revision was applied on 2026-11-09 following observed
+sample-specific principles. It adds no validation gate, retry policy, model route
+or call stage. Prompt compliance, entity removal and correct attribution are not
+guaranteed by the runtime checks. In particular, singleton clusters still copy
+their settled principle and failed abstraction repairs can still use an atomic
+medoid. Producing reusable rules during debate is therefore essential under this
+prompt-only approach.
 
 Each principle starts with `Select the trajectory`. Its following grammar is
 preserved: `that`, `where`, `which`, `with` and `in which` are all valid. Empty
-criteria, placeholders and bare choices fail semantic validation. The constitution
-remains a list of strings; no component-scope JSON schema or task-specific answer
-style is introduced.
+criteria, bare choices, trailing ellipses and the existing condition/criterion
+placeholder forms fail format validation. The constitution remains a list of
+strings; no component-scope JSON schema or task-specific answer style is
+introduced.
 
 ## Runtime alignment with those prompts
 
@@ -138,8 +148,8 @@ identical messages and different seeds.
 
 ## CAISO one-quality semantic check
 
-The 15 source-derived requests above are unchanged. Three complete CAISO-authored
-requests in `caiso/prompts/method/constitution_atomicity/` enforce the existing
+Three complete CAISO-authored requests in
+`caiso/prompts/method/constitution_atomicity/` enforce the existing
 one-quality rule at runtime. Each changed chairperson list is reviewed for
 independently satisfiable requirements. Compound items receive bounded split
 revisions; unflagged items are preserved in Python. The repaired list is reviewed
@@ -147,9 +157,11 @@ again before reconstruction or publication. A repeated verified list needs no
 new review. A failed revision retains the last verified working list; unverified
 seed-only lists cannot become settled output.
 
-The existing split and abstraction-repair requests also ask each replacement to
-retain the exact component IDs for the behavior it evaluates. This instruction
-preserves attribution through repairs without adding a component-name check.
+The existing split and abstraction-repair requests also include the
+generalization instruction and retain actual component IDs. Split repair
+preserves the quality and logical conditions being compared, allowing
+sample-specific names to become semantic roles. These prompt edits add no
+entity-removal or component-name check; unflagged atomic items remain unchanged.
 
 Batched semantic review also checks all cluster abstractions. A compound
 abstraction is revised to a single shared quality, keeping one output per source

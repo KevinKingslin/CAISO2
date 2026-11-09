@@ -38,9 +38,9 @@ instruction suffixes are assembled at runtime.
 
 All generated principles begin with **`Select the trajectory`**. Parsing preserves
 valid conditions such as `that`, `where`, `which`, `with` and `in which`; no exact
-following connector is required. Empty criteria, placeholders, bare A/B choices
-and old response-style prefixes remain invalid. Actual criteria and component
-identifiers are preserved.
+following connector is required. Empty criteria, bare A/B choices, trailing
+ellipses, the existing condition/criterion placeholder forms and old response-style
+prefixes remain invalid. Actual criteria and component identifiers are preserved.
 
 The source instructions retain one-quality-per-question rules and reconstruction
 feedback. Only response/story terminology, human-label wording and CAISO input
@@ -48,15 +48,21 @@ serialization are adapted, plus the documented reasoning, debate and abstraction
 guidance. Reasoning considers discriminating intermediate-component behavior as
 well as the final output. Every proposed question must name the exact trajectory
 `component_id` values for the behavior it evaluates, including the producing
-component for final-output questions. Question-specific entities and answer
-values are generalized into reusable component behavior. Debaters use the same
-instruction; chairpersons preserve these IDs while editing or merging. Reasoning
-question examples, chairperson lists and abstraction formats explicitly show a
-component ID in the principle. Abstraction names the components of the shared
-behavior using IDs from the member principles. Existing split and abstraction
-repairs also preserve those IDs. These are prompt instructions with no new
-per-component quota, validation gate, retry policy or model-call stage; model
-compliance is not guaranteed. The source-adaptation audit documents the wording
+component for final-output questions. Reasoning questions and dimensions,
+self-refinement critique, all debate variants, abstraction and existing repairs
+explicitly exclude sample-specific entity names and values from generated rules.
+They describe semantic roles while preserving actual component IDs and ask for
+criteria that remain applicable when the example's entities change. Supporting
+evidence retains the facts needed to compare trajectories. Chairpersons preserve
+these IDs while editing or merging and reconstruct preferences through reusable
+criteria. Output examples omit the literal component-ID placeholder;
+abstraction requests the actual ID and reusable condition in natural language.
+Split repair preserves the quality and logical conditions rather than requiring
+instance-specific wording. These are prompt instructions with no new
+per-component quota, validation gate, retry policy or model-call stage. Entity
+removal and model compliance are not guaranteed: singleton clusters still copy
+their settled principles and fallback medoids remain subject only to existing
+checks. The source-adaptation audit documents the wording
 changes within the 15 source-derived DICAI requests separately from the existing
 atomicity repair prompts.
 No dataset-specific answer styles or new structured constitution schema is added.

@@ -16,37 +16,37 @@
       "original": "third_party/democratic_icai/prompts/reasoning/cot.txt",
       "active": "caiso/prompts/dicai/reasoning/cot.txt",
       "original_sha256": "9f3fb7c82802d056cca57fed6801ed30fa4187272b546847951ba838e68bd173",
-      "active_sha256": "9880934c60195a3ef7d7d5fa5ba788ccbc8bf0107dbf7578ae9107c0a9dc5cd3"
+      "active_sha256": "113866b2f732c7d46fb334acc0e1fce4183f9e6071db86cb2cb5735408b25640"
     },
     "reasoning.self_consistency": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_consistency.txt",
       "active": "caiso/prompts/dicai/reasoning/self_consistency.txt",
       "original_sha256": "0e77b0a4285618686e4c5dbfb5dbda8a599551fadeae6ea886223088beefc205",
-      "active_sha256": "8428f764982269c37bdc605ea2dd9822ecc933027085dbc587ef030c64c9b330"
+      "active_sha256": "30e42a5e4c03e163d1dcdfbe2958f38a185000630f1a0b69e9edaf0bdb133e5e"
     },
     "reasoning.self_consistency_consensus": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_consistency_consensus.txt",
       "active": "caiso/prompts/dicai/reasoning/self_consistency_consensus.txt",
       "original_sha256": "718186adeab27c3709895c89018dc03e3a29a1862bd86060002061eaa2f2ed7b",
-      "active_sha256": "61b8cf98610fbbc019f9dd20f9d8d75a56c0e05d256cc60eabcf1c2b0a28fae1"
+      "active_sha256": "ae6fd30f4bc8b34c1a88a5155ea18247f21589a50afe5e57cd1191bed40767b0"
     },
     "reasoning.self_refine": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_refine.txt",
       "active": "caiso/prompts/dicai/reasoning/self_refine.txt",
       "original_sha256": "ccc6174fef5e04eb07c74057ccef212da22e382e25db40a25f45f5f6107e6383",
-      "active_sha256": "6102aaf2c30e896e3237c7d5dd02cae36b9f311ed4a6126a9755cda2c675fa48"
+      "active_sha256": "af8aded10f21bb233c879feda8731be1052d99d28c67b68fe366616546ad2449"
     },
     "reasoning.self_refine_critique": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_refine_critique.txt",
       "active": "caiso/prompts/dicai/reasoning/self_refine_critique.txt",
       "original_sha256": "12aac165baf6ca926b3bf8cd6cbf87e63a6c7d99c6159e4fae5c1c17e00f1e7f",
-      "active_sha256": "be28a27b596a7bff7b502927ec7612ace6dafdd1b196152d727b2be3a144f98d"
+      "active_sha256": "81c5269eca544ee59d59acf1fadac6935611277820189874baf27e8d8f5600fc"
     },
     "reasoning.self_refine_revision": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_refine_revision.txt",
       "active": "caiso/prompts/dicai/reasoning/self_refine_revision.txt",
       "original_sha256": "800d98ee72219d30cd9e1b663f265194af8f2a5559dfa320eac92dc58de6e685",
-      "active_sha256": "cb310fd038d8776cb199b2261fd25e9d85e55ab2df3117497eca2e40e3fc4e8d"
+      "active_sha256": "278c02a75275bd499228ea4fd87168ab933efb8d60e581b47b7daf9ecee5ebd2"
     },
     "reconstruction": {
       "original": "third_party/democratic_icai/prompts/reconstruction.txt",
@@ -58,7 +58,7 @@
       "original": "third_party/democratic_icai/prompts/abstraction.txt",
       "active": "caiso/prompts/dicai/abstraction.txt",
       "original_sha256": "a628aa82dfd3b912b43b1a2273ac84f17bb3a9f54cd774ca750f92582162df39",
-      "active_sha256": "3e09a2040805e7e0ecdd5902c1f516cc6436e52be64ba7e653257ff4275dbd6d"
+      "active_sha256": "04c5e0c92396bcf42179b2a200fe461d3470a828e12a0ed20ccd1e04bbdc5b15"
     },
     "audit": {
       "original": "third_party/democratic_icai/prompts/audit.txt",
@@ -70,47 +70,49 @@
       "original": "third_party/democratic_icai/prompts/debate/debater.txt",
       "active": "caiso/prompts/dicai/debate/debater.txt",
       "original_sha256": "fd39ea8f218b3dbfe86b513a12d581357006331ff2f60b6d43af2f35a754a6fb",
-      "active_sha256": "81c755c2b28242318eb5e3ab0675db194aa5e87f601a0463a23016f0815abdba"
+      "active_sha256": "e1a5c84082fa08cb0487f1e96fa8247865244a2080d11a94885a1b6b669f9ed8"
     },
     "debate.chairperson": {
       "original": "third_party/democratic_icai/prompts/debate/chairperson.txt",
       "active": "caiso/prompts/dicai/debate/chairperson.txt",
       "original_sha256": "a633bdd4ec67d4376d374a7dcc8009efa6e2659fde6adad71da5a4738c8d8b56",
-      "active_sha256": "fdc6455619d735f6f4ecb597adda1c853c531d3664413bce5b0b9fd0c79fab0d"
+      "active_sha256": "19b943eecd88ee6a380c3a969d71f5c448e5642757790fcfe2a22b73a6ed7bb8"
     },
     "debate.debater_reconstruction_failed": {
       "original": "third_party/democratic_icai/prompts/debate/debater_reconstruction_failed.txt",
       "active": "caiso/prompts/dicai/debate/debater_reconstruction_failed.txt",
       "original_sha256": "01bebbe69bf5f1318e297f8aad9c2d512b99a6de13ee1fc06b5f1d5b904bce6d",
-      "active_sha256": "4887d21350e99fa9700029f6c8facd029cbde1d0bf1c8aa3dd3fb413c2519bda"
+      "active_sha256": "2344e243fabe85aa0cf8af77ff31943854a215956983b0f475394189227d442e"
     },
     "debate.chairperson_reconstruction_failed": {
       "original": "third_party/democratic_icai/prompts/debate/chairperson_reconstruction_failed.txt",
       "active": "caiso/prompts/dicai/debate/chairperson_reconstruction_failed.txt",
       "original_sha256": "0ddb3ca4d4ceb6f2fbb2c698a46376f3603c19d84f326687eb80b7292f1f90e1",
-      "active_sha256": "57cdf6044fa600ff6b6dc829622ccb1060b9489500617af47c06347891465381"
+      "active_sha256": "e08b19c467037f17d7ee0f289a829b8a0346e43aa3352871fc5efd3e575fcd79"
     },
     "debate.debater_too_few": {
       "original": "third_party/democratic_icai/prompts/debate/debater_too_few.txt",
       "active": "caiso/prompts/dicai/debate/debater_too_few.txt",
       "original_sha256": "08518781693a1fe68047d420e0a2187ef075b789bac6ad57cc5f0c118d32055c",
-      "active_sha256": "11d8d54ca8c2d2b55b4047fd3c97c753d9e87a6b1901b774c4b76a62d629aaff"
+      "active_sha256": "e3c88861678b56a83f601c2398dacd090a45572f8a898432684598143b1c497a"
     },
     "debate.chairperson_too_few": {
       "original": "third_party/democratic_icai/prompts/debate/chairperson_too_few.txt",
       "active": "caiso/prompts/dicai/debate/chairperson_too_few.txt",
       "original_sha256": "2cb51d3d1ab9c7b088157379afddf18bdeffa547bffa4342f976c5b181741107",
-      "active_sha256": "9f67e8fb1688f2fe347d32599885c6f4ad009ed3fdbb1899b8d38ebb30091bc0"
+      "active_sha256": "314e14cd6d73d84e5bfef44e9b297f8b389055f1d901d1ba32e35064f0bbc25a"
     }
   },
   "adaptations": [
     "Response/story terminology becomes trajectory terminology.",
     "Human-label wording becomes provided preference-label wording.",
-    "Reasoning considers intermediate and final-output behavior; every question names exact component_id values and generalizes question-specific facts into reusable component behavior (three sentences and a component-ID question example).",
-    "Debaters may discuss component behavior, interactions or final output; every proposed question names exact component_id values, including the final-output producer (two sentences).",
-    "Chairpersons require component IDs in every question, including final-output producers, and preserve them when editing or merging (one updating bullet and component-ID list examples).",
-    "Abstraction generalizes example-specific facts into a single shared quality, naming the evaluated components using exact IDs from member principles (two sentences and a component-ID output format).",
-    "Dynamic inputs use CAISO JSON execution records and renamed placeholders."
+    "Reasoning considers intermediate and final-output behavior, names actual component IDs, and expresses proposed questions and dimensions as reusable qualities without sample-specific entity names or values.",
+    "Self-refinement critique flags sample-specific names or facts used as criteria or dimensions.",
+    "Debaters discuss component behavior, interactions or final output using actual component IDs and reconstruct preferences through reusable criteria without sample-specific entities.",
+    "Chairpersons preserve actual component IDs and reusable semantic-role criteria when editing or merging; reconstruction remains mandatory without overriding those requirements.",
+    "Abstraction preserves one shared quality, expresses sample-specific entities through semantic roles, and names evaluated components using actual IDs from the member principles.",
+    "Principle output examples omit literal component-ID placeholders and request actual IDs from executions or member principles.",
+    "Dynamic inputs use CAISO JSON execution records and renamed placeholders; raw evidence is preserved."
   ],
   "principle_prefix": "Select the trajectory",
   "audit": "Template imported; no new auditor model or automatic audit stage is enabled."
