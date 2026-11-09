@@ -28,9 +28,12 @@ def discover_blocks(
     seed=0,
     output=None,
     n_iterations=-1,
+    max_comm_size=2,
 ):
     if resolution_gamma < 0:
         raise ValueError("CPM resolution must be nonnegative")
+    if isinstance(max_comm_size, bool) or not isinstance(max_comm_size, int) or max_comm_size < 0:
+        raise ValueError("max_comm_size must be a nonnegative integer (0 disables the cap)")
     if {e.edge_id for e in effects} != {e.edge_id for e in state.workflow.edges}:
         raise ValueError("Attribution must cover the current workflow exactly")
     if any(e.state_hash != state.fingerprint() for e in effects):
@@ -45,15 +48,28 @@ def discover_blocks(
     graph.es["directed_edge_id"] = [e.edge_id for e in effects]
     graph["projection"] = "directed execution DAG"
     graph["weight_transform"] = weight_transform
-    partition = leidenalg.find_partition(
+    partition = leidenalg.CPMVertexPartition(
         graph,
-        leidenalg.CPMVertexPartition,
         weights="weight",
         resolution_parameter=resolution_gamma,
-        seed=seed,
-        n_iterations=n_iterations,
     )
+    optimiser = leidenalg.Optimiser()
+    optimiser.max_comm_size = max_comm_size
+    if seed is not None:
+        optimiser.set_rng_seed(seed)
+    if max_comm_size and hasattr(optimiser, "community_constraint_enforcement"):
+        # Leiden 0.12 introduced soft constraints with zero default enforcement.
+        # Starting from singletons, any move exceeding the cap incurs at least
+        # one unit of penalty. Exceed the full CPM quality range so such a move
+        # cannot improve the objective, while valid moves keep their CPM gains.
+        optimiser.community_constraint_enforcement = 2 * (
+            1 + sum(abs(w) for w in graph.es["weight"])
+            + resolution_gamma * len(nodes) ** 2
+        )
+    optimiser.optimise_partition(partition, n_iterations=n_iterations)
     groups = sorted([sorted(nodes[i] for i in group) for group in partition])
+    if max_comm_size and any(len(group) > max_comm_size for group in groups):
+        raise RuntimeError("Leiden returned a block larger than max_comm_size")
     blocks = {f"B{i + 1}": group for i, group in enumerate(groups)}
     if sorted(n for members in blocks.values() for n in members) != nodes:
         raise RuntimeError("Leiden did not produce a hard partition")

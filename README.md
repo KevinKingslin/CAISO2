@@ -306,6 +306,10 @@ are reused within a proposal call.
 Select custom profiles with `./scripts/caiso run --config YOUR_EXPERIMENT.yaml` or
 `./scripts/caiso evaluate --config YOUR_EXPERIMENT.yaml`.
 
+`leiden.max_comm_size` defaults to `2`, limiting each discovered block to at most
+two components. Override it under `method.leiden` in an experiment; use `0` for
+unrestricted block sizes. Singleton blocks remain allowed.
+
 `block_selection.use_history` defaults to `true` in the shared method file. Set
 `method.block_selection.use_history: false` in an experiment to omit past
 optimization attempts from block-selection requests only. This is the only

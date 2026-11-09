@@ -57,6 +57,8 @@ def validate_method(config):
     task_scoring_settings(config.get("block_optimization", {}))
     if not isinstance(config.get("block_selection", {}), dict):
         raise ValueError("block_selection must be a configuration mapping")
+    if not isinstance(config.get("leiden", {}), dict):
+        raise ValueError("leiden must be a configuration mapping")
     recovery = config.get("error_handling", {})
     if not isinstance(recovery, dict):
         raise ValueError("error_handling must be a configuration mapping")
@@ -105,6 +107,7 @@ def validate_method(config):
         "dicai.minimization.sample_size",
         "attribution.bootstrap_samples",
         "leiden.resolution_gamma",
+        "leiden.max_comm_size",
         "block_constitution.score_tie_epsilon",
         "block_optimization.acceptance_epsilon",
         "block_optimization.prompt_candidates",
@@ -166,6 +169,7 @@ def validate_method(config):
         "block_optimization.prompt_candidates",
         "workflow.compatibility_search.prompt_candidates",
         "leiden.n_iterations",
+        "leiden.max_comm_size",
         "error_handling.response_retries",
         "error_handling.operation_retries",
     ]
@@ -255,6 +259,7 @@ def validate_method(config):
     for path in (
         "dicai.max_workers",
         "execution.max_workers",
+        "leiden.max_comm_size",
         "block_constitution.enabled",
         "block_constitution.reuse_trajectories",
         "block_optimization.reevaluate_current",

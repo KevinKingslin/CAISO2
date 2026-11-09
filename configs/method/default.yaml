@@ -48,6 +48,7 @@ attribution:
   confidence_level: 0.95
 leiden:
   resolution_gamma: 0.05
+  max_comm_size: 2  # Maximum components per block; 0 disables the cap.
   weight_transform: raw_if_supported
   n_iterations: -1  # -1 runs Leiden until convergence; positive values cap passes.
 block_selection:

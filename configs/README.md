@@ -35,6 +35,20 @@ the fixed validation set remains the separate acceptance gate. A positive
 Reward-model/PPO settings in those files are unused by CAISO. Its existing DPO
 settings remain in the shared method file.
 
+Leiden blocks contain at most two components by default. To change the cap in an
+experiment, override:
+
+```yaml
+method:
+  leiden:
+    max_comm_size: 2
+```
+
+In `method/default.yaml`, this is `leiden.max_comm_size`. Positive integers set
+the maximum number of components in a block; `0` disables the cap. Singleton
+blocks remain allowed. The cap is enforced during Leiden optimization, including
+when the workflow is repartitioned. Use a new run when changing this setting.
+
 To replace the default validation prefix with a reproducible random subset,
 change these keys inside the experiment's existing `method` block:
 
