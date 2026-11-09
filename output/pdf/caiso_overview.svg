@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="790" viewBox="0 0 1200 790">
 <title>Compound AI System Optimization</title>
-<desc>System constitution guides causal block discovery, component-specific candidate generation and joint block optimization, and single-edit workflow generation with compatibility adaptation.</desc>
+<desc>Causal block discovery, block constitution induction, and component-specific candidate generation with joint block evaluation and global validation.</desc>
 <rect x="18" y="10" width="1164" height="98" rx="17" fill="#F7F8FA" stroke="#8A96A2" stroke-width="1.5"/>
 <rect x="38" y="27" width="40" height="57" rx="2" fill="#FFFEF6" stroke="#233344" stroke-width="1.3"/>
 <polyline points="47,40 69,40" fill="none" stroke="#527FA0" stroke-width="1.6"/>
@@ -24,7 +24,7 @@
 <text x="765.52392578125" y="49" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#233344">Q</text>
 <text x="781.8583984375" y="53.83" font-family="Arial, Helvetica, sans-serif" font-size="14.7" font-weight="700" fill="#233344">sys</text>
 <text x="806.384716796875" y="49" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#233344"></text>
-<text x="559.0" y="77" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="400" fill="#233344">Guides diagnosis, local principles, and workflow proposals</text>
+<text x="559.0" y="77" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="400" fill="#233344">Guides block diagnosis and local constitution induction</text>
 <polyline points="194,108 194,144" fill="none" stroke="#67758D" stroke-width="1.5" stroke-dasharray="5 4"/>
 <polygon points="194,144 190.0,137.0717967697245 198.0,137.0717967697245" fill="#67758D"/>
 <polyline points="600,108 600,144" fill="none" stroke="#67758D" stroke-width="1.5" stroke-dasharray="5 4"/>
@@ -35,10 +35,10 @@
 <text x="57.04248046875" y="178" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#233344">1  Causal Block Discovery</text>
 <polyline points="36,194 352,194" fill="none" stroke="#233344" stroke-width="1"/>
 <rect x="424" y="144" width="352" height="548" rx="29" fill="#FFD9A6" stroke="#233344" stroke-width="1.7"/>
-<text x="488.15234375" y="178" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#233344">2  Block Optimization</text>
+<text x="490.0" y="178" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#233344">2  Block Constitution</text>
 <polyline points="442,194 758,194" fill="none" stroke="#233344" stroke-width="1"/>
 <rect x="830" y="144" width="352" height="548" rx="29" fill="#D3EBD3" stroke="#233344" stroke-width="1.7"/>
-<text x="883.78076171875" y="178" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#233344">3  Workflow Adaptation</text>
+<text x="879.47314453125" y="178" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#233344">3  Candidate Generation</text>
 <polyline points="848,194 1164,194" fill="none" stroke="#233344" stroke-width="1"/>
 <text x="73.5837890625" y="222" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">Current system </text>
 <text x="218.24541015625" y="222" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">S</text>
@@ -103,83 +103,85 @@
 <text x="312.60612792968755" y="654" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#233344">B</text>
 <text x="324.88298339843755" y="649.24" font-family="Arial, Helvetica, sans-serif" font-size="11.899999999999999" font-weight="700" fill="#233344">*</text>
 <text x="329.51398925781257" y="654" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#233344"></text>
-<text x="470.1111572265625" y="220" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">Induce block constitution </text>
-<text x="705.5052001953125" y="220" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">Q</text>
-<text x="720.2840087890625" y="224.37" font-family="Arial, Helvetica, sans-serif" font-size="13.299999999999999" font-weight="700" fill="#233344">B</text>
-<text x="729.8888427734374" y="220" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344"></text>
-<text x="451.5" y="245" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Two block configurations: full-system runs</text>
-<text x="453.99453125" y="267" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Rank trajectories using task metric + </text>
-<text x="716.76015625" y="267" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Q</text>
-<text x="729.20546875" y="270.68" font-family="Arial, Helvetica, sans-serif" font-size="11.2" font-weight="400" fill="#233344">sys</text>
-<text x="746.00546875" y="267" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344"></text>
-<text x="458.59765625" y="289" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Induce local principles from preferences</text>
-<polyline points="600,299 600,319" fill="none" stroke="#233344" stroke-width="1.6"/>
-<polygon points="600,319 596.0,312.0717967697245 604.0,312.0717967697245" fill="#233344"/>
-<text x="460.46484375" y="342" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#233344">Generate component candidates</text>
-<rect x="446" y="356" width="308" height="55" rx="8" fill="#FFF8EC" stroke="#233344" stroke-width="1.2"/>
-<text x="540.479248046875" y="378" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#233344">Prompt search</text>
-<text x="496.390625" y="399" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Generate alternative prompts</text>
-<rect x="446" y="420" width="308" height="55" rx="8" fill="#FFF8EC" stroke="#233344" stroke-width="1.2"/>
-<text x="519.262451171875" y="442" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#233344">Weight optimization</text>
-<text x="493.5578125" y="463" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Judge with </text>
-<text x="574.4953125" y="463" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Q</text>
-<text x="586.940625" y="466.68" font-family="Arial, Helvetica, sans-serif" font-size="11.2" font-weight="400" fill="#233344">B</text>
-<text x="594.4109374999999" y="463" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">; train with DPO</text>
-<rect x="446" y="484" width="308" height="55" rx="8" fill="#FFF8EC" stroke="#233344" stroke-width="1.2"/>
-<text x="497.4853515625" y="506" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#233344">Model / parameter search</text>
-<text x="494.15625" y="527" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Score options; sample update</text>
-<polyline points="600,540 600,559" fill="none" stroke="#233344" stroke-width="1.6"/>
-<polygon points="600,559 596.0,552.0717967697245 604.0,552.0717967697245" fill="#233344"/>
-<text x="476.04389648437495" y="579" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#233344">Combine proposals within </text>
-<text x="706.053662109375" y="579" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#233344">B</text>
-<text x="719.052685546875" y="573.96" font-family="Arial, Helvetica, sans-serif" font-size="12.6" font-weight="700" fill="#233344">*</text>
-<text x="723.9561035156249" y="579" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#233344"></text>
-<text x="503.3390625" y="599" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Rank / filter jointly using </text>
-<text x="676.7453125" y="599" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Q</text>
-<text x="689.190625" y="602.68" font-family="Arial, Helvetica, sans-serif" font-size="11.2" font-weight="400" fill="#233344">B</text>
-<text x="696.6609374999999" y="599" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344"></text>
-<rect x="446" y="610" width="308" height="62" rx="9" fill="#FFFFFF" stroke="#233344" stroke-width="1.5"/>
-<text x="501.2890625" y="635" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">Global validation gate</text>
-<text x="458.14453125" y="658" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Accept only an end-to-end improvement</text>
-<rect x="852" y="210" width="308" height="68" rx="9" fill="#F3FAF1" stroke="#233344" stroke-width="1.5"/>
-<text x="896.193359375" y="236" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">Trigger workflow search</text>
-<text x="871.69140625" y="261" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">K accepted block updates OR plateau</text>
-<polyline points="1006,279 1006,301" fill="none" stroke="#233344" stroke-width="1.6"/>
-<polygon points="1006,301 1002.0,294.0717967697245 1010.0,294.0717967697245" fill="#233344"/>
-<text x="912.103515625" y="325" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#233344">Workflow generator</text>
-<text x="926.25947265625" y="351" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#233344">Llama 3.1 8B + </text>
-<text x="1052.83955078125" y="351" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#233344">Q</text>
-<text x="1066.84052734375" y="355.14" font-family="Arial, Helvetica, sans-serif" font-size="12.6" font-weight="400" fill="#233344">sys</text>
-<text x="1085.74052734375" y="351" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#233344"></text>
-<text x="862.6015625" y="377" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Inputs: current DAG + component library</text>
-<polyline points="1006,390 1006,414" fill="none" stroke="#233344" stroke-width="1.6"/>
-<polygon points="1006,414 1002.0,407.0717967697245 1010.0,407.0717967697245" fill="#233344"/>
-<text x="879.29931640625" y="437" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">Generate one structural edit</text>
-<polyline points="945,496 986,466" fill="none" stroke="#426987" stroke-width="1.4"/>
-<polygon points="986,466 982.7707698683798,473.31929455323643 978.0466899133061,466.863051947969" fill="#426987"/>
-<polyline points="945,496 986,526" fill="none" stroke="#426987" stroke-width="1.4"/>
-<polygon points="986,526 978.0466899133061,525.136948052031 982.7707698683798,518.6807054467636" fill="#426987"/>
-<polyline points="1025,466 1066,496" fill="none" stroke="#426987" stroke-width="1.4"/>
-<polygon points="1066,496 1058.0466899133062,495.136948052031 1062.7707698683798,488.68070544676357" fill="#426987"/>
-<polyline points="1025,526 1066,496" fill="none" stroke="#426987" stroke-width="1.4"/>
-<polygon points="1066,496 1062.7707698683798,503.31929455323643 1058.0466899133062,496.863051947969" fill="#426987"/>
-<polyline points="1006,481 1006,511" fill="none" stroke="#3D8050" stroke-width="2.2"/>
-<polygon points="1006,511 1002.0,504.0717967697245 1010.0,504.0717967697245" fill="#3D8050"/>
-<rect x="908" y="482" width="36" height="28" rx="5" fill="white" stroke="#233344" stroke-width="1.2"/>
-<text x="917.0517578125" y="501" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#233344">C1</text>
-<rect x="988" y="452" width="36" height="28" rx="5" fill="white" stroke="#233344" stroke-width="1.2"/>
-<text x="997.0517578125" y="471" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#233344">C2</text>
-<rect x="988" y="512" width="36" height="28" rx="5" fill="white" stroke="#233344" stroke-width="1.2"/>
-<text x="997.0517578125" y="531" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#233344">C3</text>
-<rect x="1068" y="482" width="36" height="28" rx="5" fill="white" stroke="#233344" stroke-width="1.2"/>
-<text x="1077.0517578125" y="501" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" fill="#233344">C4</text>
-<text x="884.1640625" y="566" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Add / remove / reconnect / reorder</text>
-<text x="860.60546875" y="589" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Preserve a DAG; use library components</text>
-<polyline points="1006,598 1006,609" fill="none" stroke="#233344" stroke-width="1.6"/>
-<polygon points="1006,609 1002.0,602.0717967697245 1010.0,602.0717967697245" fill="#233344"/>
-<rect x="852" y="610" width="308" height="62" rx="9" fill="#FFFFFF" stroke="#233344" stroke-width="1.5"/>
-<text x="907.284423828125" y="635" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">Adapt affected blocks</text>
-<text x="898.37109375" y="658" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Small, fixed adaptation budget</text>
+<text x="446.9938720703125" y="223" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">Propose two configurations for </text>
+<text x="734.1091064453125" y="223" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">B</text>
+<text x="747.8302978515625" y="217.68" font-family="Arial, Helvetica, sans-serif" font-size="13.299999999999999" font-weight="700" fill="#233344">*</text>
+<text x="753.0061279296875" y="223" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344"></text>
+<text x="449.711328125" y="247" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Keep configurations outside </text>
+<text x="651.625390625" y="247" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">B</text>
+<text x="662.297265625" y="242.52" font-family="Arial, Helvetica, sans-serif" font-size="11.2" font-weight="400" fill="#233344">*</text>
+<text x="666.655859375" y="247" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344"> unchanged</text>
+<rect x="446" y="267" width="144" height="68" rx="8" fill="#FFF8EC" stroke="#233344" stroke-width="1.5"/>
+<text x="465.494140625" y="292" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#233344">Candidate A</text>
+<text x="463.32421875" y="318" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Full-system run</text>
+<rect x="610" y="267" width="144" height="68" rx="8" fill="#FFF8EC" stroke="#233344" stroke-width="1.5"/>
+<text x="629.494140625" y="292" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#233344">Candidate B</text>
+<text x="627.32421875" y="318" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Full-system run</text>
+<polyline points="518,335 518,358 682,358 682,335" fill="none" stroke="#233344" stroke-width="1.5"/>
+<polyline points="600,358 600,382" fill="none" stroke="#233344" stroke-width="1.6"/>
+<polygon points="600,382 596.0,375.0717967697245 604.0,375.0717967697245" fill="#233344"/>
+<text x="477.44970703125" y="408" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#233344">Compare complete trajectories</text>
+<text x="526.78974609375" y="433" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#233344">Task metric + </text>
+<text x="640.30927734375" y="433" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#233344">Q</text>
+<text x="654.31025390625" y="437.14" font-family="Arial, Helvetica, sans-serif" font-size="12.6" font-weight="400" fill="#233344">sys</text>
+<text x="673.2102539062499" y="433" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#233344"></text>
+<polyline points="600,447 600,472" fill="none" stroke="#233344" stroke-width="1.6"/>
+<polygon points="600,472 596.0,465.0717967697245 604.0,465.0717967697245" fill="#233344"/>
+<rect x="463" y="489" width="42" height="53" rx="2" fill="#FFFEF6" stroke="#233344" stroke-width="1.3"/>
+<polyline points="472,502 496,502" fill="none" stroke="#A36C32" stroke-width="1.6"/>
+<polyline points="472,511 496,511" fill="none" stroke="#A36C32" stroke-width="1.6"/>
+<polyline points="472,520 496,520" fill="none" stroke="#A36C32" stroke-width="1.6"/>
+<polyline points="472,529 496,529" fill="none" stroke="#A36C32" stroke-width="1.6"/>
+<text x="542.45703125" y="504" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#233344">Block preference pairs</text>
+<text x="554.9638671875" y="529" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#233344">Preferred / rejected</text>
+<polyline points="600,550 600,576" fill="none" stroke="#233344" stroke-width="1.6"/>
+<polygon points="600,576 596.0,569.0717967697245 604.0,569.0717967697245" fill="#233344"/>
+<text x="448.52490234375" y="599" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#233344">Constitution induction: DICAI / ICAI</text>
+<rect x="446" y="620" width="308" height="48" rx="9" fill="#FFFFFF" stroke="#233344" stroke-width="1.5"/>
+<text x="492.0248291015625" y="650" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#233344">Block constitution </text>
+<text x="681.0248291015625" y="650" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#233344">Q</text>
+<text x="697.3593017578125" y="654.83" font-family="Arial, Helvetica, sans-serif" font-size="14.7" font-weight="700" fill="#233344">B</text>
+<text x="707.9751708984376" y="650" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="700" fill="#233344"></text>
+<text x="864.5390625" y="220" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">Component-specific optimizers</text>
+<text x="863.746484375" y="244" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">For components in the selected block </text>
+<text x="1133.223046875" y="244" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">B</text>
+<text x="1143.894921875" y="239.52" font-family="Arial, Helvetica, sans-serif" font-size="11.2" font-weight="400" fill="#233344">*</text>
+<text x="1148.2535156249999" y="244" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344"></text>
+<rect x="852" y="260" width="308" height="80" rx="8" fill="#F3FAF1" stroke="#233344" stroke-width="1.2"/>
+<text x="942.97802734375" y="283" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#233344">Prompt search</text>
+<text x="905.62841796875" y="307" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="400" fill="#233344">Generate alternative prompts</text>
+<text x="886.506201171875" y="328" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="400" fill="#233344">Execute component; score with </text>
+<text x="1106.200537109375" y="328" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="400" fill="#233344">Q</text>
+<text x="1118.25693359375" y="331.565" font-family="Arial, Helvetica, sans-serif" font-size="10.85" font-weight="400" fill="#233344">B</text>
+<text x="1125.4937988281251" y="328" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="400" fill="#233344"></text>
+<polyline points="1160,300 1171,300" fill="none" stroke="#233344" stroke-width="1.2"/>
+<rect x="852" y="351" width="308" height="80" rx="8" fill="#F3FAF1" stroke="#233344" stroke-width="1.2"/>
+<text x="893.5087890625" y="374" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#233344">Model weight optimization</text>
+<text x="886.0558837890625" y="398" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="400" fill="#233344"></text>
+<text x="886.0558837890625" y="398" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="400" fill="#233344">Q</text>
+<text x="898.1122802734375" y="401.565" font-family="Arial, Helvetica, sans-serif" font-size="10.85" font-weight="400" fill="#233344">B</text>
+<text x="905.3491455078125" y="398" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="400" fill="#233344"> judge labels output preferences</text>
+<text x="880.645263671875" y="419" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="400" fill="#233344">DPO trains candidate model weights</text>
+<polyline points="1160,391 1171,391" fill="none" stroke="#233344" stroke-width="1.2"/>
+<rect x="852" y="442" width="308" height="80" rx="8" fill="#F3FAF1" stroke="#233344" stroke-width="1.2"/>
+<text x="872.94677734375" y="465" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#233344">Model / hyperparameter search</text>
+<text x="871.8500732421875" y="489" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="400" fill="#233344">Score candidate configurations with </text>
+<text x="1120.8566650390626" y="489" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="400" fill="#233344">Q</text>
+<text x="1132.9130615234376" y="492.565" font-family="Arial, Helvetica, sans-serif" font-size="10.85" font-weight="400" fill="#233344">B</text>
+<text x="1140.1499267578126" y="489" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="400" fill="#233344"></text>
+<text x="875.9036865234375" y="510" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="400" fill="#233344">Form a distribution; sample an update</text>
+<polyline points="1160,482 1171,482" fill="none" stroke="#233344" stroke-width="1.2"/>
+<polyline points="1171,300 1171,539 1006,539" fill="none" stroke="#233344" stroke-width="1.5"/>
+<polyline points="1006,539 1006,557" fill="none" stroke="#233344" stroke-width="1.6"/>
+<polygon points="1006,557 1002.0,550.0717967697245 1010.0,550.0717967697245" fill="#233344"/>
+<text x="863.49072265625" y="579" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">Combine component proposals</text>
+<text x="876.87421875" y="601" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Evaluate jointly; rank / filter using </text>
+<text x="1115.21015625" y="601" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Q</text>
+<text x="1127.65546875" y="604.68" font-family="Arial, Helvetica, sans-serif" font-size="11.2" font-weight="400" fill="#233344">B</text>
+<text x="1135.12578125" y="601" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344"></text>
+<rect x="852" y="620" width="308" height="48" rx="9" fill="#FFFFFF" stroke="#233344" stroke-width="1.5"/>
+<text x="907.2890625" y="641" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">Global validation gate</text>
+<text x="864.14453125" y="660" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Accept only an end-to-end improvement</text>
 <polyline points="374,401 420,401" fill="none" stroke="#233344" stroke-width="2"/>
 <polygon points="420,401 413.0717967697245,405.0 413.0717967697245,397.0" fill="#233344"/>
 <polyline points="780,401 826,401" fill="none" stroke="#233344" stroke-width="2"/>
@@ -188,18 +190,6 @@
 <polygon points="194,695 198.0,701.9282032302755 190.0,701.9282032302755" fill="#233344"/>
 <rect x="320" y="701" width="575" height="33" rx="0" fill="white" stroke="white" stroke-width="0"/>
 <text x="351.46044921875" y="724" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#233344">Repeat attribution and block discovery on the accepted system</text>
-<text x="239.83437500000002" y="752" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Refresh </text>
-<text x="300.303125" y="752" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Q</text>
-<text x="312.7484375" y="755.68" font-family="Arial, Helvetica, sans-serif" font-size="11.2" font-weight="400" fill="#233344">sys</text>
-<text x="329.54843750000003" y="752" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344"> after an accepted structural change. Continue until the optimization budget is exhausted.</text>
-<text x="281.1158935546875" y="778" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">Output: optimized workflow and component configurations </text>
-<text x="820.4728271484375" y="778" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">S</text>
-<text x="833.1456787109375" y="772.68" font-family="Arial, Helvetica, sans-serif" font-size="13.299999999999999" font-weight="700" fill="#233344">*</text>
-<text x="838.3215087890626" y="778" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344"> = (</text>
-<text x="866.3019775390626" y="778" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">G</text>
-<text x="881.0807861328126" y="772.68" font-family="Arial, Helvetica, sans-serif" font-size="13.299999999999999" font-weight="700" fill="#233344">*</text>
-<text x="886.2566162109376" y="778" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">, </text>
-<text x="896.8142333984376" y="778" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">v</text>
-<text x="907.3811279296876" y="772.68" font-family="Arial, Helvetica, sans-serif" font-size="13.299999999999999" font-weight="700" fill="#233344">*</text>
-<text x="912.5569580078127" y="778" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">)</text>
+<text x="203.3359375" y="752" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" fill="#233344">Reject non-improving candidates; retain the current system. Continue until the optimization budget is exhausted.</text>
+<text x="284.927490234375" y="778" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700" fill="#233344">Output: optimized component configurations for the current workflow</text>
 </svg>

@@ -1,7 +1,8 @@
 # CAISO proposal overview
 
 Original vector artwork based on `CAISO_proposal.pdf` supplied by the user
-(Sections 4.1-4.8 and Algorithm 1). This is a diagram of the proposed method,
+(Sections 4.1-4.7 and the block-optimization steps of Algorithm 1).
+This is a diagram of the proposed method,
 not a statement of experimental results or implementation completeness.
 
 ## Deliverables
@@ -29,30 +30,21 @@ discussing constitution induction.
 - The block preference label comes from complete trajectories evaluated by
   the task objective and system constitution. Only the selected block's
   configurations differ between the two runs.
-- The green edge in the third panel illustrates one added connection. All
-  workflow modifications must preserve a DAG and use the fixed component library.
-- Workflow search is conditional. If neither K accepted block updates nor a
-  plateau triggers search, iteration continues without a workflow proposal.
-- After a rejected candidate, the accepted state is retained. After accepted
-  structural changes, the system constitution is refreshed. Attribution and
+- After a rejected candidate, the accepted state is retained. Attribution and
   partitioning are recomputed on subsequent iterations (Algorithm 1).
-- Section 4.2 calls the system constitution "fixed," while Section 4.8 and
-  Algorithm 1 explicitly refresh it after an accepted structural change. The
-  diagram follows the latter, more specific rule. The paper should reconcile
-  that wording.
 
 The figure emphasizes candidate generation: alternative prompts from prompt
 search, weights trained using constitution-labeled preferences and DPO, and
 sampled model or parameter updates. Component proposals are combined within
 the selected block and ranked or filtered jointly using its constitution.
-The workflow generator uses the current DAG, the system constitution, and the
-fixed component library to propose one structural edit.
-
-The workflow validation stage is omitted from the visualization at the user's
-request. This is a presentation change; the source proposal still evaluates
-workflow candidates globally before acceptance. The block validation gate
-remains visible. Detailed sampling budgets and batch aggregation belong in
-the method text.
+Workflow adaptation is omitted at the user's request. The figure focuses on
+the current workflow's component configurations: block discovery, constitution
+induction, and candidate generation. The block validation gate remains visible.
+The initial pair of configurations used to induce the local constitution is
+shown separately from the subsequent constitution-guided optimization proposals.
+The proposal does not prescribe a specific algorithm for generating that initial
+pair; the figure does not add one. Detailed sampling budgets and batch aggregation
+belong in the method text.
 
 ## Rebuild
 

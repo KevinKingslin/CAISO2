@@ -25,7 +25,7 @@ c.setAuthor('CAISO')
 c.scale(SCALE, SCALE)
 svg = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">',
        '<title>Compound AI System Optimization</title>',
-       '<desc>System constitution guides causal block discovery, component-specific candidate generation and joint block optimization, and single-edit workflow generation with compatibility adaptation.</desc>']
+       '<desc>Causal block discovery, block constitution induction, and component-specific candidate generation with joint block evaluation and global validation.</desc>']
 
 def rect(x,y,w,h,fill='white',stroke=INK,r=10,lw=1.5,dash=False):
     c.setFillColor(fill); c.setStrokeColor(stroke); c.setLineWidth(lw)
@@ -100,10 +100,10 @@ lines(342,42,['Constitution induction','DICAI / ICAI'],18,24,bold=True)
 arrow([(443,57),(483,57)])
 document(499,27,None,accent='#568456',w=40,h=57)
 text(559,49,'System constitution Q_sys',21,True,anchor='start')
-text(559,77,'Guides diagnosis, local principles, and workflow proposals',17,anchor='start')
+text(559,77,'Guides block diagnosis and local constitution induction',17,anchor='start')
 for xx in (194,600,1006): arrow([(xx,108),(xx,144)],'#67758D',1.5,True)
 
-panels=[(18,BLUE,'1  Causal Block Discovery'),(424,ORANGE,'2  Block Optimization'),(830,GREEN,'3  Workflow Adaptation')]
+panels=[(18,BLUE,'1  Causal Block Discovery'),(424,ORANGE,'2  Block Constitution'),(830,GREEN,'3  Candidate Generation')]
 for x,fill,title in panels:
     rect(x,144,352,548,fill,INK,29,1.7)
     text(x+176,178,title,22,True)
@@ -122,44 +122,42 @@ text(194,609,'Q_sys + complete execution trajectories',16)
 rect(40,625,308,47,'#FFFFFF',INK,9)
 text(194,654,'Select the most deficient block B*',17,True)
 
-# Panel 2: global preference induction, then explicit candidate generation.
-text(600,220,'Induce block constitution Q_B',19,True)
-lines(600,245,['Two block configurations: full-system runs',
-               'Rank trajectories using task metric + Q_sys',
-               'Induce local principles from preferences'],16,22)
-arrow([(600,299),(600,319)])
-text(600,342,'Generate component candidates',18,True)
-rows=[('Prompt search','Generate alternative prompts'),
-      ('Weight optimization','Judge with Q_B; train with DPO'),
-      ('Model / parameter search','Score options; sample update')]
-for yy,(title,detail) in zip((356,420,484),rows):
-    rect(446,yy,308,55,'#FFF8EC',INK,8,1.2)
-    text(600,yy+22,title,17,True)
-    text(600,yy+43,detail,16)
-arrow([(600,540),(600,559)])
-text(600,579,'Combine proposals within B*',18,True)
-text(600,599,'Rank / filter jointly using Q_B',16)
-rect(446,610,308,62,'#FFFFFF',INK,9)
-text(600,635,'Global validation gate',19,True)
-text(600,658,'Accept only an end-to-end improvement',16)
+# Panel 2: derive local principles from globally evaluated candidate pairs.
+text(600,223,'Propose two configurations for B*',19,True)
+text(600,247,'Keep configurations outside B* unchanged',16)
+for xx,label in [(446,'Candidate A'),(610,'Candidate B')]:
+    rect(xx,267,144,68,'#FFF8EC',INK,8)
+    text(xx+72,292,label,18,True)
+    text(xx+72,318,'Full-system run',16)
+line([(518,335),(518,358),(682,358),(682,335)])
+arrow([(600,358),(600,382)])
+lines(600,408,['Compare complete trajectories','Task metric + Q_sys'],18,25)
+arrow([(600,447),(600,472)])
+document(463,489,None,accent='#A36C32',w=42,h=53)
+lines(632,504,['Block preference pairs','Preferred / rejected'],18,25)
+arrow([(600,550),(600,576)])
+text(600,599,'Constitution induction: DICAI / ICAI',18,True)
+rect(446,620,308,48,'#FFFFFF',INK,9)
+text(600,650,'Block constitution Q_B',21,True)
 
-# Panel 3: emphasize generator inputs and edits; workflow validation is omitted.
-rect(852,210,308,68,'#F3FAF1',INK,9)
-text(1006,236,'Trigger workflow search',19,True)
-text(1006,261,'K accepted block updates OR plateau',16)
-arrow([(1006,279),(1006,301)])
-text(1006,325,'Workflow generator',20,True)
-text(1006,351,'Llama 3.1 8B + Q_sys',18)
-text(1006,377,'Inputs: current DAG + component library',16)
-arrow([(1006,390),(1006,414)])
-text(1006,437,'Generate one structural edit',19,True)
-graph(926,466,'modified')
-text(1006,566,'Add / remove / reconnect / reorder',16)
-text(1006,589,'Preserve a DAG; use library components',16)
-arrow([(1006,598),(1006,609)])
-rect(852,610,308,62,'#FFFFFF',INK,9)
-text(1006,635,'Adapt affected blocks',19,True)
-text(1006,658,'Small, fixed adaptation budget',16)
+# Panel 3: three optimizer types feed joint candidate evaluation.
+text(1006,220,'Component-specific optimizers',19,True)
+text(1006,244,'For components in the selected block B*',16)
+rows=[('Prompt search',['Generate alternative prompts', 'Execute component; score with Q_B']),
+      ('Model weight optimization',['Q_B judge labels output preferences', 'DPO trains candidate model weights']),
+      ('Model / hyperparameter search',['Score candidate configurations with Q_B', 'Form a distribution; sample an update'])]
+for yy,(title,details) in zip((260,351,442),rows):
+    rect(852,yy,308,80,'#F3FAF1',INK,8,1.2)
+    text(1006,yy+23,title,18,True)
+    lines(1006,yy+47,details,15.5,21)
+    line([(1160,yy+40),(1171,yy+40)],INK,1.2)
+line([(1171,300),(1171,539),(1006,539)])
+arrow([(1006,539),(1006,557)])
+text(1006,579,'Combine component proposals',19,True)
+text(1006,601,'Evaluate jointly; rank / filter using Q_B',16)
+rect(852,620,308,48,'#FFFFFF',INK,9)
+text(1006,641,'Global validation gate',19,True)
+text(1006,660,'Accept only an end-to-end improvement',16)
 
 # Stage-to-stage flow; the panels are architectural stages, not graph nodes.
 arrow([(374,401),(420,401)],INK,2)
@@ -169,8 +167,8 @@ arrow([(780,401),(826,401)],INK,2)
 arrow([(1006,692),(1006,718),(194,718),(194,695)],INK,1.8)
 rect(320,701,575,33,'white','white',0,0)
 text(607,724,'Repeat attribution and block discovery on the accepted system',17,True)
-text(600,752,'Refresh Q_sys after an accepted structural change. Continue until the optimization budget is exhausted.',16)
-text(600,778,'Output: optimized workflow and component configurations S* = (G*, v*)',19,True)
+text(600,752,'Reject non-improving candidates; retain the current system. Continue until the optimization budget is exhausted.',16)
+text(600,778,'Output: optimized component configurations for the current workflow',19,True)
 
 svg.append('</svg>')
 (OUT / 'caiso_overview.svg').write_text('\n'.join(svg))
