@@ -1,0 +1,20 @@
+% Requires \usepackage{graphicx}. Copy the PDF beside the manuscript or
+% adjust its path. Use figure* for a full-width figure in a two-column paper.
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{output/pdf/caiso_overview.pdf}
+  \caption{Overview of the proposed compound AI system optimization method.
+  A system constitution induced from training preferences guides three stages.
+  (1) Repeated edge interventions estimate causal effects, Leiden-CPM partitions
+  the current workflow, and constitution-guided trajectory diagnosis selects
+  a deficient block.
+  (2) Full-system comparisons of block configurations provide preferences for
+  a local constitution, which guides joint block optimization.
+  (3) After $K$ accepted block updates or a performance plateau, a workflow
+  generator proposes one structural modification and briefly adapts affected
+  blocks. Both block and workflow updates require an end-to-end validation
+  improvement. Optimization repeats on the accepted system until the budget
+  is exhausted; an accepted structural change also refreshes the system
+  constitution. Graphs and partitions are illustrative.}
+  \label{fig:caiso-overview}
+\end{figure*}
