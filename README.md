@@ -449,6 +449,10 @@ python -m scripts.eval_system --dataset hotpotqa --system_name hotpotqa_system \
 
 ## Verify
 
+The [optimization quality audit](docs/OPTIMIZATION_AUDIT.md) traces the active
+search, explains its main limitations, compares it with Optimas, and includes
+offline probes plus a read-only inspector for saved runs.
+
 ```sh
 python -m scripts.verify_upstream
 pip install -e '.[test]'
