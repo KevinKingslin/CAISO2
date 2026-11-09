@@ -43,6 +43,8 @@ class JointBlockOptimizer:
                 "different search protocol."
             )
         self.runtime, self.judge, self.config, self.output_dir = runtime, judge, config, output_dir
+        if not isinstance(config.get("use_history", True), bool):
+            raise ValueError("use_history must be true or false")
         self.include_current = config.get("include_current_configuration", True)
         if not isinstance(self.include_current, bool):
             raise ValueError("include_current_configuration must be true or false")

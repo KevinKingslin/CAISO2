@@ -165,6 +165,7 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch
         key: value for key, value in optimizer.config["block_selection"].items()
         if key != "use_history"
     }
+    legacy.pop("use_history", None)
     checkpoint.config_hash = digest(legacy)
     checkpoint.save(tmp_path / "checkpoint")
     # Restore the accepted checkpoint onto a fresh copy of the benchmark system.

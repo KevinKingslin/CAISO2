@@ -1,5 +1,6 @@
 # Dataset/question batch sizes live in configs/experiments/*.yaml under method.
 seed: 42
+use_history: true  # Global optimization-history switch; DICAI debate history is independent.
 max_iterations: null  # Continue until a run, time, or model-call budget is exhausted.
 execution:
   max_workers: 10  # Independent system runs; provider concurrency/RPM limits still apply.

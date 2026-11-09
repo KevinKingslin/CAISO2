@@ -176,7 +176,13 @@ class Algorithm:
             config["block_optimization"],
             self.output / ".internal/optimization",
         )
+        if isinstance(self.optimizer, JointBlockOptimizer):
+            self.optimizer.config = {
+                **self.optimizer.config, "use_history": config.get("use_history", True),
+            }
         self.generator = generator or WorkflowGenerator(runtime.providers)
+        if isinstance(self.generator, WorkflowGenerator):
+            self.generator.use_history = config.get("use_history", True)
         self.allowed_connections = allowed_connections
 
     def run(self, initial, train, validation, preferences=None, resume=None):
@@ -246,6 +252,7 @@ class Algorithm:
 
     def _run(self, initial, train, validation, preferences=None, resume=None):
         cfg = self.config
+        use_history = cfg.get("use_history", True)
         seed = cfg["seed"]
         if any(x.split != "train" for x in train) or any(
             x.split != "validation" for x in validation
@@ -446,7 +453,7 @@ class Algorithm:
                         [step_seed],
                         None,
                     )
-                    use_selection_history = cfg["block_selection"].get("use_history", True)
+                    use_selection_history = use_history and cfg["block_selection"].get("use_history", True)
                     self.report.save_phase(
                         "03_selection",
                         diagnostic_trajectories=diagnostics,
@@ -488,11 +495,13 @@ class Algorithm:
                             current, members, qsys, local_train, step_seed
                         )
                         self.report.configuration_state(status="Evaluated for preference generation")
-                        preliminary = optimization_history.filter_candidates(current, preliminary)
+                        if use_history:
+                            preliminary = optimization_history.filter_candidates(current, preliminary)
                         self.report.save_phase(
                             "04_block_constitution",
                             preliminary_candidates=preliminary,
                             members=members,
+                            history_enabled=use_history,
                         )
                         changed = [
                             c.configurations
@@ -602,6 +611,7 @@ class Algorithm:
                         self.report.save_phase(
                             "05_block_optimization",
                             constitution_source="block" if block_constitution_enabled else "system",
+                            history_enabled=use_history,
                         )
                         scored = self.optimizer.propose(
                             current, members, optimization_constitution, local_train, step_seed + 10000
@@ -609,7 +619,10 @@ class Algorithm:
                         self.report.configuration_state(status="Local candidates evaluated")
                         scored = [
                             c
-                            for c in optimization_history.filter_candidates(current, scored)
+                            for c in (
+                                optimization_history.filter_candidates(current, scored)
+                                if use_history else scored
+                            )
                             if current.with_configs(c.configurations) != current
                         ]
                         if not scored:

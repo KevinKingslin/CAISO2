@@ -254,12 +254,20 @@ This example is an optional override, not a change to the shipped values. Select
 custom profiles with `./scripts/caiso run --config YOUR_EXPERIMENT.yaml` or
 `./scripts/caiso evaluate --config YOUR_EXPERIMENT.yaml`.
 
-`block_selection.use_history` defaults to `true`. Set it to `false` in the shared
-method file, or under an experiment's `method.block_selection`, to withhold past
-optimization attempts from the block-selection judge. Checkpoint history and
-rejected-candidate filtering keep their existing behavior. The selection phase
-records `history_enabled` and the supplied history. Start a new run when changing
-the setting.
+`use_history` defaults to `true` in the shared method file. Set it to `false`, or
+set `method.use_history: false` in an experiment, to disable optimization history:
+block selection receives no past attempts, previously rejected candidates are
+eligible again, and prompt generation receives no earlier candidate scores.
+Feedback-only prompt scoring is skipped; complete candidates are still scored,
+and selected candidates still pass validation. Workflow proposals also omit
+recent-performance feedback.
+
+This master switch overrides `block_selection.use_history`. With the master
+enabled, the block-selection setting can still disable history for selection
+alone. Phase status files record the effective `history_enabled` setting.
+DICAI debate history, current system state, budgets, logs and checkpoints remain
+available. Start a new run when changing either setting; older checkpoints that
+omit these keys remain compatible with the equivalent `true` defaults.
 
 To disable block constitution induction, set `method.block_constitution.enabled` to
 `false` in an experiment, or `block_constitution.enabled` to `false` in the shared

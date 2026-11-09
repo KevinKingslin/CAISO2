@@ -8,6 +8,8 @@ def resume_config_hashes(config):
     from caiso.core.serialization import digest
 
     variants = [config]
+    if config.get("use_history") is True:
+        variants.append({key: value for key, value in config.items() if key != "use_history"})
     for section, key in (
         ("block_optimization", "reevaluate_current"),
         ("block_optimization", "include_current_configuration"),
@@ -21,6 +23,8 @@ def resume_config_hashes(config):
 
 
 def validate_method(config):
+    if "use_history" in config and not isinstance(config["use_history"], bool):
+        raise ValueError("use_history must be true or false")
     if config.get("validation_sampling", "seeded") not in {"seeded", "first"}:
         raise ValueError("validation_sampling must be seeded or first")
     if not isinstance(config.get("block_constitution", {}), dict):

@@ -32,6 +32,7 @@ def test_shared_method_copy_does_not_change_any_values():
     assert load_method({})["block_optimization"]["reevaluate_current"] is True
     assert load_method({})["block_optimization"]["include_current_configuration"] is True
     assert load_method({})["block_selection"]["use_history"] is True
+    assert load_method({})["use_history"] is True
 
 
 def test_experiment_overrides_method_recursively_and_paths_are_relative(tmp_path):
@@ -43,6 +44,7 @@ def test_experiment_overrides_method_recursively_and_paths_are_relative(tmp_path
     config["method"]["dicai"] = {"debate_rounds": 1}
     config["method"]["block_constitution"] = {"enabled": False}
     config["method"]["block_selection"] = {"use_history": False}
+    config["method"]["use_history"] = False
     config["method"]["block_optimization"] = {"reevaluate_current": False, "include_current_configuration": False}
     path = tmp_path / "experiment.yaml"
     path.write_text(yaml.safe_dump(config))
@@ -53,10 +55,17 @@ def test_experiment_overrides_method_recursively_and_paths_are_relative(tmp_path
     assert resolved["block_constitution"]["enabled"] is False
     assert resolved["block_constitution"]["preference_pairs"] == 2
     assert resolved["block_selection"]["use_history"] is False
+    assert resolved["use_history"] is False
     assert resolved["block_selection"]["model_role"] == "block_selection"
     assert resolved["block_optimization"]["reevaluate_current"] is False
     assert resolved["block_optimization"]["include_current_configuration"] is False
     assert resolved["block_optimization"]["max_joint_candidates"] == 16
+
+
+@pytest.mark.parametrize("invalid", [None, 0, 1, "false", {}, []])
+def test_global_history_switch_requires_a_boolean(invalid):
+    with pytest.raises(ValueError, match="use_history must be true or false"):
+        validate_method({"use_history": invalid})
 
 
 @pytest.mark.parametrize("invalid", [None, 0, 1, "false", {}, []])
