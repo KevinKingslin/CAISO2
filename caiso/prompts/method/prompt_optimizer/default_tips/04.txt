@@ -1,1 +1,1 @@
-Consider a different formulation of the instruction.
+The instruction should include specific details such as numbers or conditions.

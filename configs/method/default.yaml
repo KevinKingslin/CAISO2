@@ -69,10 +69,10 @@ block_optimization:
   acceptance_epsilon: 0.000001
   prompt_candidates: 3
   prompt_tips:
+    - Don't be afraid to be creative when creating the new instruction!
     - Keep the instruction clear and concise.
-    - Make the instruction informative and descriptive.
-    - Include specific conditions when useful.
-    - Consider a different formulation of the instruction.
+    - Make sure your instruction is very informative and descriptive.
+    - The instruction should include specific details such as numbers or conditions.
   softmax_temperature: 0.5
   sample_discrete: true
   dpo:

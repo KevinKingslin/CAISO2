@@ -187,6 +187,8 @@ systems/
 
 Ordered default tips and personas use one numbered `.txt` file per entry under
 `method/prompt_optimizer/default_tips/` and `method/default_personas/`.
+Default optimizer tips match the preserved Optimas OPRO tips verbatim and in order,
+in both the method YAML and fallback text files.
 `_catalogs.py` maps existing caller keys to these resources and keeps list order;
 it contains paths, not prompt content. The loaders read only the requested text
 files and preserve all whitespace, including trailing spaces in field prefixes.

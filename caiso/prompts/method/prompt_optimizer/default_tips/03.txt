@@ -1,1 +1,1 @@
-Include specific conditions when useful.
+Make sure your instruction is very informative and descriptive.
