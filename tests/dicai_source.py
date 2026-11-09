@@ -125,7 +125,7 @@ def trajectory_adaptation(key, original):
         text = text.replace(
             'State the reason as something reusable, not a description of these exact texts.',
             'State the reason as something reusable, not a description of these exact texts. '
-            'Consider discriminating behavior in intermediate components as well as the final output. '
+            'Examine each component in the trajectories. Where an observable difference helps explain the preference, propose a separate principle naming that component\'s exact component_id. '
             'Every question must evaluate one observable behavior of named components, using exact component_id values from the trajectories; final-output questions must name the producing component. '
             + general.replace('from principles.', 'from proposed questions and dimensions.'),
         )
@@ -136,17 +136,18 @@ def trajectory_adaptation(key, original):
     if key == 'reasoning.self_refine_critique':
         text = text.replace(
             'Be brief.',
-            'Also flag sample-specific names or facts used as criteria or dimensions. '
+            'Also flag overlooked component differences that help explain the preference, and sample-specific names or facts used as criteria or dimensions. '
             + general.replace('from principles.', 'from proposed criteria and dimensions.') + ' Be brief.',
         )
     if key.startswith('debate.debater'):
-        text = text.replace('DEBATE RULES (must follow):', 'Proposed questions may concern individual component behavior, interactions between components, or the final output. Every proposed question must evaluate one observable behavior using exact component_id values from the trajectories, including the producing component for final-output questions.\n\n' + general + '\n\nDEBATE RULES (must follow):')
+        text = text.replace('DEBATE RULES (must follow):', 'Proposed questions may concern individual component behavior, interactions between components, or the final output. Every proposed question must evaluate one observable behavior using exact component_id values from the trajectories, including the producing component for final-output questions. Examine each component in the trajectories. Where an observable difference helps explain the preference, propose a separate principle naming that component\'s exact component_id.\n\n' + general + '\n\nDEBATE RULES (must follow):')
         text = text.replace('The final list must reconstruct the provided preference.', 'The final list must reconstruct the provided preference through reusable criteria.')
     if key.startswith('debate.chairperson'):
         text = text.replace(
             '- Apply edits if they improve clarity.\n',
             '- Apply edits if they improve clarity.\n'
             '- Every question must name the exact component_id from the trajectories for the component or components whose behavior it evaluates, including the producing component for final-output questions. Preserve these IDs when editing or merging.\n'
+            '- Retain supported principles for different components. Do not remove a component\'s only supported principle merely to shorten the list.\n'
             '- ' + general + '\n',
         )
         text = text.replace('Select the trajectory ...\n', 'Select the trajectory where ...\n')
@@ -154,5 +155,5 @@ def trajectory_adaptation(key, original):
     if key == 'abstraction':
         text = text.replace('Each has the form "Select the trajectory that <condition>".', 'Each begins with "Select the trajectory" and names the component whose behavior it evaluates.')
         text = text.replace('Use the exact format: "Select the trajectory that <condition>."', 'Begin with "Select the trajectory where", followed by the actual component ID and the reusable condition.')
-        text = text.replace('\nCLUSTER:', '\nPreserve the single quality shared by the principles. ' + general + ' Name the component or components whose behavior the shared rule evaluates, using exact component IDs from the member principles.\n\nCLUSTER:')
+        text = text.replace('\nCLUSTER:', '\nPreserve the single quality shared by the principles. ' + general + ' Name the component or components whose behavior the shared rule evaluates, using exact component IDs from the member principles. Do not replace exact component IDs with generic references such as "final answer", "rewritten query", or "retrieved content".\n\nCLUSTER:')
     return text

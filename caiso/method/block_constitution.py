@@ -118,7 +118,9 @@ def build_block_preferences(
 def induce_block_constitution(
     dicai, pairs, members, seed, output=None, progress=None, cache_dir=None, activity=None
 ):
-    options = {"progress": progress} if progress else {}
+    options = {"component_ids": members}
+    if progress:
+        options["progress"] = progress
     if activity:
         options["activity"] = activity
     if output:

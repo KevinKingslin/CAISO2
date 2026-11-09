@@ -139,12 +139,31 @@ source-based trajectory adaptation, not a claim to reproduce every setting or
 published score of DICAI. Report the adapted prompts and resolved experiment
 settings in research.
 
-The protocol identifier is `democratic-icai-c8d5-source-trajectory-v4-atomicity`.
+The protocol identifier is `democratic-icai-c8d5-source-trajectory-v5-component-coverage`.
 Source, prompt and schema fingerprints invalidate earlier induction caches.
 Start a new optimization run: old checkpoints retain constitutions generated
 under their previous protocol. Successful requests within a matching induction
 are still recovered after interruption, including independent samples with
 identical messages and different seeds.
+
+## Component coverage extension
+
+Reasoning and debate requests now explicitly inspect every component for
+observable differences explaining the preference. The critique flags overlooked
+component differences, chairpersons preserve each component's supported
+criteria when shortening lists, and abstraction keeps exact IDs instead of
+generic references to a final answer or rewritten query. These are short edits
+within the existing complete source-derived requests. No per-pair component
+quota is imposed, and reconstruction/audit request text is unchanged.
+
+After abstraction and optional minimization, CAISO restores settled debate rules
+for missing workflow/block component IDs when their source trajectories executed
+those components. It records explicit coverage and source provenance, and leaves
+unsupported components marked as insufficient evidence. The final reconstruction
+report evaluates the restored list. This is a deterministic CAISO runtime
+extension, distinct from the original DICAI procedure and from semantic atomicity
+checking. It introduces no additional model-call stage and leaves silhouette
+clustering unchanged. See [CONSTITUTION_COVERAGE.md](CONSTITUTION_COVERAGE.md).
 
 ## CAISO one-quality semantic check
 

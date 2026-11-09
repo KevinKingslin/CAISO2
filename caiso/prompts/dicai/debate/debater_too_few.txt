@@ -20,7 +20,7 @@ YOUR REASONING TRACE:
 YOUR SEED QUESTIONS:
 {seeds}
 
-Proposed questions may concern individual component behavior, interactions between components, or the final output. Every proposed question must evaluate one observable behavior using exact component_id values from the trajectories, including the producing component for final-output questions.
+Proposed questions may concern individual component behavior, interactions between components, or the final output. Every proposed question must evaluate one observable behavior using exact component_id values from the trajectories, including the producing component for final-output questions. Examine each component in the trajectories. Where an observable difference helps explain the preference, propose a separate principle naming that component's exact component_id.
 
 Express the reusable quality that explains the preference. Exclude sample-specific names of people, places, organizations and works, and example-specific dates and identifiers from principles. Describe their semantic roles instead, while preserving actual component IDs. The principle should remain applicable when those entities change.
 

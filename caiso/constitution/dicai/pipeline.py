@@ -25,6 +25,7 @@ from .atomicity import PROMPT_KEYS as ATOMICITY_PROMPTS
 from .atomicity import AtomicityError, enabled as atomicity_enabled, ensure_atomic
 from .activity import InductionActivity
 from .clustering import cluster_principles
+from .coverage import coverage_targets, preserve_component_coverage
 from .debate import debate, principle_key
 from .personas import assign_personas
 from .plotting import save_silhouette_artifacts
@@ -32,7 +33,7 @@ from .reasoning_assembly import assemble
 from .request_cache import RequestCache
 from .reconstruction import minimize_constitution, validate_constitution
 
-PROTOCOL = "democratic-icai-c8d5-source-trajectory-v4-atomicity"
+PROTOCOL = "democratic-icai-c8d5-source-trajectory-v5-component-coverage"
 INDUCTION_METHOD_PROMPTS = ("providers.format_retry",)
 
 
@@ -54,11 +55,12 @@ class DICAI:
         validate_method({"dicai": self.config})
         check_dicai_provider("system_constitution", getattr(providers, "roles", {}).get(role, role))
 
-    def induce(self, pairs, seed, scope="system", progress=None, output_dir=None, activity=None):
+    def induce(self, pairs, seed, scope="system", progress=None, output_dir=None, activity=None, component_ids=None):
         if not pairs:
             raise ValueError("Constitution induction requires training preference pairs")
         if len({p.pair_id for p in pairs}) != len(pairs):
             raise ValueError("DICAI preference pair IDs must be unique")
+        expected_components, target_source = coverage_targets(pairs, scope, component_ids)
         method_prompts = INDUCTION_METHOD_PROMPTS + (ATOMICITY_PROMPTS if atomicity_enabled(self.config) else ())
         validate_resources({"dicai": None, "method": method_prompts})
         started = monotonic()
@@ -87,6 +89,8 @@ class DICAI:
                 "pairs": pairs,
                 "seed": seed,
                 "scope": scope,
+                "coverage_components": expected_components,
+                "coverage_target_source": target_source,
                 "personas": self.identities,
                 "config": self.config,
                 "role": self.role,
@@ -311,18 +315,6 @@ class DICAI:
         if progress:
             progress("reconstruction", 0, len(pairs))
         reconstruction_started = monotonic()
-        report = validate_constitution(
-            providers,
-            self.role,
-            pairs,
-            outputs,
-            votes,
-            temperatures.get("reconstruction", 0.0),
-            progress=(lambda done, total: progress("reconstruction", done, total))
-            if progress
-            else None,
-            max_workers=workers,
-        )
         minimization = self.config.get("minimization", {})
         dropped = []
         if minimization.get("enabled", False):
@@ -340,15 +332,18 @@ class DICAI:
                 temperatures.get("reconstruction", 0.0),
                 max_workers=workers,
             )
-            report = validate_constitution(
-                providers,
-                self.role,
-                pairs,
-                outputs,
-                votes,
-                temperatures.get("reconstruction", 0.0),
-                max_workers=workers,
-            )
+        outputs, coverage = preserve_component_coverage(
+            outputs, settled, origins, pairs, expected_components,
+            scope=scope, target_source=target_source,
+        )
+        # Reconstruction must describe the final, coverage-preserving list,
+        # including when optional minimization removed a component's last rule.
+        report = validate_constitution(
+            providers, self.role, pairs, outputs, votes,
+            temperatures.get("reconstruction", 0.0),
+            progress=(lambda done, total: progress("reconstruction", done, total)) if progress else None,
+            max_workers=workers,
+        )
         if progress:
             progress("reconstruction", len(pairs), len(pairs))
         constitution = Constitution(
@@ -379,6 +374,7 @@ class DICAI:
                 "implementation_fingerprint": implementation,
                 "reconstruction": report,
                 "minimization": dropped,
+                "component_coverage": coverage,
                 "timings": {
                     "reasoning_debate_seconds": debate_seconds,
                     "embedding_clustering_seconds": cluster_seconds,
@@ -403,4 +399,7 @@ class DICAI:
         )
         if artifacts:
             save_json(artifacts / "constitution.json", constitution)
+            save_json(artifacts / "component_coverage.json", coverage)
+            if scope == "system":
+                save_json(Path(output_dir) / "component_coverage.json", coverage)
         return constitution

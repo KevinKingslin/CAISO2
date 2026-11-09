@@ -313,6 +313,7 @@ class Algorithm:
                 preferences,
                 seed,
                 cache_dir=self.output / ".internal/dicai/system",
+                component_ids=current.workflow.nodes,
                 activity=self.report.induction_activity,
                 progress=lambda stage, done, total: self.report.update(
                     progress=f"{stage.replace('_', ' ')}: {done}/{total}"
@@ -395,6 +396,7 @@ class Algorithm:
                             preferences,
                             step_seed,
                             cache_dir=self.output / ".internal/dicai/system",
+                            component_ids=current.workflow.nodes,
                             activity=self.report.induction_activity,
                             progress=lambda stage, done, total: self.report.update(
                                 progress=f"{stage.replace('_', ' ')}: {done}/{total}"
@@ -779,6 +781,7 @@ class Algorithm:
                                     preferences,
                                     step_seed + 50000,
                                     cache_dir=self.output / ".internal/dicai/system",
+                                    component_ids=current.workflow.nodes,
                                     activity=self.report.induction_activity,
                                     progress=lambda stage, done, total: self.report.update(
                                         progress=f"{stage.replace('_', ' ')}: {done}/{total}"

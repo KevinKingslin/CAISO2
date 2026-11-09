@@ -8,7 +8,7 @@ Write ONE principle that captures what they share. Make it general enough to
 cover every member, but specific enough that two trajectories could actually
 differ on it. Begin with "Select the trajectory where", followed by the actual component ID and the reusable condition.
 
-Preserve the single quality shared by the principles. Express the reusable quality that explains the preference. Exclude sample-specific names of people, places, organizations and works, and example-specific dates and identifiers from principles. Describe their semantic roles instead, while preserving actual component IDs. The principle should remain applicable when those entities change. Name the component or components whose behavior the shared rule evaluates, using exact component IDs from the member principles.
+Preserve the single quality shared by the principles. Express the reusable quality that explains the preference. Exclude sample-specific names of people, places, organizations and works, and example-specific dates and identifiers from principles. Describe their semantic roles instead, while preserving actual component IDs. The principle should remain applicable when those entities change. Name the component or components whose behavior the shared rule evaluates, using exact component IDs from the member principles. Do not replace exact component IDs with generic references such as "final answer", "rewritten query", or "retrieved content".
 
 CLUSTER:
 {principles}

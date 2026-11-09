@@ -58,14 +58,35 @@ these IDs while editing or merging and reconstruct preferences through reusable
 criteria. Output examples omit the literal component-ID placeholder;
 abstraction requests the actual ID and reusable condition in natural language.
 Split repair preserves the quality and logical conditions rather than requiring
-instance-specific wording. These are prompt instructions with no new
-per-component quota, validation gate, retry policy or model-call stage. Entity
+instance-specific wording. These remain prompt instructions rather than an
+entity-removal gate. Entity
 removal and model compliance are not guaranteed: singleton clusters still copy
 their settled principles and fallback medoids remain subject only to existing
 checks. The source-adaptation audit documents the wording
 changes within the 15 source-derived DICAI requests separately from the existing
 atomicity repair prompts.
 No dataset-specific answer styles or new structured constitution schema is added.
+
+Component coverage is preserved across the complete induction set. Reasoners
+and debaters inspect each component for observable differences explaining the
+preference; chairpersons retain supported criteria for different components.
+Abstraction retains exact IDs instead of aliases such as "final answer".
+After abstraction and optional minimization, CAISO checks explicit ID coverage
+against the active workflow (system scope) or selected block members. For each
+missing component, it restores an existing settled debate principle whose source
+pair executed the named components. No new model request or generic rule is
+introduced. Components without an eligible settled principle remain listed as
+insufficient evidence. This does not force every pair to cover every component.
+The final reconstruction report judges the resulting list.
+
+`component_coverage.json` and constitution metadata record expected/observed
+components, coverage before/after restoration, missing components, restored
+principles and their source pair IDs/settled indices. A latest system report is
+saved directly in `.internal/dicai/system`; iteration system/block constitution
+folders also receive it. Coverage measures explicit attribution, not semantic
+correctness. Restored rules have the same checks as their settled debate source;
+entity generalization and model-based atomicity remain fallible. See
+[`docs/CONSTITUTION_COVERAGE.md`](../../docs/CONSTITUTION_COVERAGE.md).
 
 CAISO additionally checks each new chairperson list for independently satisfiable
 qualities. A bounded revision replaces only flagged items; unflagged principles

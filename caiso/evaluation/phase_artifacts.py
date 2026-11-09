@@ -157,6 +157,9 @@ def save_phase_artifacts(directory, phase, fields):
             for index, constitution in enumerate(value, start + 1):
                 save_json(snapshots / f"{index:04d}.json", constitution)
                 save_json(directory / "system_constitution.json", constitution)
+                coverage = constitution.get("metadata", {}).get("component_coverage")
+                if coverage is not None:
+                    save_json(directory / "component_coverage.json", coverage)
         elif (
             key in {"current_validation", "candidate_validation"}
             and phase == "05_block_optimization"
@@ -172,6 +175,9 @@ def save_phase_artifacts(directory, phase, fields):
                 "00_system_constitution",
                 "04_block_constitution",
             }:
+                coverage = value.get("metadata", {}).get("component_coverage")
+                if coverage is not None:
+                    save_json(directory / "component_coverage.json", coverage)
                 clustering = value.get("metadata", {}).get("clustering")
                 if clustering:
                     from caiso.constitution.dicai.plotting import save_silhouette_artifacts
