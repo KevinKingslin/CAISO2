@@ -23,8 +23,7 @@ def training(runtime):
     return adapt_examples(runtime.engine, [Example(question="2", gd_answer="4")], "train")
 
 
-@pytest.mark.parametrize("use_history", [True, False])
-def test_task_only_feedback_ranking_and_joint_scores_skip_local_judging(monkeypatch, tmp_path, use_history):
+def test_task_only_feedback_ranking_and_joint_scores_skip_local_judging(monkeypatch, tmp_path):
     runtime = make_runtime()
     examples = training(runtime)
     replies = iter(["double", "other"])
@@ -44,7 +43,7 @@ def test_task_only_feedback_ranking_and_joint_scores_skip_local_judging(monkeypa
     monkeypatch.setattr(joint_module, "evaluate", observe)
     optimizer = JointBlockOptimizer(
         runtime, SimpleNamespace(choose=unexpected_judge),
-        {"prompt_candidates": 2, "max_joint_candidates": 16, "use_history": use_history}, tmp_path,
+        {"prompt_candidates": 2, "max_joint_candidates": 16}, tmp_path,
     )
     scored = optimizer.propose(
         runtime.initial_state, ["source", "transform", "sink"],

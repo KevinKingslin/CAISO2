@@ -306,20 +306,20 @@ are reused within a proposal call.
 Select custom profiles with `./scripts/caiso run --config YOUR_EXPERIMENT.yaml` or
 `./scripts/caiso evaluate --config YOUR_EXPERIMENT.yaml`.
 
-`use_history` defaults to `true` in the shared method file. Set it to `false`, or
-set `method.use_history: false` in an experiment, to omit past optimization
-attempts from block-selection requests only. The existing
-`block_selection.use_history` setting has the same scope; either setting being
-`false` omits selection history.
+`block_selection.use_history` defaults to `true` in the shared method file. Set
+`method.block_selection.use_history: false` in an experiment to omit past
+optimization attempts from block-selection requests only. This is the only
+history toggle; the duplicate top-level `use_history` setting has been removed.
 
 Prompt optimization always retains candidate instructions and task-score
 feedback within each proposal call. Rejected-candidate filtering, block preference
 generation, workflow performance feedback, and DICAI debate history remain enabled
 regardless of the selection-history setting. Phase status files record the
 effective `history_enabled` setting for each stage. Logs and checkpoints continue
-to retain all optimization attempts. Start a new run when changing either setting;
-older checkpoints that omit these keys remain compatible with the equivalent
-`true` defaults.
+to retain all optimization attempts. Start a new run when changing the setting;
+older checkpoints that omit the selection key or include the removed top-level
+`true` default remain compatible when all other settings match. Move any old
+top-level override into `block_selection.use_history` in your YAML.
 
 To disable block constitution induction, set `method.block_constitution.enabled` to
 `false` in an experiment, or `block_constitution.enabled` to `false` in the shared

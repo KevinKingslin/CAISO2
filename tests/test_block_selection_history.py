@@ -15,11 +15,10 @@ from tests.offline import OfflineEmbeddings, OfflineProvider
 from tests.test_runtime import make_system
 
 
-@pytest.mark.parametrize("use_history,selection_history,block_constitution", [
-    (True, True, False), (True, False, False), (False, True, False),
-    (False, False, False), (False, True, True),
+@pytest.mark.parametrize("selection_history,block_constitution", [
+    (True, False), (False, False), (True, True), (False, True),
 ])
-def test_history_controls_and_resume(tmp_path, monkeypatch, use_history, selection_history, block_constitution):
+def test_history_controls_and_resume(tmp_path, monkeypatch, selection_history, block_constitution):
     experiment = {
         "dataset": "pubmed", "system": "synthetic-test-only", "num_iterations": 2,
         "val_size": 1, "per_component_train_size": 1, "per_iteration_new_data_size": 1,
@@ -29,7 +28,6 @@ def test_history_controls_and_resume(tmp_path, monkeypatch, use_history, selecti
                 "transform->sink": {"result": {"value": "0"}},
             },
             "method": {
-                "use_history": use_history,
                 "initial_preference_pairs": 1,
                 "block_selection": {"use_history": selection_history},
                 "block_constitution": {"enabled": block_constitution, "preference_pairs": 1},
@@ -81,7 +79,7 @@ def test_history_controls_and_resume(tmp_path, monkeypatch, use_history, selecti
     calls = [messages for messages, _, schema in provider.calls if schema and schema.__name__ == "BlockVote"]
     assert len(calls) == 2
     histories = [json.loads(messages[-1]["content"].split("OPTIMIZATION HISTORY:\n", 1)[1]) for messages in calls]
-    selection_enabled = use_history and selection_history
+    selection_enabled = selection_history
     assert len(summaries) == (2 if selection_enabled else 0)
     if selection_enabled:
         assert histories == summaries
@@ -117,8 +115,7 @@ def test_history_controls_and_resume(tmp_path, monkeypatch, use_history, selecti
     assert not (tmp_path / "iterations/0002/05_block_optimization/validation_metrics.json").exists()
     # True retains the old implicit behavior; false must remain in the run hash.
     legacy = deepcopy(original.config)
-    if use_history:
-        legacy.pop("use_history")
+    legacy["use_history"] = True  # Previously shipped redundant top-level default.
     if selection_history:
         legacy["block_selection"].pop("use_history")
     checkpoint.config_hash = digest(legacy)

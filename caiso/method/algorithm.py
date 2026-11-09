@@ -448,7 +448,7 @@ class Algorithm:
                         [step_seed],
                         None,
                     )
-                    use_selection_history = cfg.get("use_history", True) and cfg["block_selection"].get("use_history", True)
+                    use_selection_history = cfg["block_selection"].get("use_history", True)
                     self.report.save_phase(
                         "03_selection",
                         diagnostic_trajectories=diagnostics,

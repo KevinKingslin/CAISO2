@@ -22,10 +22,8 @@ from tests.test_candidate_configuration_toggle import context
 from tests.test_runtime import make_runtime
 
 
-@pytest.mark.parametrize("use_history", [True, False])
-def test_prompt_feedback_is_scored_and_preserved_for_either_selection_setting(tmp_path, use_history):
+def test_prompt_feedback_is_always_scored_and_preserved(tmp_path):
     component, ctx = context(tmp_path, ConfigurationType.PROMPT, "Original instruction", True, count=3)
-    ctx.config["use_history"] = use_history
     feedback = []
     scores = iter([0.3, 0.1, 0.2])
 
@@ -52,7 +50,7 @@ def test_workflow_feedback_is_preserved_for_either_selection_setting(tmp_path, u
     performance = [{"iteration": 1, "score": 0.4}, {"iteration": 2, "score": 0.5}]
     algorithm = Algorithm(
         runtime, None, None,
-        {"use_history": use_history, "training_batch_size": 1,
+        {"block_selection": {"use_history": use_history}, "training_batch_size": 1,
          "validation_batch_size": 1, "block_optimization": {}}, tmp_path,
         generator=WorkflowGenerator(provider),
     )
@@ -71,7 +69,7 @@ def test_workflow_feedback_is_preserved_for_either_selection_setting(tmp_path, u
 def test_compatibility_prompt_feedback_is_preserved(monkeypatch, tmp_path):
     runtime, provider = make_runtime(), Recorder()
     examples = adapt_examples(runtime.engine, [Example(question="2", gd_answer="4")], "train")
-    optimizer = JointBlockOptimizer(runtime, None, {"use_history": False}, tmp_path)
+    optimizer = JointBlockOptimizer(runtime, None, {}, tmp_path)
     monkeypatch.setattr(runtime.providers, "complete", provider.complete)
     monkeypatch.setattr(compatibility_adaptation, "affected_components", lambda *args: ["transform"])
     _, report = compatibility_adaptation.compatibility_adapt(
@@ -92,21 +90,24 @@ def test_compatibility_prompt_feedback_is_preserved(monkeypatch, tmp_path):
 @pytest.mark.parametrize("use_history", [True, False])
 def test_selection_history_resume_hash_is_strict_except_for_implicit_true(use_history):
     config = {
-        "seed": 42, "use_history": use_history,
-        "block_selection": {"use_history": True},
+        "seed": 42,
+        "block_selection": {"use_history": use_history},
         "block_optimization": {"include_current_configuration": True, "reevaluate_current": True},
     }
     before = deepcopy(config)
     hashes = resume_config_hashes(config)
-    paths = [(None, "use_history"), ("block_selection", "use_history"),
+    paths = [("block_selection", "use_history"),
              ("block_optimization", "include_current_configuration"), ("block_optimization", "reevaluate_current")]
     for omitted in product([True, False], repeat=len(paths)):
         older = deepcopy(config)
         for (section, key), remove in zip(paths, omitted, strict=True):
             if remove:
-                (older if section is None else older[section]).pop(key)
-        assert (digest(older) in hashes) == (use_history or not omitted[0])
+                older[section].pop(key)
+        equivalent = use_history or not omitted[0]
+        assert (digest(older) in hashes) == equivalent
+        assert (digest({**older, "use_history": True}) in hashes) == equivalent
+        assert digest({**older, "use_history": False}) not in hashes
     changed = deepcopy(config)
-    changed["use_history"] = not use_history
+    changed["block_selection"]["use_history"] = not use_history
     assert digest(changed) not in hashes
     assert config == before

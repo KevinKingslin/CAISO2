@@ -60,10 +60,11 @@ To omit history from block selection:
 
 ```yaml
 method:
-  use_history: false
+  block_selection:
+    use_history: false
 ```
 
-In the shared `method/default.yaml`, set the top-level `use_history` instead.
+In the shared `method/default.yaml`, set `block_selection.use_history` instead.
 The default is `true`. With `false`, block selection receives an empty history
 object. Its constitution, diagnostic trajectories and available blocks remain
 available. All other stages keep their history:
@@ -76,26 +77,18 @@ available. All other stages keep their history:
   remains disabled for the benchmark experiments).
 - DICAI retains its shared debate history.
 
-The existing selection-specific setting is also supported:
-
-```yaml
-method:
-  block_selection:
-    use_history: false
-```
-
-Both settings default to `true` and control only block selection. Either setting
-being `false` omits history from the selection judge; summaries are not generated
-for that request. Logs, plots, checkpoints and optimization-attempt records are
-still saved.
+This is the only history toggle. The duplicate top-level `use_history` setting
+has been removed; move old top-level overrides into `block_selection.use_history`.
+With `false`, summaries are not generated for the selection judge. Logs, plots,
+checkpoints and optimization-attempt records are still saved.
 
 `iterations/<iteration>/03_selection/status.json` records `history_enabled`;
-`block_selection.json` records the history actually supplied to the judge. Set `true`
-for both settings to enable selection history again. Block-constitution and
+`block_selection.json` records the history actually supplied to the judge. Set
+`block_selection.use_history: true` to enable selection history again. Block-constitution and
 block-optimization phase status files keep `history_enabled: true` independently.
-Use a new run when changing either setting. Older
-checkpoints that omit the keys can resume with the equivalent `true` defaults when
-all other fingerprints match.
+Use a new run when changing the setting. Older checkpoints that omit the selection
+key or include the removed top-level `true` default can resume when all other
+fingerprints match.
 
 To skip block constitution induction, add this override to an experiment:
 
