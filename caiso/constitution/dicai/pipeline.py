@@ -246,7 +246,7 @@ class DICAI:
                     temporary.replace(latest)
         cluster_seconds = monotonic() - cluster_started
         abstract_started = monotonic()
-        abstraction_calls = sum(list(labels).count(label) > 1 for label in set(labels))
+        abstraction_calls = len(set(labels))
         abstractions = abstract_clusters(
             settled,
             labels,

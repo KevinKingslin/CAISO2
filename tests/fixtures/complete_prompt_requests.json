@@ -331,6 +331,21 @@
   },
   {
     "role": "audit",
+    "seed": 43,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "615e35e657f64e92358a10afe55475724c042244235253df30183f2700a74318"
+      },
+      {
+        "role": "user",
+        "sha256": "015f913c0d56e8f0e5fb629cedc66c7c2aa7bdd88abf88d7db7b6e00c16bb757"
+      }
+    ]
+  },
+  {
+    "role": "audit",
     "seed": 42,
     "schema": "Reasoning",
     "messages": [
@@ -656,6 +671,21 @@
       {
         "role": "user",
         "sha256": "6a605dd375528b224725ed71b0fa9464029652a6ba4c4cc413159cc412bb3b89"
+      }
+    ]
+  },
+  {
+    "role": "audit",
+    "seed": 43,
+    "schema": null,
+    "messages": [
+      {
+        "role": "system",
+        "sha256": "615e35e657f64e92358a10afe55475724c042244235253df30183f2700a74318"
+      },
+      {
+        "role": "user",
+        "sha256": "015f913c0d56e8f0e5fb629cedc66c7c2aa7bdd88abf88d7db7b6e00c16bb757"
       }
     ]
   },

@@ -94,10 +94,9 @@ debate structure, reconstruction objective and one-quality rule remain intact.
 This prompt-only revision was applied on 2026-11-09 following observed
 sample-specific principles. It adds no validation gate, retry policy, model route
 or call stage. Prompt compliance, entity removal and correct attribution are not
-guaranteed by the runtime checks. In particular, singleton clusters still copy
-their settled principle and failed abstraction repairs can still use an atomic
-medoid. Producing reusable rules during debate is therefore essential under this
-prompt-only approach.
+guaranteed by the runtime checks. Every cluster, including singletons, receives
+a model abstraction request. Failed abstraction repairs can still use an atomic
+medoid, so producing reusable rules during debate remains essential.
 
 Each principle starts with `Select the trajectory`. Its following grammar is
 preserved: `that`, `where`, `which`, `with` and `in which` are all valid. Empty
@@ -118,7 +117,7 @@ introduced.
 | Finalization | Reconstruction must succeed, minimum question/round counts must hold, and the judge must declare `DEBATE_OVER` |
 | Round cap | Original best-effort list retained, with `finalized: false` if gates fail |
 | Inference | Original blind JSON `choice: "1" / "2"` plus reason, with shuffled trajectories |
-| Abstraction | Original shared-rule prompt; singleton clusters retain their principle without a model request |
+| Abstraction | Shared-rule prompt applied to every cluster, including singleton clusters |
 | Audit | Original three-axis prompt imported; no new audit stage or auditor model enabled |
 
 Each normal and rejection-feedback request is a complete editable `.txt` file.

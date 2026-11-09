@@ -158,10 +158,12 @@ def test_minimum_question_gate_uses_the_source_feedback_template():
     assert any('fewer than the required 3' in str(call['messages']) for call in recorder.calls)
 
 
-def test_singleton_clusters_retain_their_principle_without_an_abstraction_call():
+def test_singleton_clusters_use_the_model_abstraction_output():
     recorder = Recorder()
-    assert abstract_clusters([PRINCIPLES[0]], [0], recorder, 'audit', 42) == [PRINCIPLES[0]]
-    assert recorder.calls == []
+    assert abstract_clusters([PRINCIPLES[2]], [0], recorder, 'audit', 42) == [PRINCIPLES[0]]
+    assert len(recorder.calls) == 1
+    assert recorder.calls[0]['seed'] == 42
+    assert PRINCIPLES[2] in recorder.calls[0]['messages'][-1]['content']
 
 
 def test_original_audit_prompt_is_available_without_enabling_an_audit_stage():
