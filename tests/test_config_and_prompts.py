@@ -66,7 +66,7 @@ def test_experiment_overrides_method_recursively_and_paths_are_relative(tmp_path
 
 
 @pytest.mark.parametrize("invalid", [None, 0, 1, "false", {}, []])
-def test_global_history_switch_requires_a_boolean(invalid):
+def test_selection_history_switch_requires_a_boolean(invalid):
     with pytest.raises(ValueError, match="use_history must be true or false"):
         validate_method({"use_history": invalid})
 

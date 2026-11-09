@@ -307,19 +307,19 @@ Select custom profiles with `./scripts/caiso run --config YOUR_EXPERIMENT.yaml` 
 `./scripts/caiso evaluate --config YOUR_EXPERIMENT.yaml`.
 
 `use_history` defaults to `true` in the shared method file. Set it to `false`, or
-set `method.use_history: false` in an experiment, to disable optimization history:
-block selection receives no past attempts, previously rejected candidates are
-eligible again, and prompt generation receives no earlier candidate scores.
-Feedback-only prompt scoring is skipped; complete candidates are still scored,
-and selected candidates still pass validation. Workflow proposals also omit
-recent-performance feedback.
+set `method.use_history: false` in an experiment, to omit past optimization
+attempts from block-selection requests only. The existing
+`block_selection.use_history` setting has the same scope; either setting being
+`false` omits selection history.
 
-This master switch overrides `block_selection.use_history`. With the master
-enabled, the block-selection setting can still disable history for selection
-alone. Phase status files record the effective `history_enabled` setting.
-DICAI debate history, current system state, budgets, logs and checkpoints remain
-available. Start a new run when changing either setting; older checkpoints that
-omit these keys remain compatible with the equivalent `true` defaults.
+Prompt optimization always retains candidate instructions and task-score
+feedback within each proposal call. Rejected-candidate filtering, block preference
+generation, workflow performance feedback, and DICAI debate history remain enabled
+regardless of the selection-history setting. Phase status files record the
+effective `history_enabled` setting for each stage. Logs and checkpoints continue
+to retain all optimization attempts. Start a new run when changing either setting;
+older checkpoints that omit these keys remain compatible with the equivalent
+`true` defaults.
 
 To disable block constitution induction, set `method.block_constitution.enabled` to
 `false` in an experiment, or `block_constitution.enabled` to `false` in the shared

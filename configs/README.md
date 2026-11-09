@@ -56,7 +56,7 @@ For acceptance on the complete validation split, set
 released OPTIMAS-compatible prefix behavior. Changing the protocol or seed
 requires a new run; saved checkpoints verify their configuration and data hashes.
 
-To disable optimization history throughout the method:
+To omit history from block selection:
 
 ```yaml
 method:
@@ -64,26 +64,19 @@ method:
 ```
 
 In the shared `method/default.yaml`, set the top-level `use_history` instead.
-The default is `true`. With `false`:
+The default is `true`. With `false`, block selection receives an empty history
+object. Its constitution, diagnostic trajectories and available blocks remain
+available. All other stages keep their history:
 
-- Block selection receives no summary of past optimization attempts.
-- Earlier rejections do not filter out candidates, including preliminary
-  candidates used to induce a block constitution.
-- Prompt generation receives no earlier candidate instructions/scores and skips
-  scoring performed solely to build that feedback. Complete joint candidates
-  are still scored, including during workflow compatibility search; selected
-  candidates still pass the full-system validation gate.
-- Workflow proposals receive no recent-performance feedback (workflow search
+- Prompt generation retains earlier candidate instructions and task scores
+  within each proposal call, including during workflow compatibility search.
+- Earlier rejections still filter candidates in the same system context,
+  including preliminary candidates used to induce a block constitution.
+- Workflow proposals retain recent-performance feedback (workflow search
   remains disabled for the benchmark experiments).
+- DICAI retains its shared debate history.
 
-The current accepted system, constitutions, validation/acceptance rules and
-workflow scheduling counters remain part of the algorithm's state. DICAI's
-shared debate history is independent and stays enabled. Logs, plots, checkpoints
-and optimization-attempt records are still saved for auditing and resuming;
-they are not used as optimization feedback when this switch is off.
-
-With the master `use_history: true`, you can disable history for block selection
-alone:
+The existing selection-specific setting is also supported:
 
 ```yaml
 method:
@@ -91,20 +84,16 @@ method:
     use_history: false
 ```
 
-The selection-only default is `true`. With `false`, selection receives an empty
-history object; its constitution, diagnostic trajectories and available blocks
-are unchanged.
-History summaries are not generated for the judge. Optimization attempts remain
-in checkpoints and continue to prevent repeating rejected candidates in the same
-system state when the master switch is enabled. The selection-only setting
-does not disable prompt-search feedback. The master `use_history: false`
-overrides it, even when `block_selection.use_history` is `true`.
+Both settings default to `true` and control only block selection. Either setting
+being `false` omits history from the selection judge; summaries are not generated
+for that request. Logs, plots, checkpoints and optimization-attempt records are
+still saved.
 
 `iterations/<iteration>/03_selection/status.json` records `history_enabled`;
 `block_selection.json` records the history actually supplied to the judge. Set `true`
-to enable selection history again when the master is enabled. Block-constitution
-and block-optimization phase status files also record the master setting as
-`history_enabled`. Use a new run when changing either setting. Older
+for both settings to enable selection history again. Block-constitution and
+block-optimization phase status files keep `history_enabled: true` independently.
+Use a new run when changing either setting. Older
 checkpoints that omit the keys can resume with the equivalent `true` defaults when
 all other fingerprints match.
 

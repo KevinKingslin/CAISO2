@@ -1,4 +1,4 @@
-"""Global and selection-only history controls, with saved evidence and resume."""
+"""Selection-history controls preserve all other feedback and rejection memory."""
 
 from copy import deepcopy
 import json
@@ -60,7 +60,6 @@ def test_history_controls_and_resume(tmp_path, monkeypatch, use_history, selecti
     filter_candidates = OptimizationHistory.filter_candidates
 
     def observe_filter(self, *args, **kwargs):
-        assert use_history, "The global switch must bypass rejection-history filtering"
         filters.append(True)
         return filter_candidates(self, *args, **kwargs)
 
@@ -98,26 +97,24 @@ def test_history_controls_and_resume(tmp_path, monkeypatch, use_history, selecti
         assert json.loads((phase / "status.json").read_text())["history_enabled"] is selection_enabled
         assert json.loads((phase / "block_selection.json").read_text())["optimization_history"] == history
         optimization = phase.parent / "05_block_optimization/status.json"
-        assert json.loads(optimization.read_text())["history_enabled"] is use_history
+        if optimization.exists():
+            assert json.loads(optimization.read_text())["history_enabled"] is True
         if block_constitution:
             induction = phase.parent / "04_block_constitution/status.json"
-            assert json.loads(induction.read_text())["history_enabled"] is use_history
+            assert json.loads(induction.read_text())["history_enabled"] is True
 
     prompt_calls = [messages for messages, _, schema in provider.calls if schema and schema.__name__ == "PromptProposal"]
     prompt_histories = [json.loads(messages[-1]["content"].split("PREVIOUS INSTRUCTIONS AND SCORES:\n", 1)[1].split("\n\nOPTIMIZATION TIP:", 1)[0]) for messages in prompt_calls]
     assert bool(prompt_histories)
-    assert any(prompt_histories) is use_history
-    assert len(filters) == (2 if use_history else 0)
+    assert any(prompt_histories)
+    assert len(filters) == (3 if block_constitution else 2)
     checkpoint = Checkpoint.load(tmp_path / "checkpoint")
-    assert [attempt.outcome for attempt in checkpoint.optimization_history.attempts] == ["validated", "no_new_candidate" if use_history else "validated"]
+    assert [attempt.outcome for attempt in checkpoint.optimization_history.attempts] == ["validated", "no_new_candidate"]
     assert checkpoint.optimization_history.attempts[0].accepted is False
-    if use_history:
-        skipped = json.loads((tmp_path / "iterations/0002/05_block_optimization/status.json").read_text())
-        assert "No new block candidates" in skipped["reason"]
-        assert not (tmp_path / "iterations/0002/05_block_optimization/validation_metrics.json").exists()
-    else:
-        assert checkpoint.optimization_history.attempts[0].candidate == checkpoint.optimization_history.attempts[1].candidate
-        assert (tmp_path / "iterations/0002/05_block_optimization/validation_metrics.json").exists()
+    phase = "04_block_constitution" if block_constitution else "05_block_optimization"
+    skipped = json.loads((tmp_path / f"iterations/0002/{phase}/status.json").read_text())
+    assert "No new block candidates" in skipped["reason"]
+    assert not (tmp_path / "iterations/0002/05_block_optimization/validation_metrics.json").exists()
     # True retains the old implicit behavior; false must remain in the run hash.
     legacy = deepcopy(original.config)
     if use_history:

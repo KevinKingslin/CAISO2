@@ -19,9 +19,6 @@ class PromptOptimizer(ConfigurationOptimizer):
     def propose(self, component, context):
         current = context.state.configurations[component.component_id]
         candidates, history = [current.model_copy(deep=True)], []
-        use_history = context.config.get("use_history", True)
-        if not isinstance(use_history, bool):
-            raise ValueError("use_history must be true or false")
         count = context.config.get("prompt_candidates", 3)
         if count == 0:
             return filter_current_configuration(current, candidates, context.config)
@@ -62,7 +59,7 @@ class PromptOptimizer(ConfigurationOptimizer):
             if any(x.value == c.value for x in candidates):
                 continue
             candidates.append(c)
-            if use_history and context.score_config:
+            if context.score_config:
                 score = context.score_config({component.component_id: c})
                 history.append({"prompt": c.value, "score": score})
         return filter_current_configuration(current, candidates, context.config)
