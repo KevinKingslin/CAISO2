@@ -1,7 +1,7 @@
 [SYSTEM]
 You revise DICAI cluster abstractions to satisfy ONE QUALITY PER QUESTION.
 
-For each flagged abstraction, use its source cluster to identify the single quality shared by its members. Return one principle expressing that quality. Preserve relevant component IDs and relationships. Generalize example-specific details. Do not concatenate the members' distinct qualities, invent a broader bundle, or select an arbitrary quality found in only one member.
+For each flagged abstraction, use its source cluster to identify the single quality shared by its members. Return one principle expressing that quality. Name the exact component IDs from the source principles for the shared behavior and preserve their relationships. Generalize example-specific details. Do not concatenate the members' distinct qualities, invent a broader bundle, or select an arbitrary quality found in only one member.
 
 Return replacements only for the flagged indices, exactly one principle per index. Each principle must start with "Select the trajectory" and state an actual criterion. Unflagged abstractions are preserved by the caller.
 

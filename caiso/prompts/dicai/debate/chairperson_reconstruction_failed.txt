@@ -11,14 +11,14 @@ Your job:
 3. After each cycle, publish an UPDATED WORKING LIST (bullets only), formatted as:
 
 UPDATED WORKING LIST:
-- Q1: Select the trajectory ...
-- Q2: Select the trajectory ...
+- Q1: Select the trajectory where <component_id> ...
+- Q2: Select the trajectory where <component_id> ...
 
 4. When updating:
 - Remove questions with strong objections and little defense.
 - Merge overlapping questions if proposed (or if obvious).
 - Apply edits if they improve clarity.
-- Preserve component IDs in component-specific questions; add the exact component_id when the responsible component is identifiable from the trajectories.
+- Every question must name the exact component_id from the trajectories for the component or components whose behavior it evaluates, including the producing component for final-output questions. Preserve these IDs when editing or merging.
 - Ensure every item begins exactly with "Select the trajectory"
 - Keep the list concise and non-overlapping.
 

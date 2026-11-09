@@ -55,27 +55,40 @@ permitted text adaptations are:
    remain hidden from the blind judge.
 4. The five requests using the original reusable-criterion reasoning instruction
    append: "Consider discriminating behavior in intermediate components as well
-   as the final output. In each component-specific question, name the exact
-   component_id shown in the trajectory and describe one observable behavior.
+   as the final output. Every question must evaluate one observable behavior of
+   named components, using exact component_id values from the trajectories;
+   final-output questions must name the producing component.
    Generalize question-specific entities and answer values into reusable
-   criteria." This applies during CoT, sampling, consensus, drafting and revision;
-   the original critique request is retained.
+   criteria about component behavior." This applies during CoT, sampling,
+   consensus, drafting and revision; the original critique request is retained.
 5. Debaters receive: "Proposed questions may concern individual component
-   behavior, interactions between components, or the final output. Name the exact
-   component_id in component-specific questions, including the producing component
-   for final-output questions when identifiable."
-6. All three chairperson variants add one updating rule: "Preserve component IDs
-   in component-specific questions; add the exact component_id when the responsible
-   component is identifiable from the trajectories."
+   behavior, interactions between components, or the final output. Every proposed
+   question must evaluate one observable behavior using exact component_id values
+   from the trajectories, including the producing component for final-output
+   questions."
+6. All three chairperson variants add one updating rule: "Every question must
+   name the exact component_id from the trajectories for the component or
+   components whose behavior it evaluates, including the producing component for
+   final-output questions. Preserve these IDs when editing or merging."
 7. Abstraction receives: "Generalize example-specific entities and answer values
-   while preserving relevant component IDs and the single quality shared by the
-   principles."
+   while preserving the single quality shared by the principles. Name the
+   component or components whose behavior the shared rule evaluates, using exact
+   component IDs from the member principles."
+8. The reasoning question examples, chairperson list examples and abstraction
+   output format explicitly include `<component_id>` after
+   `Select the trajectory where`.
 
-The component-attribution wording was strengthened on 2026-11-09 with these
-minimal reasoning/debater/chairperson edits. Criteria remain grounded in the
-paired executions, with no quota of principles per component. The debate,
-reconstruction objective and one-quality rule retain their original structure.
-These are prompt instructions, not a new component-name validation gate.
+The component-attribution wording was strengthened again on 2026-11-09 after a
+fresh run still produced generic principles. The earlier conditional wording
+applied only to questions the model treated as component-specific. The current
+instructions apply to every question, including the final-output producer, and
+carry component names through abstraction and the existing repair requests.
+Criteria remain grounded in the paired executions, with no quota of principles
+per component. The debate, reconstruction objective and one-quality rule retain
+their original structure.
+At the user's request, this remains a prompt-only correction: there is no new
+component-name validation gate, retry policy, model route or call stage. Prompt
+compliance and correct attribution are not guaranteed by the runtime checks.
 
 Each principle starts with `Select the trajectory`. Its following grammar is
 preserved: `that`, `where`, `which`, `with` and `in which` are all valid. Empty
@@ -133,6 +146,10 @@ revisions; unflagged items are preserved in Python. The repaired list is reviewe
 again before reconstruction or publication. A repeated verified list needs no
 new review. A failed revision retains the last verified working list; unverified
 seed-only lists cannot become settled output.
+
+The existing split and abstraction-repair requests also ask each replacement to
+retain the exact component IDs for the behavior it evaluates. This instruction
+preserves attribution through repairs without adding a component-name check.
 
 Batched semantic review also checks all cluster abstractions. A compound
 abstraction is revised to a single shared quality, keeping one output per source

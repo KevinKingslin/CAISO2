@@ -45,10 +45,10 @@
     "adaptations": [
       "Response/story terminology becomes trajectory terminology.",
       "Human-label wording becomes provided preference-label wording.",
-      "Reasoning considers discriminating intermediate and final-output behavior, names exact component_id values in component-specific questions, and generalizes question-specific entities and answer values (three sentences).",
-      "Debaters may discuss component behavior, interactions or final output, and name exact component_id values in component-specific questions, including an identifiable final-output producer (two sentences).",
-      "Chairpersons preserve component IDs in component-specific questions and add the exact component_id when identifiable from the trajectories (one updating bullet).",
-      "Abstraction generalizes example-specific entities and answer values while preserving relevant component IDs and the single shared quality (one sentence).",
+      "Reasoning considers intermediate and final-output behavior; every question names exact component_id values and generalizes question-specific facts into reusable component behavior (three sentences and a component-ID question example).",
+      "Debaters may discuss component behavior, interactions or final output; every proposed question names exact component_id values, including the final-output producer (two sentences).",
+      "Chairpersons require component IDs in every question, including final-output producers, and preserve them when editing or merging (one updating bullet and component-ID list examples).",
+      "Abstraction generalizes example-specific facts into a single shared quality, naming the evaluated components using exact IDs from member principles (two sentences and a component-ID output format).",
       "Dynamic inputs use CAISO JSON execution records and renamed placeholders."
     ],
     "protocol": "democratic-icai-c8d5-source-trajectory-v4-atomicity",

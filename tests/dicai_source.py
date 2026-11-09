@@ -119,17 +119,23 @@ def trajectory_adaptation(key, original):
             'State the reason as something reusable, not a description of these exact texts.',
             'State the reason as something reusable, not a description of these exact texts. '
             'Consider discriminating behavior in intermediate components as well as the final output. '
-            'In each component-specific question, name the exact component_id shown in the trajectory and describe one observable behavior. '
-            'Generalize question-specific entities and answer values into reusable criteria.',
+            'Every question must evaluate one observable behavior of named components, using exact component_id values from the trajectories; final-output questions must name the producing component. '
+            'Generalize question-specific entities and answer values into reusable criteria about component behavior.',
+        )
+        text = text.replace(
+            '"select_prompt": "Select the trajectory that ..."',
+            '"select_prompt": "Select the trajectory where <component_id> ..."',
         )
     if key.startswith('debate.debater'):
-        text = text.replace('DEBATE RULES (must follow):', 'Proposed questions may concern individual component behavior, interactions between components, or the final output. Name the exact component_id in component-specific questions, including the producing component for final-output questions when identifiable.\n\nDEBATE RULES (must follow):')
+        text = text.replace('DEBATE RULES (must follow):', 'Proposed questions may concern individual component behavior, interactions between components, or the final output. Every proposed question must evaluate one observable behavior using exact component_id values from the trajectories, including the producing component for final-output questions.\n\nDEBATE RULES (must follow):')
     if key.startswith('debate.chairperson'):
         text = text.replace(
             '- Apply edits if they improve clarity.\n',
             '- Apply edits if they improve clarity.\n'
-            '- Preserve component IDs in component-specific questions; add the exact component_id when the responsible component is identifiable from the trajectories.\n',
+            '- Every question must name the exact component_id from the trajectories for the component or components whose behavior it evaluates, including the producing component for final-output questions. Preserve these IDs when editing or merging.\n',
         )
+        text = text.replace('Select the trajectory ...\n', 'Select the trajectory where <component_id> ...\n')
     if key == 'abstraction':
-        text = text.replace('\nCLUSTER:', '\nGeneralize example-specific entities and answer values while preserving relevant component IDs and the single quality shared by the principles.\n\nCLUSTER:')
+        text = text.replace('Select the trajectory that <condition>', 'Select the trajectory where <component_id> <condition>')
+        text = text.replace('\nCLUSTER:', '\nGeneralize example-specific entities and answer values while preserving the single quality shared by the principles. Name the component or components whose behavior the shared rule evaluates, using exact component IDs from the member principles.\n\nCLUSTER:')
     return text

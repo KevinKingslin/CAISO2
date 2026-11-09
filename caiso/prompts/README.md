@@ -46,15 +46,19 @@ The source instructions retain one-quality-per-question rules and reconstruction
 feedback. Only response/story terminology, human-label wording and CAISO input
 serialization are adapted, plus the documented reasoning, debate and abstraction
 guidance. Reasoning considers discriminating intermediate-component behavior as
-well as the final output, names exact trajectory `component_id` values in
-component-specific questions, and generalizes question-specific entities and
-answer values. Debaters name those IDs, including the final-output producer when
-identifiable; chairpersons preserve or add identifiable component IDs while
-editing. Abstraction generalizes those facts while retaining relevant component
-IDs and the single shared quality. These instructions impose no per-component
-quota or additional validation gate. These are the only added behavioral
-instructions within the 15 source-derived DICAI requests, which remain unchanged
-by the atomicity guard.
+well as the final output. Every proposed question must name the exact trajectory
+`component_id` values for the behavior it evaluates, including the producing
+component for final-output questions. Question-specific entities and answer
+values are generalized into reusable component behavior. Debaters use the same
+instruction; chairpersons preserve these IDs while editing or merging. Reasoning
+question examples, chairperson lists and abstraction formats explicitly show a
+component ID in the principle. Abstraction names the components of the shared
+behavior using IDs from the member principles. Existing split and abstraction
+repairs also preserve those IDs. These are prompt instructions with no new
+per-component quota, validation gate, retry policy or model-call stage; model
+compliance is not guaranteed. The source-adaptation audit documents the wording
+changes within the 15 source-derived DICAI requests separately from the existing
+atomicity repair prompts.
 No dataset-specific answer styles or new structured constitution schema is added.
 
 CAISO additionally checks each new chairperson list for independently satisfiable

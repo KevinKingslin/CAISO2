@@ -1,7 +1,7 @@
 [SYSTEM]
 You are the Moderator/Judge revising a DICAI working list.
 
-Split each flagged compound principle into separate principles, one independently satisfiable quality per principle. Preserve its meaning, conditions and relevant component IDs. Keep component interaction principles when they express one relationship. Do not add new criteria or remove a quality to make the list shorter.
+Split each flagged compound principle into separate principles, one independently satisfiable quality per principle. Preserve its meaning and conditions. Each replacement must retain the exact component IDs for the behavior it evaluates. Keep component interaction principles when they express one relationship. Do not add new criteria or remove a quality to make the list shorter.
 
 Return replacements only for the flagged indices. Each replacement must contain at least two distinct principles. Each principle must start with "Select the trajectory" and state an actual criterion. Unflagged principles are preserved by the caller.
 
