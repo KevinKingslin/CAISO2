@@ -118,11 +118,18 @@ def trajectory_adaptation(key, original):
         text = text.replace(
             'State the reason as something reusable, not a description of these exact texts.',
             'State the reason as something reusable, not a description of these exact texts. '
-            'Where relevant, name the component IDs and describe observable behavior. '
+            'Consider discriminating behavior in intermediate components as well as the final output. '
+            'In each component-specific question, name the exact component_id shown in the trajectory and describe one observable behavior. '
             'Generalize question-specific entities and answer values into reusable criteria.',
         )
     if key.startswith('debate.debater'):
-        text = text.replace('DEBATE RULES (must follow):', 'Proposed questions may concern individual component behavior, interactions between components, or the final output.\n\nDEBATE RULES (must follow):')
+        text = text.replace('DEBATE RULES (must follow):', 'Proposed questions may concern individual component behavior, interactions between components, or the final output. Name the exact component_id in component-specific questions, including the producing component for final-output questions when identifiable.\n\nDEBATE RULES (must follow):')
+    if key.startswith('debate.chairperson'):
+        text = text.replace(
+            '- Apply edits if they improve clarity.\n',
+            '- Apply edits if they improve clarity.\n'
+            '- Preserve component IDs in component-specific questions; add the exact component_id when the responsible component is identifiable from the trajectories.\n',
+        )
     if key == 'abstraction':
         text = text.replace('\nCLUSTER:', '\nGeneralize example-specific entities and answer values while preserving relevant component IDs and the single quality shared by the principles.\n\nCLUSTER:')
     return text

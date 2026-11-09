@@ -45,8 +45,9 @@
     "adaptations": [
       "Response/story terminology becomes trajectory terminology.",
       "Human-label wording becomes provided preference-label wording.",
-      "Reasoning names relevant component IDs and observable behavior, generalizing question-specific entities and answer values (two sentences).",
-      "Debaters may discuss component behavior, interactions or final output (one sentence).",
+      "Reasoning considers discriminating intermediate and final-output behavior, names exact component_id values in component-specific questions, and generalizes question-specific entities and answer values (three sentences).",
+      "Debaters may discuss component behavior, interactions or final output, and name exact component_id values in component-specific questions, including an identifiable final-output producer (two sentences).",
+      "Chairpersons preserve component IDs in component-specific questions and add the exact component_id when identifiable from the trajectories (one updating bullet).",
       "Abstraction generalizes example-specific entities and answer values while preserving relevant component IDs and the single shared quality (one sentence).",
       "Dynamic inputs use CAISO JSON execution records and renamed placeholders."
     ],

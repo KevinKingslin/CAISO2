@@ -20,7 +20,7 @@ YOUR REASONING TRACE:
 YOUR SEED QUESTIONS:
 {seeds}
 
-Proposed questions may concern individual component behavior, interactions between components, or the final output.
+Proposed questions may concern individual component behavior, interactions between components, or the final output. Name the exact component_id in component-specific questions, including the producing component for final-output questions when identifiable.
 
 DEBATE RULES (must follow):
 - Always reference questions by ID (e.g., Q3, Q7) when defending or countering.

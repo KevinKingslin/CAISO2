@@ -45,12 +45,16 @@ identifiers are preserved.
 The source instructions retain one-quality-per-question rules and reconstruction
 feedback. Only response/story terminology, human-label wording and CAISO input
 serialization are adapted, plus the documented reasoning, debate and abstraction
-guidance. Reasoning names relevant component IDs, describes observable behavior
-and generalizes question-specific entities and answer values. Abstraction
-generalizes those facts while retaining relevant component IDs and the single
-shared quality. The existing debater guidance permits component and interaction
-criteria. These are the only added behavioral instructions within the 15
-source-derived DICAI requests, which remain unchanged by the atomicity guard.
+guidance. Reasoning considers discriminating intermediate-component behavior as
+well as the final output, names exact trajectory `component_id` values in
+component-specific questions, and generalizes question-specific entities and
+answer values. Debaters name those IDs, including the final-output producer when
+identifiable; chairpersons preserve or add identifiable component IDs while
+editing. Abstraction generalizes those facts while retaining relevant component
+IDs and the single shared quality. These instructions impose no per-component
+quota or additional validation gate. These are the only added behavioral
+instructions within the 15 source-derived DICAI requests, which remain unchanged
+by the atomicity guard.
 No dataset-specific answer styles or new structured constitution schema is added.
 
 CAISO additionally checks each new chairperson list for independently satisfiable

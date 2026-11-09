@@ -54,16 +54,28 @@ permitted text adaptations are:
    use corresponding template placeholders. Gold, rewards and evaluation metadata
    remain hidden from the blind judge.
 4. The five requests using the original reusable-criterion reasoning instruction
-   append: "Where relevant, name the component IDs and describe observable
-   behavior. Generalize question-specific entities and answer values into reusable
+   append: "Consider discriminating behavior in intermediate components as well
+   as the final output. In each component-specific question, name the exact
+   component_id shown in the trajectory and describe one observable behavior.
+   Generalize question-specific entities and answer values into reusable
    criteria." This applies during CoT, sampling, consensus, drafting and revision;
    the original critique request is retained.
-5. Debaters receive the previously agreed single sentence: "Proposed questions
-   may concern individual component behavior, interactions between components,
-   or the final output."
-6. Abstraction receives: "Generalize example-specific entities and answer values
+5. Debaters receive: "Proposed questions may concern individual component
+   behavior, interactions between components, or the final output. Name the exact
+   component_id in component-specific questions, including the producing component
+   for final-output questions when identifiable."
+6. All three chairperson variants add one updating rule: "Preserve component IDs
+   in component-specific questions; add the exact component_id when the responsible
+   component is identifiable from the trajectories."
+7. Abstraction receives: "Generalize example-specific entities and answer values
    while preserving relevant component IDs and the single quality shared by the
    principles."
+
+The component-attribution wording was strengthened on 2026-11-09 with these
+minimal reasoning/debater/chairperson edits. Criteria remain grounded in the
+paired executions, with no quota of principles per component. The debate,
+reconstruction objective and one-quality rule retain their original structure.
+These are prompt instructions, not a new component-name validation gate.
 
 Each principle starts with `Select the trajectory`. Its following grammar is
 preserved: `that`, `where`, `which`, `with` and `in which` are all valid. Empty
