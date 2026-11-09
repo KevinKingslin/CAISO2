@@ -591,37 +591,13 @@ class IterationReport:
         save_json(self.folder / "performance.json", points)
         fig, ax = plt.subplots(figsize=(8, 4.5))
         x = [p["display_iteration"] for p in points]
-        ax.plot(x, [p["score"] for p in points], "o-", label="Accepted system (validation)")
+        ax.plot(
+            x,
+            [p["score"] if p["display_iteration"] == 0 else p.get("candidate_score") for p in points],
+            "o-",
+            label="Validation (block candidate)",
+        )
         ax.plot(x, [p["best_score"] for p in points], "--", label="Best so far")
-        skipped = [p for p in points if p.get("status") == "skipped"]
-        if skipped:
-            ax.scatter(
-                [p["display_iteration"] for p in skipped],
-                [p["score"] for p in skipped],
-                marker="v",
-                color="tab:orange",
-                s=75,
-                zorder=5,
-                label="Skipped iteration (validated state)",
-            )
-        for name, key, marker, color in (
-            ("Block candidate", "candidate_score", "x", "tab:red"),
-            ("Workflow candidate", "workflow_candidate_score", "+", "tab:purple"),
-        ):
-            candidates = []
-            for p in points:
-                value = p.get(key)
-                if value is not None:
-                    candidates.append((p["display_iteration"], value))
-            if candidates:
-                ax.scatter(
-                    *zip(*candidates, strict=True),
-                    marker=marker,
-                    color=color,
-                    label=name,
-                    s=65,
-                    zorder=4,
-                )
         ax.set(
             xlabel="Iteration (0 = baseline)",
             ylabel="Task metric on fixed validation batch",
