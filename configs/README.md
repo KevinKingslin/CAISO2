@@ -207,9 +207,19 @@ configuration requires a new run/output directory.
 ```sh
 ./scripts/caiso run amazon
 ./scripts/caiso evaluate amazon --unoptimized
+./scripts/caiso evaluate hotpotqa --interactive
 ./scripts/caiso evaluate results/amazon-run --state current
 ./scripts/caiso run --config configs/experiments/amazon.yaml
 ```
+
+For terminal entry of component prompts, hyperparameters, model selectors, and
+existing generation settings, use `--interactive` or set
+`evaluation.interactive: true` in an experiment profile. Enter keeps the current value; `/multiline` starts
+a multiline prompt, ended by `/end` on its own line. Manual evaluations default
+to the test split and a new `results/<dataset>-manual-<id>/` folder with
+`component_config.json`, `manual_system.pth`, and `evaluation.json`. Use `--output`
+to choose a new folder explicitly. Interactive mode uses dataset/YAML targets
+without a saved state or optimization-run directory.
 
 Run-directory evaluation supports `--state current`, `--state best` and
 `--state final`. The first two freeze a saved CAISO checkpoint and work while

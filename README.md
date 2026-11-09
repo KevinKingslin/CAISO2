@@ -131,6 +131,44 @@ For a shorter preliminary check, add `--repeats 1`; the default three repeats
 remain useful for measuring variation. This reduces evaluation work rather than
 speeding up each repeat.
 
+### Enter a configuration interactively
+
+Use `--interactive` to enter each component's settings in execution order and
+evaluate the resulting system on the test set:
+
+```sh
+./scripts/caiso evaluate hotpotqa --interactive
+./scripts/caiso evaluate pubmedqa --interactive --repeats 1 --output results/my-manual-system
+```
+
+Enter keeps the displayed value. Type a new prompt directly, or type `/multiline`,
+paste multiple lines, and finish with `/end` on its own line. Hyperparameters and
+model selectors are requested one field at a time. Numbers and booleans use JSON
+syntax; strings such as model names are entered without quotes. Values may differ
+from the optimizer's search grid. Existing generation settings (model,
+temperature, token limits, top-p and top-k) are also offered. Components with
+model-weight variables accept an existing adapter directory; fixed components
+keep their behavior. The same external services and model files are required as
+for ordinary evaluation.
+
+Each invocation defaults to a new `results/<dataset>-manual-<id>/` folder containing:
+
+- `component_config.json`: the entered component values and evaluation settings.
+- `manual_system.pth`: the complete system state, including generation settings.
+- `evaluation.json`: test scores, repetition results, and coverage.
+- `.internal/evaluation/manual/test/`: raw metrics, logs, and rollout files.
+
+`--output` selects an exact folder; an existing run is rejected to avoid overwriting
+its configuration or results. Interactive mode starts from the factory system;
+use a dataset or YAML profile, without `--state`, `--unoptimized`, or a saved state.
+To enable it in an experiment YAML, add `interactive: true` under `evaluation`
+(or at the top level of a legacy evaluation profile). The direct
+`python -m scripts.eval_system` launcher also accepts `--interactive`.
+
+To repeat evaluation later without entering the settings again, pass
+`--system_state_dict_path results/my-manual-system/manual_system.pth` to the direct
+evaluation launcher, together with the matching dataset and system name.
+
 ```sh
 python -m scripts.eval_system scripts/configs/eval/hotpotqa_vanilla.yaml
 python -m scripts.eval_system scripts/configs/eval/pubmed_vanilla.yaml

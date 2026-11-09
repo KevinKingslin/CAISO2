@@ -7,7 +7,7 @@ from uuid import uuid4
 
 from dotenv import load_dotenv
 
-from scripts.results_layout import dataset_label, optimization_output, write_evaluation
+from scripts.results_layout import dataset_label, manual_output, optimization_output, write_evaluation
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,6 +34,8 @@ def parser():
         if name == "evaluate":
             state = command.add_mutually_exclusive_group()
             state.add_argument("--unoptimized", action="store_true", help="Evaluate the initial factory system")
+            state.add_argument("--interactive", action="store_true",
+                               help="Enter component configurations in the terminal before evaluation")
             state.add_argument("--state", choices=("current", "best", "final"),
                                help="Run state to evaluate; default: final export if present, otherwise current checkpoint")
             command.add_argument("--repeats", type=positive_int, help="Override the evaluation profile's repetition count")
@@ -87,6 +89,15 @@ def resolve(args):
         raise ValueError(f"Expected a configuration mapping in {path}")
     if args.system and config.get("dataset") != DATASETS[args.system]:
         raise ValueError("--system does not match the configuration's dataset")
+    if args.command == "evaluate":
+        interactive = args.interactive or config.get("interactive", False)
+        if not isinstance(interactive, bool):
+            raise ValueError("interactive must be true or false")
+        if interactive:
+            if run or args.state or args.unoptimized or config.get("system_state_dict_path"):
+                raise ValueError("Interactive evaluation requires a dataset or YAML profile without a saved system state")
+            config["interactive"] = True
+            config["run_name"] = "manual"
     if run:
         config["system_name"] = experiment["system"]
         config["dotenv_path"] = experiment.get("dotenv_path", ".env")
@@ -161,10 +172,15 @@ def main(argv=None):
     snapshot = None
     checkpoint_path = config.pop("caiso_checkpoint_path", None)
     checkpoint_state = config.pop("caiso_checkpoint_state", None)
-    variant = checkpoint_state or ("optimized" if config.get("system_state_dict_path") else "unoptimized")
+    interactive = config.get("interactive", False)
+    variant = "manual" if interactive else checkpoint_state or (
+        "optimized" if config.get("system_state_dict_path") else "unoptimized"
+    )
     output = args.output
     if output is None:
-        output = run if run else Path("results") / f"{dataset_label(config)}-{variant}"
+        output = manual_output(config) if interactive else (
+            run if run else Path("results") / f"{dataset_label(config)}-{variant}"
+        )
     split = config.get("split", "test")
     raw_output = output / ".internal" / "evaluation" / variant / split
     if checkpoint_path:
@@ -185,6 +201,8 @@ def main(argv=None):
     if snapshot is not None:
         options.update(state_snapshot=snapshot, results_dir=raw_output)
     metrics = evaluate(arguments, **options)
+    if interactive:
+        return metrics  # The evaluator saves the manual config, state and report together.
     write_evaluation(
         output, metrics, variant=variant, split=split,
         state_source=raw_output / "state_snapshot.json" if snapshot else config.get("system_state_dict_path"),

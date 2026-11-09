@@ -17,6 +17,10 @@ def optimization_output(config, method):
     return Path("results") / f"{dataset_label(config)}-{identifier}"
 
 
+def manual_output(config):
+    return Path("results") / f"{dataset_label(config)}-manual-{uuid4().hex[:12]}"
+
+
 def write_evaluation(directory, metrics, *, variant, split, state_source=None, state_snapshot=None):
     """Keep historical filenames without changing scoring or inventing seeds."""
     directory = Path(directory)
