@@ -25,7 +25,8 @@ from .atomicity import PROMPT_KEYS as ATOMICITY_PROMPTS
 from .atomicity import AtomicityError, enabled as atomicity_enabled, ensure_atomic
 from .activity import InductionActivity
 from .clustering import cluster_principles
-from .coverage import coverage_targets, preserve_component_coverage
+from .coverage import coverage_targets, observed_components, preserve_component_coverage, require_component_coverage
+from .parsing import normalize_principle
 from .debate import debate, principle_key
 from .personas import assign_personas
 from .plotting import save_silhouette_artifacts
@@ -33,7 +34,7 @@ from .reasoning_assembly import assemble
 from .request_cache import RequestCache
 from .reconstruction import minimize_constitution, validate_constitution
 
-PROTOCOL = "democratic-icai-c8d5-source-trajectory-v5-component-coverage"
+PROTOCOL = "democratic-icai-c8d5-source-trajectory-v6-required-component-principles"
 INDUCTION_METHOD_PROMPTS = ("providers.format_retry",)
 
 
@@ -190,6 +191,7 @@ class DICAI:
                 "No unfiltered preference pairs remain for constitution induction"
             )
         pairs, results = zip(*retained, strict=True)
+        observed = set().union(*(observed_components(pair) for pair in pairs))
         settled, transcripts, catalogues, origins = [], [], [], []
         reused, expected_calls = 0, 0
         for pair, (record, cached) in zip(pairs, results, strict=True):
@@ -259,6 +261,7 @@ class DICAI:
             else None,
             temperature=temperatures.get("abstraction", 0.2),
             config=self.config,
+            component_ids=observed or None,
         )
         if progress and atomicity_enabled(self.config):
             progress("abstraction_atomicity", 0, len(abstractions))
@@ -266,6 +269,7 @@ class DICAI:
             abstractions, abstraction_atomicity = ensure_atomic(
                 abstractions, providers, self.role, seed + 950000,
                 config=self.config, kind="abstraction",
+                component_ids=observed or None,
                 context=[{"index": cluster + 1, "principles": [
                     p for p, label in zip(settled, labels, strict=True) if label == cluster
                 ]} for cluster in range(len(abstractions))],
@@ -336,6 +340,14 @@ class DICAI:
             outputs, settled, origins, pairs, expected_components,
             scope=scope, target_source=target_source,
         )
+        # Save diagnostics even when missing evidence prevents publication.
+        if artifacts:
+            save_json(artifacts / "component_coverage.json", coverage)
+            if scope == "system":
+                save_json(Path(output_dir) / "component_coverage.json", coverage)
+        for principle in outputs:
+            normalize_principle(principle, observed or None)
+        require_component_coverage(coverage)
         # Reconstruction must describe the final, coverage-preserving list,
         # including when optional minimization removed a component's last rule.
         report = validate_constitution(

@@ -21,7 +21,7 @@ UPDATED WORKING LIST:
 - Every question must name the exact component_id from the trajectories for the component or components whose behavior it evaluates, including the producing component for final-output questions. Preserve these IDs when editing or merging.
 - Retain supported principles for different components. Do not remove a component's only supported principle merely to shorten the list.
 - Express the reusable quality that explains the preference. Exclude sample-specific names of people, places, organizations and works, and example-specific dates and identifiers from principles. Describe their semantic roles instead, while preserving actual component IDs. The principle should remain applicable when those entities change.
-- Ensure every item begins exactly with "Select the trajectory"
+- Ensure every item begins exactly with "Select the trajectory where"
 - Keep the list concise and non-overlapping.
 
 ONE QUALITY PER QUESTION (hard rule):
@@ -50,6 +50,8 @@ Finalization:
 After the final cycle, publish FINAL LIST (bullets Q1..Qn) and then print:
 
 DEBATE_OVER
+
+Every principle must begin exactly with "Select the trajectory where", immediately followed by the actual component_id as its subject and one observable, reusable criterion. A component mentioned only later in an interaction does not receive its own principle; write a separate principle with that component as the subject when its behavior is supported by the evidence. The final constitution must contain at least one principle for every workflow component (every selected block member for a block constitution). Propose and retain evidence-supported principles for the components present in these trajectories. Do not merge away a component's last supported principle or invent behavior to fill a gap.
 [USER]
 TASK PROMPT:
 {context:json}

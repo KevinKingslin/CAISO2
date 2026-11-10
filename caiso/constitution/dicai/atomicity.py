@@ -67,14 +67,14 @@ class AtomicityError(ModelResponseError):
         self.report = report
 
 
-def ensure_atomic(principles, providers, role, seed, *, config=None, kind="debate", context=None):
+def ensure_atomic(principles, providers, role, seed, *, config=None, kind="debate", context=None, component_ids=None):
     """Review every item; bounded repairs cannot edit unflagged principles.
 
     Debate repairs split independent qualities. Abstraction repairs retain one
     shared quality per cluster, preserving the cluster-to-principle mapping.
     Budget, service and policy exceptions always propagate.
     """
-    values = [normalize_principle(p) for p in principles]
+    values = [normalize_principle(p, component_ids) for p in principles]
     report = {"enabled": enabled(config), "passed": False, "calls_before_retries": 0, "trace": []}
     if not report["enabled"]:
         return values, report
@@ -131,6 +131,8 @@ def ensure_atomic(principles, providers, role, seed, *, config=None, kind="debat
                     if sorted(indices) != sorted(row.index for row in flagged):
                         raise ModelResponseError("Replace every flagged index exactly once; leave unflagged items untouched")
                     for row in result.replacements:
+                        for principle in row.principles:
+                            normalize_principle(principle, component_ids)
                         if kind == "debate" and len(row.principles) < 2:
                             raise ModelResponseError("Split each compound debate principle into at least two independent principles")
                         if kind == "abstraction" and len(row.principles) != 1:

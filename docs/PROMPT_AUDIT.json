@@ -103,7 +103,7 @@
   },
   "method_response_recovery": {
     "normal_prompt_text": "Original code-based complete requests with the documented minimal trajectory adaptations; no separate seed-drafting prompt.",
-    "principle_wording": "Requires Select the trajectory followed by an actual criterion, preserving equivalent where/that/which/with/in which wording and component identifiers. Grammatical variations do not trigger retries; empty criteria, placeholders, bare A/B choices and old response-style prefixes remain invalid. Prompt text is unchanged.",
+    "principle_wording": "Requires Select the trajectory where followed immediately by an actual component ID and one observable reusable criterion. Prefix case/whitespace is normalized; other connectors, placeholders and unknown execution subjects trigger repair.",
     "repair": "Includes the invalid assistant response before the format-repair instruction; raw response and call context are logged. Principle validation errors no longer include a copyable placeholder criterion.",
     "request_checkpoints": "Successful DICAI requests are saved under each induction provenance directory and validated on reuse."
   },
@@ -125,7 +125,7 @@
     "license": "CC BY-NC-SA 4.0 (paper; original code remains MIT)",
     "verified_on": "2026-11-06",
     "transcription": "Published wording, with TeX layout/list markers normalized for plain text.",
-    "result": "Appendix G Figures 10–16 minimally adapted to trajectory comparisons; Figure 16 judging unchanged. No reconstruction gate, minimum-principle rule or structured component constitution schema.",
+    "result": "Appendix G Figures 10\u201316 minimally adapted to trajectory comparisons; Figure 16 judging unchanged. No reconstruction gate, minimum-principle rule or structured component constitution schema.",
     "adaptations": [
       "Three configured QA/recommendation persona profiles, rather than creative-writing personas.",
       "Dynamic CAISO task/trajectory evidence and turn counters supplied in user messages.",
@@ -155,17 +155,22 @@
     "source_files": 8,
     "complete_requests": 15,
     "license": "MIT",
-    "principle_prefix": "Select the trajectory",
+    "principle_prefix": "Select the trajectory where",
     "adaptations": [
       "Response/story terminology becomes trajectory terminology.",
       "Human-label wording becomes provided preference-label wording.",
-      "Reasoning names relevant component IDs and observable behavior, generalizing question-specific entities and answer values (two sentences).",
-      "Debaters may discuss component behavior, interactions or final output (one sentence).",
-      "Abstraction generalizes example-specific entities and answer values while preserving relevant component IDs and the single shared quality (one sentence).",
-      "Dynamic inputs use CAISO JSON execution records and renamed placeholders."
+      "Reasoning considers intermediate and final-output behavior, names actual component IDs, and expresses proposed questions and dimensions as reusable qualities without sample-specific entity names or values.",
+      "Self-refinement critique flags sample-specific names or facts used as criteria or dimensions.",
+      "Debaters discuss component behavior, interactions or final output using actual component IDs and reconstruct preferences through reusable criteria without sample-specific entities.",
+      "Chairpersons preserve actual component IDs and reusable semantic-role criteria when editing or merging; reconstruction remains mandatory without overriding those requirements.",
+      "Abstraction preserves one shared quality, expresses sample-specific entities through semantic roles, and names evaluated components using actual IDs from the member principles.",
+      "Principle output examples omit literal component-ID placeholders and request actual IDs from executions or member principles.",
+      "Dynamic inputs use CAISO JSON execution records and renamed placeholders; raw evidence is preserved.",
+      "Reasoners and debaters inspect each component for preference-explaining differences; chairpersons retain supported component criteria; abstraction preserves exact IDs instead of generic aliases.",
+      "Principles require the exact trajectory-where prefix and an actual component ID as their subject; final constitutions require a separate supported principle for each workflow/block component."
     ],
-    "protocol": "democratic-icai-c8d5-source-trajectory-v4-atomicity",
-    "runtime": "Original structured rationales/questions, sampled consensus, iterative refinement, reconstruction status and finalization gates, JSON 1/2 judging, singleton abstraction bypass.",
+    "protocol": "democratic-icai-c8d5-source-trajectory-v6-required-component-principles",
+    "runtime": "Structured rationales with required actual questions, sampled consensus, iterative refinement, reconstruction status and finalization gates, JSON 1/2 judging, abstraction requests including singletons.",
     "audit": "Template imported; no new auditor model or automatic audit stage enabled.",
     "preserved": "All existing numeric configuration values, model routes, benchmark prompts, datasets, metrics and dataset personas.",
     "runtime_extensions": {
@@ -180,7 +185,8 @@
         "max_revisions": 2,
         "batch_size": 20
       },
-      "verified_on": "2026-11-08"
+      "verified_on": "2026-11-10",
+      "component_coverage": "After abstraction/minimization, restore missing component-subject criteria from settled debate principles with observed source execution IDs; save diagnostics and reject induction if any target remains uncovered. Interaction mentions do not cover other components. See docs/CONSTITUTION_COVERAGE.md."
     }
   }
 }

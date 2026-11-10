@@ -21,8 +21,7 @@ instruction suffixes are assembled at runtime.
   full instructions intentionally so each file contains the entire request.
 - `dicai/reconstruction.txt`: blind, shuffled trajectory judging, with original
   JSON `choice` (`"1"` / `"2"`) and `reason` output.
-- `dicai/abstraction.txt`: original cluster abstraction; singleton clusters skip
-  the model call and retain their principle.
+- `dicai/abstraction.txt`: cluster abstraction, including singleton clusters.
 - `dicai/audit.txt`: original external-auditor request, preserved as a template.
   Importing it does not enable a new audit stage or configure an auditor model.
 - `method/<stage>/prompt.txt`: complete CAISO block-selection, prompt-search and
@@ -36,19 +35,22 @@ instruction suffixes are assembled at runtime.
 - `systems/<dataset>/<component>/`: unchanged benchmark task prompts/field metadata.
 - `systems/<dataset>/personas/`: the configured three dataset-specific personas.
 
-All generated principles begin with **`Select the trajectory`**. Parsing preserves
-valid conditions such as `that`, `where`, `which`, `with` and `in which`; no exact
-following connector is required. Empty criteria, bare A/B choices, trailing
-ellipses, the existing condition/criterion placeholder forms and old response-style
-prefixes remain invalid. Actual criteria and component identifiers are preserved.
+All generated principles use **`Select the trajectory where`**, immediately
+followed by the exact component ID as the subject and one observable, reusable
+criterion. Parsing normalizes prefix capitalization and whitespace, and accepts
+list/Markdown wrappers. Other connectors, generic subjects, empty criteria and
+component/criterion placeholders are rejected. Subjects are checked against
+execution IDs during reasoning, debate, abstraction and semantic revision.
+Reasoning must supply actual questions; dimensions alone cannot generate
+component-attributed criteria.
 
 The source instructions retain one-quality-per-question rules and reconstruction
 feedback. Only response/story terminology, human-label wording and CAISO input
 serialization are adapted, plus the documented reasoning, debate and abstraction
 guidance. Reasoning considers discriminating intermediate-component behavior as
-well as the final output. Every proposed question must name the exact trajectory
-`component_id` values for the behavior it evaluates, including the producing
-component for final-output questions. Reasoning questions and dimensions,
+well as the final output. Every proposed question must use an exact trajectory
+`component_id` as its subject and name other IDs needed for the behavior it
+evaluates, including the producing component for final-output questions. Reasoning questions and dimensions,
 self-refinement critique, all debate variants, abstraction and existing repairs
 explicitly exclude sample-specific entity names and values from generated rules.
 They describe semantic roles while preserving actual component IDs and ask for
@@ -59,11 +61,10 @@ criteria. Output examples omit the literal component-ID placeholder;
 abstraction requests the actual ID and reusable condition in natural language.
 Split repair preserves the quality and logical conditions rather than requiring
 instance-specific wording. These remain prompt instructions rather than an
-entity-removal gate. Entity
-removal and model compliance are not guaranteed: singleton clusters still copy
-their settled principles and fallback medoids remain subject only to existing
-checks. The source-adaptation audit documents the wording
-changes within the 15 source-derived DICAI requests separately from the existing
+entity-removal gate. Entity removal and model compliance are not guaranteed:
+fallback medoids retain their settled principles and remain subject to format,
+attribution and configured atomicity checks. The source-adaptation audit
+documents the wording changes within the 15 source-derived DICAI requests separately from the existing
 atomicity repair prompts.
 No dataset-specific answer styles or new structured constitution schema is added.
 
@@ -71,12 +72,16 @@ Component coverage is preserved across the complete induction set. Reasoners
 and debaters inspect each component for observable differences explaining the
 preference; chairpersons retain supported criteria for different components.
 Abstraction retains exact IDs instead of aliases such as "final answer".
-After abstraction and optional minimization, CAISO checks explicit ID coverage
-against the active workflow (system scope) or selected block members. For each
-missing component, it restores an existing settled debate principle whose source
-pair executed the named components. No new model request or generic rule is
-introduced. Components without an eligible settled principle remain listed as
-insufficient evidence. This does not force every pair to cover every component.
+After abstraction and optional minimization, CAISO checks component-subject
+coverage against the active workflow (system scope) or selected block members. For each
+missing component, it restores an existing settled debate principle evaluating
+that component as its subject whose source pair executed the named components.
+No new model request or generic rule is introduced. Components without an
+eligible settled principle cause induction to fail with a saved
+insufficient-evidence report. Every accepted constitution has at least
+one principle per workflow component (or per selected block member). A later
+mention in an interaction does not count as that component's principle. This
+does not force every pair to cover every component.
 The final reconstruction report judges the resulting list.
 
 `component_coverage.json` and constitution metadata record expected/observed
@@ -92,7 +97,7 @@ CAISO additionally checks each new chairperson list for independently satisfiabl
 qualities. A bounded revision replaces only flagged items; unflagged principles
 are preserved. A verified unchanged list reuses its earlier check. After cluster
 abstraction, batched checks cover all output principles, including singleton
-copies. Compound abstractions are revised to one shared quality per cluster.
+abstractions. Compound abstractions are revised to one shared quality per cluster.
 If revisions fail, individually verified abstractions are retained and other
 clusters use their already verified medoid principle. Failed debate revisions
 retain the last verified list; a pair without any verified chairperson list

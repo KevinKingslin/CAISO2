@@ -156,4 +156,17 @@ def trajectory_adaptation(key, original):
         text = text.replace('Each has the form "Select the trajectory that <condition>".', 'Each begins with "Select the trajectory" and names the component whose behavior it evaluates.')
         text = text.replace('Use the exact format: "Select the trajectory that <condition>."', 'Begin with "Select the trajectory where", followed by the actual component ID and the reusable condition.')
         text = text.replace('\nCLUSTER:', '\nPreserve the single quality shared by the principles. ' + general + ' Name the component or components whose behavior the shared rule evaluates, using exact component IDs from the member principles. Do not replace exact component IDs with generic references such as "final answer", "rewritten query", or "retrieved content".\n\nCLUSTER:')
+    if key.startswith(('reasoning.', 'debate.')) or key == 'abstraction':
+        format_rule = (
+            'Every principle must begin exactly with "Select the trajectory where", '
+            'immediately followed by the actual component_id as its subject and one observable, reusable criterion. '
+            'A component mentioned only later in an interaction does not receive its own principle; '
+            'write a separate principle with that component as the subject when its behavior is supported by the evidence. '
+            'The final constitution must contain at least one principle for every workflow component '
+            '(every selected block member for a block constitution). '
+            'Propose and retain evidence-supported principles for the components present in these trajectories. '
+            'Do not merge away a component\'s last supported principle or invent behavior to fill a gap.'
+        )
+        text = text.replace('"Select the trajectory"', '"Select the trajectory where"')
+        text = text.replace('\n[USER]\n', '\n\n' + format_rule + '\n[USER]\n', 1)
     return text

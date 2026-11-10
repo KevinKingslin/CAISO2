@@ -1,6 +1,7 @@
 """Deterministic method-service fixture; no benchmark scores are mocked."""
 
 import json
+import re
 import numpy as np
 
 
@@ -36,13 +37,25 @@ class OfflineProvider:
         self.budget, self.calls = budget, []
 
     def fingerprint(self):
-        return "offline-synthetic-dicai-v2"
+        return "offline-synthetic-dicai-v3-component-coverage"
 
     def complete(self, messages, *, seed, schema=None, **kwargs):
         self.budget.call()
         self.calls.append((messages, seed, schema))
         system = messages[0]["content"]
         user = messages[-1]["content"]
+        principles = [
+            "Select the trajectory where transform applies the requested arithmetic operation correctly.",
+            "Select the trajectory where transform preserves the relevant input through intermediate steps.",
+            "Select the trajectory where transform presents the result clearly.",
+        ]
+        # Full-cycle fixtures include deterministic input/output components too.
+        for component, criterion in {
+            "source": "preserves the question's number in its output.",
+            "sink": "preserves the computed result in the final answer.",
+        }.items():
+            if re.search(r'"component_id"\s*:\s*"' + component + r'"', user):
+                principles.append(f"Select the trajectory where {component} {criterion}")
         if schema:
             name = schema.__name__
             if name == "AtomicityReview":
@@ -51,11 +64,7 @@ class OfflineProvider:
                 return json.dumps({
                     "reasoning": "The preferred trajectory applies the requested operation and preserves its input.",
                     "dimensions": ["operation correctness", "input preservation"],
-                    "questions": [{"select_prompt": p, "reason": "Discriminates the requested operation."} for p in [
-                        "Select the trajectory that applies the requested arithmetic operation correctly.",
-                        "Select the trajectory where transform preserves the relevant input through intermediate steps.",
-                        "Select the trajectory where transform presents the result clearly.",
-                    ]],
+                    "questions": [{"select_prompt": p, "reason": "Evaluates the observed component behavior."} for p in principles],
                 })
             if name == "PromptProposal":
                 return json.dumps({"prompt": "double"})
@@ -71,11 +80,7 @@ class OfflineProvider:
                 )
             raise ValueError(f"Unsupported offline schema {name}")
         if "You are the Moderator/Judge." in system:
-            return (
-                "FINAL LIST\n- Q1: Select the trajectory where transform applies the requested arithmetic operation correctly."
-                "\n- Q2: Select the trajectory where transform preserves the relevant input through intermediate steps."
-                "\n- Q3: Select the trajectory where transform presents the result clearly.\nDEBATE_OVER"
-            )
+            return "FINAL LIST\n" + "\n".join(f"- Q{i}: {p}" for i, p in enumerate(principles, 1)) + "\nDEBATE_OVER"
         if "debater who must" in system:
             return "1. DEFEND:\n- Q1: Correct arithmetic matters.\n2. ATTACK:\n- None\n3. MERGE:\n- None\n4. EDIT:\n- None\n5. ADD:\n- None\n6. CONCEDE:\n- None"
         if "You abstract a cluster of preference principles" in system:
