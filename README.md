@@ -387,8 +387,9 @@ The existing induction model is used; `dicai.atomicity.enabled` defaults to `tru
 and `max_revisions` to `2`. Reviews, repairs and verified fallbacks are recorded.
 See [configuration](configs/README.md) for the optional original-behavior ablation.
 
-Debate and abstraction prompts request **"Select the trajectory where"**, followed
-by the actual component ID and a reusable criterion. Debate asks for a separate
+Debate and abstraction prompts explicitly show
+`Select the trajectory where <component_id> <criterion>.` and require replacing
+both placeholders with an actual component ID and a reusable criterion. Debate asks for a separate
 principle per component; abstraction preserves the component references in each
 cluster. These instructions add no runtime validation or coverage failure.
 

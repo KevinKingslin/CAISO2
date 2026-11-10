@@ -44,7 +44,14 @@ def test_every_complete_original_request_is_extracted_from_the_source_ast():
         assert active == trajectory_adaptation(key, original), key
         assert hashlib.sha256(active.encode()).hexdigest() == MANIFEST['requests'][key]['active_sha256']
         assert 'Select the response' not in active
-        assert '<component_id>' not in active
+        if key.startswith('debate.') or key == 'abstraction':
+            assert 'Select the trajectory where <component_id> <criterion>.' in active
+            assert 'Replace <component_id> with the exact component_id from ' in active
+            assert 'Do not return the literal placeholders <component_id> or <criterion>.' in active
+            assert 'Select the trajectory where ...' not in active
+            assert 'Select the trajectory...' not in active
+        else:
+            assert '<component_id>' not in active
         if 'Select the trajectory' in original:
             pytest.fail('The original reference was overwritten with trajectory wording')
 

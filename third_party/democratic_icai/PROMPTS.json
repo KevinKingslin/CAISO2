@@ -58,7 +58,7 @@
       "original": "third_party/democratic_icai/prompts/abstraction.txt",
       "active": "caiso/prompts/dicai/abstraction.txt",
       "original_sha256": "a628aa82dfd3b912b43b1a2273ac84f17bb3a9f54cd774ca750f92582162df39",
-      "active_sha256": "ebd005dfd741ac5ae09152714facd28a793141a22030e3b33bfd57f00a4e19a4"
+      "active_sha256": "bbad56ac9e679fe794dd7e6978c95eb69e24336b82a92f9d649eae7a3b6fdddc"
     },
     "audit": {
       "original": "third_party/democratic_icai/prompts/audit.txt",
@@ -70,37 +70,37 @@
       "original": "third_party/democratic_icai/prompts/debate/debater.txt",
       "active": "caiso/prompts/dicai/debate/debater.txt",
       "original_sha256": "fd39ea8f218b3dbfe86b513a12d581357006331ff2f60b6d43af2f35a754a6fb",
-      "active_sha256": "c9d2b081fcadbe27aac9ac6b7dd9afeeeb8d9b1cb989032f7c4284fb3e7e8278"
+      "active_sha256": "9c507652f55aea05feb9727719b6b00f61d6f96a41e46682ecd4c57ff3e3be91"
     },
     "debate.chairperson": {
       "original": "third_party/democratic_icai/prompts/debate/chairperson.txt",
       "active": "caiso/prompts/dicai/debate/chairperson.txt",
       "original_sha256": "a633bdd4ec67d4376d374a7dcc8009efa6e2659fde6adad71da5a4738c8d8b56",
-      "active_sha256": "4a46ee9566600331b126374fcee9430a620f25692ec3c386daad21116e360d2b"
+      "active_sha256": "89eb59b5178cbf115b9219b3223eeb7e0a0f8d8733b28f7e55e6f5d15bea2dfc"
     },
     "debate.debater_reconstruction_failed": {
       "original": "third_party/democratic_icai/prompts/debate/debater_reconstruction_failed.txt",
       "active": "caiso/prompts/dicai/debate/debater_reconstruction_failed.txt",
       "original_sha256": "01bebbe69bf5f1318e297f8aad9c2d512b99a6de13ee1fc06b5f1d5b904bce6d",
-      "active_sha256": "e997a05108e3dcadec3130cc2bb5e967fbc8ada386a8bf1d36029a0323707df5"
+      "active_sha256": "378f131a44e57b4e9affe294a7ee5bb3cdcf818edbc5bd130d2b2b1622a3b575"
     },
     "debate.chairperson_reconstruction_failed": {
       "original": "third_party/democratic_icai/prompts/debate/chairperson_reconstruction_failed.txt",
       "active": "caiso/prompts/dicai/debate/chairperson_reconstruction_failed.txt",
       "original_sha256": "0ddb3ca4d4ceb6f2fbb2c698a46376f3603c19d84f326687eb80b7292f1f90e1",
-      "active_sha256": "c15cba48331f3c50312647c1eefef8c2ab5b26662acd95f2fe88c0bbd84b7366"
+      "active_sha256": "ea98f25db03cb1510183c1910abf3d4d38a43aa9d7c24149663bcf753240be60"
     },
     "debate.debater_too_few": {
       "original": "third_party/democratic_icai/prompts/debate/debater_too_few.txt",
       "active": "caiso/prompts/dicai/debate/debater_too_few.txt",
       "original_sha256": "08518781693a1fe68047d420e0a2187ef075b789bac6ad57cc5f0c118d32055c",
-      "active_sha256": "8f8fa76feec81eb4893f1305244f194bbd7e2b1ae3637e08093e44ed56bf1cec"
+      "active_sha256": "e26ccb2a99374a0851f6b03b8289eaba3a6485d93dfa99c62503354815bb5d63"
     },
     "debate.chairperson_too_few": {
       "original": "third_party/democratic_icai/prompts/debate/chairperson_too_few.txt",
       "active": "caiso/prompts/dicai/debate/chairperson_too_few.txt",
       "original_sha256": "2cb51d3d1ab9c7b088157379afddf18bdeffa547bffa4342f976c5b181741107",
-      "active_sha256": "0f5e5bab96279f2520fdd3fd62463bedd478de2c6380de9e7615707de8b28ddc"
+      "active_sha256": "e3f957d1a8271fc1a1b3add9bc0d537691f18495bca0bff4ee8a55251db8603e"
     }
   },
   "adaptations": [

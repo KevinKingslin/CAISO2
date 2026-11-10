@@ -47,7 +47,7 @@
       "Debaters discuss component behavior, interactions or final output using actual component IDs and reconstruct preferences through reusable criteria without sample-specific entities.",
       "Chairpersons preserve actual component IDs and reusable semantic-role criteria when editing or merging; reconstruction remains mandatory without overriding those requirements.",
       "Abstraction preserves one shared quality, expresses sample-specific entities through semantic roles, and names evaluated components using actual IDs from the member principles.",
-      "Principle output examples omit literal component-ID placeholders and request actual IDs from executions or member principles.",
+      "Debate and abstraction output examples show the component-ID and criterion placeholders explicitly and require substituting actual values from executions or member principles.",
       "Dynamic inputs use CAISO JSON execution records and renamed placeholders; raw evidence is preserved.",
       "Reasoners and debaters inspect each component for preference-explaining differences; chairpersons retain supported component criteria; abstraction preserves exact IDs instead of generic aliases."
     ],
@@ -60,9 +60,10 @@
     "component_principle_prompt_revision": {
       "date": "2026-11-10",
       "scope": "All six debate variants and cluster abstraction only.",
-      "format": "Select the trajectory where, immediately followed by actual component IDs and one reusable criterion.",
+      "format": "Select the trajectory where <component_id> <criterion>.",
       "coverage": "Debate requests at least one separate supported principle per component and retains a component's sole supported rule. Abstraction preserves all evaluated IDs and roles in its existing single output per cluster.",
-      "runtime": "Unchanged from before 33ca2a6; parser flexibility, reasoning schema/fallback, coverage restoration/reporting and stopping behavior are retained. This is prompt guidance, not a runtime guarantee."
+      "runtime": "Unchanged from before 33ca2a6; parser flexibility, reasoning schema/fallback, coverage restoration/reporting and stopping behavior are retained. This is prompt guidance, not a runtime guarantee.",
+      "placeholder_instructions": "Replace the component placeholder with an actual ID from trajectory executions (debate) or source principles (abstraction), replace the criterion placeholder, and put the actual ID immediately after where. Never return literal placeholders."
     }
   }
 }

@@ -36,9 +36,17 @@ instruction suffixes are assembled at runtime.
 - `systems/<dataset>/<component>/`: unchanged benchmark task prompts/field metadata.
 - `systems/<dataset>/personas/`: the configured three dataset-specific personas.
 
-The debate prompts request principles in the form "Select the trajectory where",
-followed immediately by the actual component ID and one reusable criterion. They
-ask for at least one separate principle for each component shown in the
+The debate and abstraction prompts display the exact output template:
+
+```text
+Select the trajectory where <component_id> <criterion>.
+```
+
+They explicitly instruct the model to replace `<component_id>` with an actual
+ID from the trajectory executions (debate) or source principles (abstraction),
+and `<criterion>` with one observable, reusable behavior. The returned principle
+must contain the actual ID immediately after `where`, with neither placeholder
+left in the output. Debate asks for at least one separate principle for each component shown in the
 trajectories (each identified block member for a block comparison), and preserve
 a component's last supported principle when editing or merging. Abstraction
 prompts preserve exact evaluated component IDs and their roles. They still
@@ -66,8 +74,8 @@ They describe semantic roles while preserving actual component IDs and ask for
 criteria that remain applicable when the example's entities change. Supporting
 evidence retains the facts needed to compare trajectories. Chairpersons preserve
 these IDs while editing or merging and reconstruct preferences through reusable
-criteria. Output examples omit the literal component-ID placeholder;
-abstraction requests the actual ID and reusable condition in natural language.
+criteria. Debate and abstraction output examples include the component-ID placeholder
+with explicit instructions to substitute an actual ID before returning the rule.
 Split repair preserves the quality and logical conditions rather than requiring
 instance-specific wording. These remain prompt instructions rather than an
 entity-removal gate. Entity

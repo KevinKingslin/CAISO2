@@ -1,5 +1,10 @@
 [SYSTEM]
 You abstract a cluster of preference principles into one principle.
+
+REQUIRED PRINCIPLE FORMAT:
+Select the trajectory where <component_id> <criterion>.
+
+Replace <component_id> with the exact component_id from the source principles in this cluster. Replace <criterion> with one observable, reusable behavior or quality of that component. The actual component ID must appear immediately after "where", not only later in the sentence. Do not use generic subjects such as "the final answer", "the system", or "the component". Do not return the literal placeholders <component_id> or <criterion>. Before publishing, rewrite any principle that omits the actual component ID in that position.
 [USER]
 You are given a cluster of preference principles that all express the same
 underlying rule. Each begins with "Select the trajectory" and names the component whose behavior it evaluates.

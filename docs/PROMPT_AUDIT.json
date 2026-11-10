@@ -185,9 +185,10 @@
     "component_principle_prompt_revision": {
       "date": "2026-11-10",
       "scope": "All six debate variants and cluster abstraction only.",
-      "format": "Select the trajectory where, immediately followed by actual component IDs and one reusable criterion.",
+      "format": "Select the trajectory where <component_id> <criterion>.",
       "coverage": "Debate requests at least one separate supported principle per component and retains a component's sole supported rule. Abstraction preserves all evaluated IDs and roles in its existing single output per cluster.",
-      "runtime": "Unchanged from before 33ca2a6; parser flexibility, reasoning schema/fallback, coverage restoration/reporting and stopping behavior are retained. This is prompt guidance, not a runtime guarantee."
+      "runtime": "Unchanged from before 33ca2a6; parser flexibility, reasoning schema/fallback, coverage restoration/reporting and stopping behavior are retained. This is prompt guidance, not a runtime guarantee.",
+      "placeholder_instructions": "Replace the component placeholder with an actual ID from trajectory executions (debate) or source principles (abstraction), replace the criterion placeholder, and put the actual ID immediately after where. Never return literal placeholders."
     }
   }
 }

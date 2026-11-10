@@ -11,8 +11,8 @@ Your job:
 3. After each cycle, publish an UPDATED WORKING LIST (bullets only), formatted as:
 
 UPDATED WORKING LIST:
-- Q1: Select the trajectory where ...
-- Q2: Select the trajectory where ...
+- Q1: Select the trajectory where <component_id> <criterion>.
+- Q2: Select the trajectory where <component_id> <criterion>.
 
 4. When updating:
 - Remove questions with strong objections and little defense.
@@ -26,7 +26,7 @@ UPDATED WORKING LIST:
 
 ONE QUALITY PER QUESTION (hard rule):
 Each question names exactly ONE quality. Never conjoin distinct qualities into a
-single question. "Select the trajectory that is specific, causal, and testable" is
+single question. "Select the trajectory where <component_id> is specific, causal, and testable" is
 THREE questions wrongly fused into one, and is forbidden. Merge only questions
 that express the SAME quality in different words. Two questions that a trajectory
 could satisfy independently are distinct qualities and must stay separate.
@@ -53,6 +53,11 @@ DEBATE_OVER
 
 COMPONENT PRINCIPLES:
 Write every principle beginning exactly with "Select the trajectory where", immediately followed by the actual component_id and one observable, reusable criterion. Include at least one separate principle for every component shown in the trajectories (for a block comparison, every block member identified in the task). Inspect each component and propose a missing principle grounded in its observed behavior. Keep principles for different components separate even when they evaluate the same quality. An interaction principle does not replace the participating components' own principles. Do not remove a component's only supported principle for brevity. If the evidence does not support a component principle, identify that gap in the debate rather than inventing behavior.
+
+REQUIRED PRINCIPLE FORMAT:
+Select the trajectory where <component_id> <criterion>.
+
+Replace <component_id> with the exact component_id from the trajectory execution records. Replace <criterion> with one observable, reusable behavior or quality of that component. The actual component ID must appear immediately after "where", not only later in the sentence. Do not use generic subjects such as "the final answer", "the system", or "the component". Do not return the literal placeholders <component_id> or <criterion>. Before publishing, rewrite any principle that omits the actual component ID in that position.
 [USER]
 TASK PROMPT:
 {context:json}

@@ -36,7 +36,7 @@ DEBATE RULES (must follow):
 
 ONE QUALITY PER QUESTION (hard rule):
 - Merge ONLY questions expressing the SAME quality in different words.
-- Never fuse distinct qualities into one question. "Select the trajectory that is
+- Never fuse distinct qualities into one question. "Select the trajectory where <component_id> is
   specific, causal, and testable" is three questions wrongly fused into one.
 - If two questions could be satisfied independently by a trajectory, they are
   distinct and must stay separate, however tidy the merged version reads.
@@ -67,13 +67,13 @@ OUTPUT FORMAT (STRICT; no extra text):
 - Qy: <1-2 sentences why it should be removed, merged, or edited>
 
 3. MERGE:
-- Merge Qm + Qn -> "Select the trajectory..."
+- Merge Qm + Qn -> "Select the trajectory where <component_id> <criterion>."
 
 4. EDIT:
-- Qk: "Select the trajectory..."
+- Qk: "Select the trajectory where <component_id> <criterion>."
 
 5. ADD:
-- "Select the trajectory..." (only if truly missing and non-overlapping)
+- "Select the trajectory where <component_id> <criterion>." (only if truly missing and non-overlapping)
 
 6. CONCEDE:
 - Qz: <short reason>
@@ -82,6 +82,11 @@ Omit any section you do not use, but keep the numbering of those you do.
 
 COMPONENT PRINCIPLES:
 Write every principle beginning exactly with "Select the trajectory where", immediately followed by the actual component_id and one observable, reusable criterion. Include at least one separate principle for every component shown in the trajectories (for a block comparison, every block member identified in the task). Inspect each component and propose a missing principle grounded in its observed behavior. Keep principles for different components separate even when they evaluate the same quality. An interaction principle does not replace the participating components' own principles. Do not remove a component's only supported principle for brevity. If the evidence does not support a component principle, identify that gap in the debate rather than inventing behavior.
+
+REQUIRED PRINCIPLE FORMAT:
+Select the trajectory where <component_id> <criterion>.
+
+Replace <component_id> with the exact component_id from the trajectory execution records. Replace <criterion> with one observable, reusable behavior or quality of that component. The actual component ID must appear immediately after "where", not only later in the sentence. Do not use generic subjects such as "the final answer", "the system", or "the component". Do not return the literal placeholders <component_id> or <criterion>. Before publishing, rewrite any principle that omits the actual component ID in that position.
 [USER]
 TASK PROMPT:
 {context:json}

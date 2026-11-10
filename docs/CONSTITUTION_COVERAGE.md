@@ -11,9 +11,17 @@ remain in use. Original reference files are preserved under
 
 ## Prompt instructions
 
-The debate prompts request principles in the form "Select the trajectory where",
-followed immediately by the actual component ID and one reusable criterion. They
-ask for at least one separate principle for each component shown in the
+The debate and abstraction prompts display the exact output template:
+
+```text
+Select the trajectory where <component_id> <criterion>.
+```
+
+They explicitly instruct the model to replace `<component_id>` with an actual
+ID from the trajectory executions (debate) or source principles (abstraction),
+and `<criterion>` with one observable, reusable behavior. The returned principle
+must contain the actual ID immediately after `where`, with neither placeholder
+left in the output. Debate asks for at least one separate principle for each component shown in the
 trajectories (each identified block member for a block comparison), and preserve
 a component's last supported principle when editing or merging. Abstraction
 prompts preserve exact evaluated component IDs and their roles. They still

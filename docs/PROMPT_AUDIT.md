@@ -70,10 +70,11 @@ permitted text adaptations are:
    minimum-question runtime gates remain unchanged.
 8. Abstraction preserves one shared quality, applies the generalization rule and
    names evaluated components using actual IDs from the member principles.
-9. Reasoning and chairperson examples retain the trajectory prefix without a
-   literal component-ID token. Abstraction describes the actual ID and condition
-   in natural language. The `<component_id>` token was removed after a generated
-   principle copied it literally.
+9. Debate and abstraction examples show the exact
+   `Select the trajectory where <component_id> <criterion>.` template. They
+   explicitly require replacing both placeholders, placing the actual component
+   ID immediately after `where`, and rewriting any principle that omits it.
+   Reasoning examples retain their existing wording.
 
 The generalization instruction is written inside each complete request:
 
@@ -107,9 +108,17 @@ introduced.
 
 ## Component principle prompt revision, 2026-11-10
 
-The debate prompts request principles in the form "Select the trajectory where",
-followed immediately by the actual component ID and one reusable criterion. They
-ask for at least one separate principle for each component shown in the
+The debate and abstraction prompts display the exact output template:
+
+```text
+Select the trajectory where <component_id> <criterion>.
+```
+
+They explicitly instruct the model to replace `<component_id>` with an actual
+ID from the trajectory executions (debate) or source principles (abstraction),
+and `<criterion>` with one observable, reusable behavior. The returned principle
+must contain the actual ID immediately after `where`, with neither placeholder
+left in the output. Debate asks for at least one separate principle for each component shown in the
 trajectories (each identified block member for a block comparison), and preserve
 a component's last supported principle when editing or merging. Abstraction
 prompts preserve exact evaluated component IDs and their roles. They still

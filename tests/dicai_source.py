@@ -195,4 +195,20 @@ def trajectory_adaptation(key, original):
             'Keep one shared quality and return exactly one principle for this cluster.'
         )
         text = text.replace('\nCLUSTER:', '\n' + component_rule + '\n\nCLUSTER:')
+    if key.startswith('debate.') or key == 'abstraction':
+        source = 'the trajectory execution records' if key.startswith('debate.') else 'the source principles in this cluster'
+        format_rule = (
+            'REQUIRED PRINCIPLE FORMAT:\n'
+            'Select the trajectory where <component_id> <criterion>.\n\n'
+            'Replace <component_id> with the exact component_id from ' + source + '. '
+            'Replace <criterion> with one observable, reusable behavior or quality of that component. '
+            'The actual component ID must appear immediately after "where", not only later in the sentence. '
+            'Do not use generic subjects such as "the final answer", "the system", or "the component". '
+            'Do not return the literal placeholders <component_id> or <criterion>. '
+            'Before publishing, rewrite any principle that omits the actual component ID in that position.'
+        )
+        text = text.replace('Select the trajectory where ...', 'Select the trajectory where <component_id> <criterion>.')
+        text = text.replace('Select the trajectory...', 'Select the trajectory where <component_id> <criterion>.')
+        text = text.replace('Select the trajectory that is', 'Select the trajectory where <component_id> is')
+        text = text.replace('\n[USER]\n', '\n\n' + format_rule + '\n[USER]\n', 1)
     return text
