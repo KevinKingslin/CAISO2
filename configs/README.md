@@ -75,6 +75,23 @@ For acceptance on the complete validation split, set
 released OPTIMAS-compatible prefix behavior. Changing the protocol or seed
 requires a new run; saved checkpoints verify their configuration and data hashes.
 
+Attribution reuse is bounded independently of workflow-search plateau settings:
+
+```yaml
+method:
+  attribution:
+    reuse_unchanged: true
+    refresh_after_unsuccessful_iterations: 5
+```
+
+An accepted change is measured immediately. After five unsuccessful iterations
+since the last measurement, attribution is refreshed on new training questions
+with fresh executions. Rejections and iterations without new candidates count;
+the counter resets only after a successful measurement and survives resume.
+Earlier v3 checkpoints without the counter force one fresh measurement when
+resumed with the default limit. Explicitly changing the limit requires a new run.
+See [refresh artifacts and budget behavior](../docs/OPTIMIZATION_IMPROVEMENTS.md).
+
 To omit history from block selection:
 
 ```yaml

@@ -27,7 +27,7 @@ def task_scoring_settings(config):
 
 
 def resume_config_hashes(config):
-    """Allow older implicit true defaults without relaxing other run settings."""
+    """Allow compatible implicit defaults without relaxing changed run settings."""
     from caiso.core.serialization import digest
 
     # The removed top-level true was redundant with either selection setting.
@@ -42,6 +42,13 @@ def resume_config_hashes(config):
             variants += [{**variant, section: {
                 name: value for name, value in variant[section].items() if name != key
             }} for variant in list(variants)]
+    # The bounded-reuse default can resume a v3 checkpoint from before this key.
+    # Algorithm discards its cached effects if its refresh counter was not saved.
+    refresh_key = "refresh_after_unsuccessful_iterations"
+    if config.get("attribution", {}).get(refresh_key) == 5:
+        variants += [{**variant, "attribution": {
+            name: value for name, value in variant["attribution"].items() if name != refresh_key
+        }} for variant in list(variants)]
     return {digest(variant) for variant in variants}
 
 
@@ -52,6 +59,8 @@ def validate_method(config):
         raise ValueError("validation_sampling must be seeded or first")
     if config.get("diagnostics_split", "validation") not in {"train", "validation"}:
         raise ValueError("diagnostics_split must be train or validation")
+    if not isinstance(config.get("attribution", {}), dict):
+        raise ValueError("attribution must be a configuration mapping")
     if not isinstance(config.get("block_constitution", {}), dict):
         raise ValueError("block_constitution must be a configuration mapping")
     if not isinstance(config.get("block_optimization", {}), dict):
@@ -89,6 +98,7 @@ def validate_method(config):
         "dicai.clustering.cluster_step",
         "attribution.batch_size",
         "attribution.stochastic_repeats",
+        "attribution.refresh_after_unsuccessful_iterations",
         "block_selection.diagnostic_batch_size",
         "block_constitution.preference_pairs",
         "block_optimization.max_joint_candidates",
@@ -149,6 +159,7 @@ def validate_method(config):
     ):
         raise ValueError("initial_preference_attempts must be -1 or a positive integer")
     for path in (
+        "attribution.refresh_after_unsuccessful_iterations",
         "initial_preference_min_margin", "block_optimization.validation_repeats",
         "block_optimization.screening.batch_size", "block_optimization.screening.finalists",
         "block_optimization.feedback_examples", "block_optimization.feedback_max_chars",

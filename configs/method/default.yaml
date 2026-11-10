@@ -45,7 +45,8 @@ dicai:
     strict: false
     sample_size: 0  # 0 uses all training preference pairs.
 attribution:
-  reuse_unchanged: true  # Reuse measured effects after rejection; refresh after accepted changes.
+  reuse_unchanged: true
+  refresh_after_unsuccessful_iterations: 5  # Also refresh immediately after accepted changes.
   stochastic_repeats: 1  # One paired normal/intervention seed per question.
   baseline_policy: per_edge
   bootstrap_samples: 200

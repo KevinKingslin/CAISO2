@@ -51,6 +51,17 @@ def validation_batch(examples, config, seed):
     return batch(examples, size, seed)
 
 
+def attribution_batch(examples, size, seed, previous_effects):
+    """Prefer questions outside the previous measurement, when the pool allows."""
+    previous_ids = {input_id for effect in previous_effects for input_id in effect["input_ids"]}
+    unseen = [example for example in examples if example.example_id not in previous_ids]
+    size = min(size, len(examples))
+    if len(unseen) >= size:
+        return batch(unseen, size, seed)
+    repeated = [example for example in examples if example.example_id in previous_ids]
+    return unseen + batch(repeated, size - len(unseen), seed)
+
+
 def initial_preferences(runtime, state, train, count, attempts, seed, comparison_path=None, min_margin=0):
     """Collect strict task preferences; ties and indistinguishable outputs abstain."""
     if not train or count < 1:
@@ -262,6 +273,8 @@ class Algorithm:
         validation_seeds = [seed + repeat * 104729 for repeat in range(
             cfg["block_optimization"].get("validation_repeats", 1)
         )]
+        refresh_after = cfg["attribution"].get("refresh_after_unsuccessful_iterations", 5)
+        diagnostic_pool = train if cfg.get("diagnostics_split", "validation") == "train" else validation
         if any(x.split != "train" for x in train) or any(
             x.split != "validation" for x in validation
         ):
@@ -292,6 +305,9 @@ class Algorithm:
             trigger, start = cp.trigger, cp.iteration
             score, best_score = cp.current_score, cp.best_score
             blocks, effects = cp.blocks, cp.attribution
+            attribution_unsuccessful_iterations = cp.attribution_unsuccessful_iterations
+            if "attribution_unsuccessful_iterations" not in cp.model_fields_set:
+                effects = []  # Unknown cache age in an older v3 checkpoint: measure afresh.
             pending_refresh = cp.pending_refresh
             optimization_history = cp.optimization_history
             if hasattr(self.optimizer, "load_state_dict"):
@@ -336,6 +352,7 @@ class Algorithm:
             start = 0
             blocks = {}
             effects = []
+            attribution_unsuccessful_iterations = 0
             pending_refresh = False
             optimization_history = OptimizationHistory()
             self.report.update("Evaluating initial validation baseline")
@@ -377,11 +394,40 @@ class Algorithm:
                 library_hash=library_hash,
                 blocks=blocks,
                 attribution=effects,
+                attribution_unsuccessful_iterations=attribution_unsuccessful_iterations,
                 pending_refresh=pending_refresh,
                 consecutive_errors=consecutive_errors,
                 optimization_history=optimization_history,
                 optimizer_state=self.optimizer.state_dict() if hasattr(self.optimizer, "state_dict") else {},
             ).save(self.output / "checkpoint")
+
+        def refresh_attribution(iteration, reason, previous_effects):
+            nonlocal effects, attribution_unsuccessful_iterations
+            self.report.update("Refreshing causal edge attribution", phase_dir="01_attribution")
+            refresh_seed = seed + iteration * 1000000 + 500000
+            fresh_examples = attribution_batch(
+                diagnostic_pool, cfg["attribution"]["batch_size"], refresh_seed, previous_effects
+            )
+            fresh_seeds = [refresh_seed + repeat for repeat in range(cfg["attribution"]["stochastic_repeats"])]
+            measured = estimate_all_edges(
+                self.runtime, current, fresh_examples, fresh_seeds, None,
+                cfg["attribution"]["bootstrap_samples"],
+                confidence_level=cfg["attribution"].get("confidence_level", 0.95),
+            )
+            effects = [effect.model_dump() for effect in measured]
+            refresh = {
+                "reason": reason, "iteration": iteration, "state_hash": current.fingerprint(),
+                "unsuccessful_iterations_before_refresh": attribution_unsuccessful_iterations,
+                "source_split": fresh_examples[0].split,
+                "example_ids": [example.example_id for example in fresh_examples],
+                "seeds": fresh_seeds, "edge_effects": effects,
+            }
+            # Reset only after a complete successful measurement. Failures leave
+            # the expired counter (or invalidated accepted-state cache) intact.
+            attribution_unsuccessful_iterations = 0
+            self.report.save_phase("01_attribution", refresh=refresh)
+            self.accounting.event("attribution_refresh", **{key: value for key, value in refresh.items() if key != "edge_effects"})
+            checkpoint(iteration + 1)
 
         checkpoint(start)
         completed = start
@@ -395,6 +441,7 @@ class Algorithm:
                 budget_before = self.runtime.budget.snapshot()
                 accepted, selection, gate, workflow_report = False, None, None, None
                 discovered_blocks = {}
+                attribution_iteration_counted = False
                 try:
                     self.report.save_phase("01_attribution", state_before=current)
                     step_seed = seed + iteration * 1000000
@@ -419,13 +466,12 @@ class Algorithm:
                     self.report.update("Causal edge attribution", phase_dir="01_attribution")
                     # Scheduling evidence comes from training; acceptance questions
                     # are never exposed to prompt proposals or block selection.
-                    diagnostic_pool = train if cfg.get("diagnostics_split", "validation") == "train" else validation
-                    attr = batch(diagnostic_pool, cfg["attribution"]["batch_size"], step_seed)
+                    attr = attribution_batch(diagnostic_pool, cfg["attribution"]["batch_size"], step_seed, effects)
                     attr_seeds = [
                         step_seed + r for r in range(cfg["attribution"]["stochastic_repeats"])
                     ]
                     normal_trajectories = {}
-                    reuse_effects = bool(effects) and cfg["attribution"].get("reuse_unchanged", False) and all(
+                    reuse_effects = bool(effects) and cfg["attribution"].get("reuse_unchanged", False) and attribution_unsuccessful_iterations < refresh_after and all(
                         effect["state_hash"] == current.fingerprint() for effect in effects
                     )
                     attribution = [EdgeEffect.model_validate(effect) for effect in effects] if reuse_effects else estimate_all_edges(
@@ -435,6 +481,8 @@ class Algorithm:
                         normal=normal_trajectories,
                     )
                     effects = [e.model_dump() for e in attribution]
+                    if not reuse_effects:
+                        attribution_unsuccessful_iterations = 0
                     self.report.save_phase(
                         "01_attribution",
                         edge_effects=effects,
@@ -647,7 +695,14 @@ class Algorithm:
                             * sum(self.runtime.library[node].cost_weight for node in current.workflow.nodes)
                             / self.runtime.budget.full_cost
                         )
-                        with self.runtime.budget.reserve(validation_allowance):
+                        refresh_allowance = (
+                            (len(current.workflow.edges) + 1)
+                            * min(len(diagnostic_pool), cfg["attribution"]["batch_size"])
+                            * cfg["attribution"]["stochastic_repeats"]
+                            * sum(self.runtime.library[node].cost_weight for node in current.workflow.nodes)
+                            / self.runtime.budget.full_cost
+                        )
+                        with self.runtime.budget.reserve(validation_allowance + refresh_allowance):
                             scored = self.optimizer.propose(
                                 current, members, optimization_constitution, local_train, step_seed + 10000
                             )
@@ -751,9 +806,16 @@ class Algorithm:
                     trigger.observe(accepted)
                     # Save accepted block changes before potentially expensive workflow work.
                     completed = iteration + 1
+                    previous_effects = effects
                     if accepted:
                         effects = []  # Previous attribution refers to the pre-update configuration.
+                        attribution_unsuccessful_iterations = 0
+                    else:
+                        attribution_unsuccessful_iterations += 1
+                    attribution_iteration_counted = True
                     checkpoint(completed)
+                    if accepted:
+                        refresh_attribution(iteration, "accepted_change", previous_effects)
                     workflow_cfg = {
                         **cfg["workflow"],
                         "acceptance_epsilon": cfg["block_optimization"]["acceptance_epsilon"],
@@ -801,6 +863,7 @@ class Algorithm:
                                 best, best_score = current.model_copy(deep=True), score
                             blocks = {}
                             effects = []
+                            attribution_unsuccessful_iterations = 0
                             pending_refresh = workflow_cfg["reinduce_system_constitution_on_accept"]
                         trigger.reset()
                         checkpoint(completed)
@@ -839,6 +902,7 @@ class Algorithm:
                                 confidence_level=cfg["attribution"].get("confidence_level", 0.95),
                             )
                             effects = [e.model_dump() for e in refreshed]
+                            attribution_unsuccessful_iterations = 0
                             self.report.update("Repartitioning updated workflow")
                             blocks = discover_blocks(
                                 current,
@@ -855,6 +919,8 @@ class Algorithm:
                                 partition_settings=cfg["leiden"],
                             )
                         self.accounting.event("workflow", iteration=iteration, **workflow_report)
+                    if attribution_unsuccessful_iterations >= refresh_after:
+                        refresh_attribution(iteration, "unsuccessful_iteration_limit", effects)
                     self.report.save_phase(
                         "06_workflow",
                         trigger=trigger,
@@ -872,6 +938,7 @@ class Algorithm:
                         "candidate_score": gate.candidate_score if gate else None,
                         "block_acceptance": gate.model_dump() if gate else None,
                         "workflow": workflow_report,
+                        "attribution_unsuccessful_iterations": attribution_unsuccessful_iterations,
                     }
                     self.accounting.iteration(record, self.runtime.budget.snapshot())
                     self.report.finish(record, budget_before, current, qsys)
@@ -880,6 +947,8 @@ class Algorithm:
                 except Exception as exc:
                     if not recoverable(exc):
                         raise
+                    if not attribution_iteration_counted and not accepted:
+                        attribution_unsuccessful_iterations += 1
                     consecutive_errors += 1
                     self.recovery.error(
                         exc,
@@ -899,6 +968,7 @@ class Algorithm:
                         "candidate_score": gate.candidate_score if gate else None,
                         "workflow": workflow_report,
                         "error": str(exc),
+                        "attribution_unsuccessful_iterations": attribution_unsuccessful_iterations,
                         "consecutive_errors": consecutive_errors,
                     }
                     checkpoint(completed)
@@ -960,6 +1030,7 @@ class Algorithm:
                     "budget": self.runtime.budget.snapshot(),
                     "state_hash": best.fingerprint(),
                     "pending_refresh": pending_refresh,
+                    "attribution_unsuccessful_iterations": attribution_unsuccessful_iterations,
                 },
             },
         )

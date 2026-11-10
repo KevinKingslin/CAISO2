@@ -20,6 +20,7 @@ PHASE_FILES = {
         "edge_effects": "edge_weights.json",
         "settings": "settings.json",
         "seeds": "seeds.json",
+        "refresh": "refresh.json",
     },
     "02_blocks": {
         "blocks": "blocks.json",

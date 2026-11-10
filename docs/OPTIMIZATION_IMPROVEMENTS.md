@@ -2,8 +2,10 @@
 
 These changes implement the optimization audit's requested repairs. They change
 the optimization protocol, while retaining benchmark factories, initial prompts,
-task inference interfaces, datasets, scorers and model choices. Start a new run;
-older checkpoints fail the method fingerprint check.
+task inference interfaces, datasets, scorers and model choices. Pre-v3 checkpoints
+fail the method fingerprint check. Earlier v3 checkpoints can resume with the
+default attribution refresh limit; a checkpoint without its new counter forces
+a fresh measurement before cached effects can be reused.
 
 ```sh
 ./scripts/caiso optimize hotpotqa --output results/hotpotqa-v3
@@ -78,14 +80,32 @@ original transactional apply/restore path. The runtime's serialization lock stay
 in place.
 
 Attribution's normal trajectories also supply matching diagnostic observations.
-Edge effects are retained after rejected updates and refreshed after accepted
-state changes. Reused attribution is explicitly marked in the phase status;
+Edge effects are retained after rejected updates for at most five unsuccessful
+iterations since the last measurement. Rejections and iterations with no new
+candidate both count. On the fifth, attribution is refreshed immediately using
+a new training sample and fresh executions; the counter then resets. New samples
+prefer questions outside the previous measurement, reusing questions only when
+the pool is too small for a full disjoint batch.
+
+Accepted state changes trigger an immediate fresh measurement, including on the
+last iteration. The accepted checkpoint is saved before that work, so a budget
+limit or failed refresh cannot lose the accepted configuration. A failed periodic
+refresh retains its expired counter and cannot permit stale reuse on the next
+attempt. The counter persists across checkpoint/resume.
+
+Reused attribution is explicitly marked in the phase status;
 its original input IDs, seeds and deltas remain attached to the estimate.
 Partitioning can still explore different groupings cheaply. Set
 `attribution.reuse_unchanged: false` to collect new effects every iteration.
+The positive integer `attribution.refresh_after_unsuccessful_iterations` controls
+the reuse bound (default `5`). Post-decision measurements are saved separately
+in `01_attribution/refresh.json` with their reason, input IDs, seeds, state hash
+and effects. The original `edge_weights.json` still describes the measurement
+used for that iteration's partition. Refresh events also appear in the event log.
 
 Before the final block proposal, the optimizer reserves enough equivalent runs
-to complete current/candidate acceptance. A search cannot consume that reserved
+to complete current/candidate acceptance and a normal attribution refresh. A
+search cannot consume that reserved
 allowance. If it cannot finish full-batch finalists inside its cap, optimization
 stops with the accepted checkpoint rather than validating incomparable partial
 scores. The reservation covers normal executions; response retries can require
@@ -106,9 +126,10 @@ network connections. For its hint/answer block, training-search costs are:
 
 The 53-run measurement depends on the selected finalists and which inputs change;
 it is not a bound for every block or real model output. With the stronger
-50-question/two-repeat acceptance, that probe's complete two-prompt iteration
+50-question/two-repeat acceptance, that probe's rejected two-prompt iteration
 uses 323 equivalent runs, including 200 for fresh validation and 70 for initial
-attribution. Rejected-state iterations can avoid another attribution sweep.
+attribution. Accepted updates require an additional immediate attribution sweep.
+Rejected-state iterations reuse effects until the five-iteration refresh bound.
 Archived-prompt rescoring and unsuccessful bootstrap attempts consume additional
 budget and are charged normally. No HotpotQA accuracy improvement is claimed by
 these offline measurements.

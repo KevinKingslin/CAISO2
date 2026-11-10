@@ -28,6 +28,7 @@ class Checkpoint(Record):
     library_hash: str
     blocks: dict[str, list[str]] = Field(default_factory=dict)
     attribution: list[dict] = Field(default_factory=list)
+    attribution_unsuccessful_iterations: int = Field(default=0, ge=0, strict=True)
     pending_refresh: bool = False
     consecutive_errors: int = 0
     optimization_history: OptimizationHistory = Field(default_factory=OptimizationHistory)
