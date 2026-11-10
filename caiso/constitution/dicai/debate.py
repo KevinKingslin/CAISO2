@@ -3,6 +3,7 @@
 from caiso.core.recovery import ModelResponseError, RetryExhausted, response_failure
 from caiso.prompts import render_messages
 
+from .agents import DebateAgent, moderator_proxy
 from .personas import Persona
 from .atomicity import AtomicityError, enabled as atomicity_enabled, ensure_atomic
 from .preferences import candidate_views, task_view
@@ -24,6 +25,9 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
     votes = config.get("reconstruction_votes", 1)
     if rounds < 1 or len(catalog) != 3:
         raise ValueError("DICAI requires three debaters and at least one round")
+    moderator = moderator_proxy()
+    debaters = [DebateAgent(f"Debater_{i + 1}", providers, role) for i in range(3)]
+    judge = DebateAgent("Judge", providers, role)
     working = dedupe([p for entry in catalog for p in entry.get("principles", [])])
     history = [{"speaker": "initial_working_list", "content": render(working)}]
     a, b = candidate_views(pair)
@@ -65,8 +69,8 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
             if progress:
                 progress(cycle, f"debater {i + 1}/3")
             persona = Persona.model_validate(entry["persona"])
-            text = providers.complete(
-                role, render_messages(
+            text = debaters[i].speak(
+                moderator, render_messages(
                     "dicai", "debate.debater" + rejection_kind, **fields,
                     agent_name=persona.identity, identity=persona.prompt(), trace=entry["reasoning"],
                     seeds="\n".join(f"- {p}" for p in entry.get("principles", [])) or "(none)",
@@ -87,8 +91,8 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
             return text
 
         try:
-            chair = providers.complete(
-                role, render_messages(
+            chair = judge.speak(
+                moderator, render_messages(
                     "dicai", "debate.chairperson" + rejection_kind, **fields, cycle_arguments=recent(3),
                 ),
                 seed=seed + (cycle - 1) * 4 + 3, validate=valid_update,

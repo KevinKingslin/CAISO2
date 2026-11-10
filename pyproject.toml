@@ -11,6 +11,7 @@ dependencies = [
   "numpy", "pandas<3", "scipy", "scikit-learn", "python-igraph", "leidenalg",
   "matplotlib", "rich", "pydantic>=2", "PyYAML", "httpx", "python-dotenv",
   "requests", "joblib", "tqdm", "litellm", "dspy==3.0.4", "datasets", "ujson",
+  "autogen[openai]==0.14.1",
 ]
 
 [project.optional-dependencies]

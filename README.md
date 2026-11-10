@@ -386,6 +386,14 @@ complete original requests are in `third_party/democratic_icai/prompts/`.
 Their editable trajectory versions are in `caiso/prompts/dicai/`. The
 [prompt audit](docs/PROMPT_AUDIT.md) records source hashes and the exact adaptations.
 
+Debate runs through classic AutoGen agents (`autogen[openai]==0.14.1`): three
+`AssistantAgent` debaters, a `Judge`, and a `Moderator_Proxy` `UserProxyAgent` with
+human input and code execution disabled. Each pair owns its agents; all three
+debaters speak before the judge in every cycle. A registered custom model client
+routes their requests through CAISO's existing providers, budgets, retries and
+request checkpoints. AutoGen's separate response cache is disabled. Install the
+updated dependencies with `pip install -e .` before starting a new run.
+
 CAISO also enforces the existing one-quality rule with a semantic check after
 new chairperson lists and after abstraction. Compound debate principles receive
 bounded split revisions; compound abstractions are revised to one shared quality

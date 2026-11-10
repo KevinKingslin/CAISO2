@@ -175,6 +175,28 @@ under their previous protocol. Successful requests within a matching induction
 are still recovered after interruption, including independent samples with
 identical messages and different seeds.
 
+### AutoGen execution, 2026-11-11
+
+The active debate now uses the source's classic AutoGen agent classes, supplied
+by the pinned `autogen[openai]==0.14.1` dependency. Each preference pair creates
+three `AssistantAgent` debaters, a `Judge`, and one non-interactive,
+non-executing `Moderator_Proxy` `UserProxyAgent`. Every turn calls the assistant's
+`generate_reply(messages=[current_user_prompt], sender=moderator)`, as in the
+original `_speak`. The system message is the editable source-derived request;
+the user prompt includes the existing bounded shared history. Participants
+persist across cycles and remain isolated between concurrent pairs.
+
+A registered [custom model client](https://microsoft.github.io/autogen/0.2/docs/notebooks/agentchat_huggingface_langchain/)
+delegates each completion to CAISO's configured provider layer, retaining
+request checkpoints, response validation/recovery, role routing, seeds,
+temperatures and budget accounting. AutoGen response caching is disabled.
+Reconstruction and semantic atomicity checks retain their existing provider
+calls and gates. Prompt files, numeric settings and the best-effort round-cap
+policy are unchanged. Implementation fingerprints invalidate older induction
+caches. Tests exercise real AutoGen agents, turn order, the moderator sender,
+parallel-pair isolation and provider-option forwarding; complete-request
+snapshots continue to check the actual model messages.
+
 ## Component coverage extension
 
 Reasoning and debate requests now explicitly inspect every component for

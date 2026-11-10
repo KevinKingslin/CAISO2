@@ -38,6 +38,20 @@ The source's best-effort result at the round cap remains explicitly marked as
 unfinalized if the reconstruction/minimum-question gates fail. Existing robust
 format validation still requires at least one usable chairperson turn.
 
+Debate uses the classic AutoGen API from the source: three persistent
+`AssistantAgent` debaters and a `Judge` call `generate_reply` with one
+`Moderator_Proxy` `UserProxyAgent` as sender. The proxy has no LLM, human input or
+code execution. Agents are local to each preference pair, so concurrent debates
+share no agent state. A registered AutoGen model client delegates completions to
+CAISO's provider/recovery and request-cache layer, preserving role routing,
+per-turn seeds, temperatures, validators, budgets and response error context.
+The editable request files still supply the complete system/user messages and
+bounded shared history; no implicit agent history is appended. AutoGen caching
+is disabled. The runtime dependency is pinned to `autogen[openai]==0.14.1`, which
+provides the classic `autogen` namespace, separate from the optional modern
+`autogen_agentchat` benchmark component adapter. Implementation fingerprints
+invalidate earlier induction caches after this execution change.
+
 ## Ten explicit upstream exceptions
 
 1. `.gitignore`: adds local environment, cache, and build exclusions.
