@@ -63,10 +63,10 @@ def attribution_batch(examples, size, seed, previous_effects):
 
 
 def initial_preferences(runtime, state, train, count, attempts, seed, comparison_path=None, min_margin=0, collection=None, progress=None):
-    """Collect strict task preferences; ties and indistinguishable outputs abstain."""
+    """Dispatch configuration pairs, or the legacy rerun collector for ablations."""
     if collection is not None:
         validate_method({"preference_collection": collection})
-    if collection and collection.get("mode", "component") == "component":
+    if collection is not None and collection.get("mode", "component") == "component":
         from .preference_collection import collect_preferences
 
         return collect_preferences(
@@ -338,7 +338,7 @@ class Algorithm:
                 min_margin=cfg.get("initial_preference_min_margin", 0),
                 collection=cfg.get("preference_collection"),
                 progress=lambda done, total, retained, target: self.report.update(
-                    progress=f"Preference pools: {done}/{total}; retained pairs: {retained}/{target}"
+                    progress=f"Preference comparisons: {done}/{total}; retained pairs: {retained}/{target}"
                 ),
             )
             update_result(

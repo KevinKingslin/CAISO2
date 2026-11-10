@@ -27,8 +27,8 @@ from caiso.wrappers.example import Example as BenchmarkExample
 WIKIPEDIA_RETRIEVER = "examples.systems.hotpotqa.five_components.WikipediaRetriever"
 
 
-class _SampleComplete(Exception):
-    """Stop a training execution immediately after the sampled component."""
+class _PrefixComplete(Exception):
+    """Stop a training execution after capturing the shared upstream prefix."""
 
 
 def adapt_examples(system, examples, split):
@@ -224,39 +224,32 @@ class UpstreamRuntime(CompoundAISystem):
                 "Benchmark parity requires the original workflow; workflow search is disabled"
             )
 
-    def sample_preference_candidate(self, state, example, reference, component_id, seed, temperature):
-        """Sample one component against its recorded prefix, without a downstream run."""
-        self._validate_preference_reference(example, reference)
+    def preference_prefix(self, state, example, component_id, seed):
+        """Execute upstream components once, without running the selected component."""
+        if example.split != "train":
+            raise ValueError("Preference sampling is restricted to training examples")
         order = state.workflow.topological_order()
-        prefix = reference.executions[:order.index(component_id)]
+        index = order.index(component_id)
+        if index == 0:
+            return []
         return self._execute(
-            state, example, seed, replay={e.component_id: e for e in prefix},
-            stop_after=component_id, sample_temperature=temperature,
+            state, example, seed, replay={}, stop_after=order[index - 1],
         )
 
-    def continue_preference_candidate(self, state, example, reference, candidate, component_id, seed):
-        """Freeze the candidate and all non-descendants; execute fresh descendants."""
-        self._validate_preference_reference(example, reference)
+    def run_preference_configuration(self, state, example, prefix, component_id, seed, temperature=None):
+        """Replay the shared upstream prefix, then run this configuration once."""
         order = state.workflow.topological_order()
-        if [e.component_id for e in candidate] != order[:order.index(component_id) + 1]:
-            raise ValueError("Preference candidate must contain the complete prefix and sampled component")
-        descendants = {component_id}
-        for cid in state.workflow.topological_order():
-            if any(e.source in descendants and e.target == cid for e in state.workflow.edges):
-                descendants.add(cid)
-        replay = {e.component_id: e for e in reference.executions if e.component_id not in descendants}
-        replay.update({e.component_id: e for e in candidate})
-        return self._execute(state, example, seed, replay=replay)
-
-    @staticmethod
-    def _validate_preference_reference(example, reference):
-        if reference.input_id != example.example_id or digest(reference.inputs) != digest(example.inputs):
-            raise ValueError("Preference reference must belong to the same training example")
+        if [e.component_id for e in prefix] != order[:order.index(component_id)]:
+            raise ValueError("Preference replay must contain exactly the shared upstream prefix")
+        return self._execute(
+            state, example, seed, replay={e.component_id: e for e in prefix},
+            temperature_component=component_id, sample_temperature=temperature,
+        )
 
     def execute(self, state, example, seed, intervention=None, use_cache=False):
         return self._execute(state, example, seed, intervention=intervention)
 
-    def _execute(self, state, example, seed, intervention=None, replay=None, stop_after=None, sample_temperature=None):
+    def _execute(self, state, example, seed, intervention=None, replay=None, stop_after=None, sample_temperature=None, temperature_component=None):
         self._validate_workflow(state)
         if replay is not None and example.split != "train":
             raise ValueError("Preference sampling and replay are restricted to training examples")
@@ -369,10 +362,9 @@ class UpstreamRuntime(CompoundAISystem):
                                 "variable": deepcopy(component.variable),
                             }
                         else:
-                            if cid == stop_after and sample_temperature is not None and hasattr(component.config, "temperature"):
-                                # Exploration affects only this producer; downstream settings are restored.
-                                temperature = max(component.config.temperature or 0, sample_temperature)
-                                with component.context(temperature=temperature):
+                            if cid == temperature_component and sample_temperature is not None:
+                                # Change this component's decoding setting for this branch only.
+                                with component.context(temperature=sample_temperature):
                                     outputs = original_call(component, values)
                             else:
                                 outputs = original_call(component, values)
@@ -417,7 +409,7 @@ class UpstreamRuntime(CompoundAISystem):
                     )
                 )
                 if cid == stop_after:
-                    raise _SampleComplete()
+                    raise _PrefixComplete()
                 return outputs
 
             self.engine._single_call = observed_call
@@ -425,7 +417,7 @@ class UpstreamRuntime(CompoundAISystem):
                 prediction = self.engine(**deepcopy(example.inputs))
                 reference = BenchmarkExample(**example.inputs, **example.target)
                 reward = float(self.engine.evaluate(reference, prediction=prediction))
-            except _SampleComplete:
+            except _PrefixComplete:
                 return executions
             finally:
                 self.engine._single_call = original_call
@@ -449,6 +441,8 @@ class UpstreamRuntime(CompoundAISystem):
                     "intervention": intervention,
                     "cache_hit": False,
                     "task_generation_seeded": False,
+                    **({"temperature_overrides": {temperature_component: sample_temperature}}
+                       if temperature_component and sample_temperature is not None else {}),
                     **({"preference_replayed_components": list(replay)} if replay is not None else {}),
                     **({
                         "reused_components": reused_components,

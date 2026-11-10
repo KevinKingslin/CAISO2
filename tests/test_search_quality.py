@@ -73,7 +73,7 @@ def test_all_tied_bootstrap_stops_before_constitution_induction(tmp_path):
     optimizer = CaisoOptimizer(
         runtime.engine, [Example(question="2", gd_answer="4")],
         [Example(question="3", gd_answer="6")],
-        {"dataset": "pubmed", "caiso": {"method": {"initial_preference_attempts": 1}}},
+        {"dataset": "pubmed", "caiso": {"method": {"initial_preference_attempts": 1, "preference_collection": {"mode": "rerun"}}}},
         tmp_path, providers=ProviderRegistry({}), dicai=dicai,
     )
     with pytest.raises(RuntimeError, match="initialization failed"):

@@ -1,90 +1,85 @@
 # Initial DICAI preference collection
 
-The default `preference_collection.mode: component` collects objective training
-preferences using the component-level sampling idea in
-[OPTIMAS Section 4.1](https://arxiv.org/html/2507.03041#S4.SS1).
-It generates real alternative component outputs through higher-temperature
-decoding or alternate declared configurations. It does not generate new prompts,
-inject a reference answer as an execution, or use a constitution to label ties.
-The collection protocol is `component-continuations-v1`.
+The default `preference_collection.mode: component` follows the requested
+unchanged/changed configuration comparison. The protocol is
+`configuration-pair-v2`.
 
-## Execution and scoring
+## Procedure
 
-1. Deduplicate training inputs and seed-shuffle their order and the optimizable
-   components. Visit every component on a question before advancing to the next.
-2. Execute the normal system once for that question, capturing the reference
-   execution. Reuse it across the question's component pools.
-3. For the selected component, retain its original output and sample up to
-   `candidates - 1` alternatives against its captured prefix. Components with a
-   declared search space try alternate configurations in seeded order. LLM
-   components exposing a temperature setting use at least the exploration
-   temperature; `null` requests no override. Model services can still restrict
-   temperature support. Prompts and weights are not rewritten or trained here.
-4. Deduplicate by the sampled component's actual output. A configuration change
-   that produces the same output does not create another candidate.
-5. Freeze the candidate output and all non-descendant outputs from the reference.
-   Execute its descendants afresh, under the normal downstream configuration,
-   for `downstream_rollouts` repetitions. Validate replayed inputs/configurations.
-6. Compute each output's mean task metric. Consider every unordered candidate
-   pair, independent of which array index has the higher score. Retain pairs with
-   differences strictly greater than `initial_preference_min_margin`, prioritizing
-   larger gaps and capping each pool with `pairs_per_context`. Randomize A/B order
-   using the collection seed.
+1. Deduplicate training inputs and seed-shuffle their order.
+2. Independently select an eligible component at random for each sample. Eligible
+   components have an alternate declared configuration or a temperature setting
+   different from `preference_collection.temperature`.
+3. Change that component only: randomly choose an alternate value from its
+   declared search space, or use the configured changed temperature when there is
+   no alternate discrete value. Prompts are not rewritten.
+4. Execute the upstream prefix once under the current configuration and freeze
+   its outputs. The selected component is not run during prefix capture.
+5. Run branch A (unchanged configuration) once from that component onward.
+6. Run branch B (changed configuration) once from the same captured prefix.
+   The selected component and all subsequent components execute afresh. The
+   downstream configurations remain normal. No candidate output is frozen.
+7. Label the branch with the higher objective task metric as preferred. On exact
+   equality, choose A or B at random with equal probability. Keep the pair even
+   when the outputs are identical. No score-margin threshold is applied.
+8. Send both actual trajectories and the preference label to DICAI.
 
-The mean estimates downstream performance conditional on a particular frozen
-output and context. It is not the score of a representative single trajectory or
-an estimate of the configuration's unconditional accuracy. Three continuations
-are a bounded default, not a statistical confidence guarantee. Seeds control
-question/configuration selection and identify repeats; the benchmark adapter
-does not add model-generation seeds, so repeated calls are not deterministic.
+Each comparison therefore costs one upstream-prefix execution plus two suffix
+executions. There is no extra full-system reference execution, four-candidate
+pool, repeated downstream continuation scoring, or averaging. When the first
+component is selected, the prefix is empty and the two branches are full runs.
+Component selection and tie-breaking use seeded RNGs. The benchmark adapter
+continues to leave actual model generations unseeded.
 
-Sampling is restricted to training examples. Exploratory variables, generation
-settings and call observers are restored even after failure. Content-policy
-rejections are logged without replacement draws. A candidate lacking its full
-requested continuation count is excluded from comparisons. Service and budget
-failures propagate through the normal initialization failure handling.
+## Configuration
 
-## Configuration and artifacts
+```yaml
+initial_preference_pairs: 30
+initial_preference_attempts: 200
+preference_collection:
+  mode: component
+  temperature: 0.9
+```
 
-The shared and packaged method YAMLs default to four candidates including the
-original, exploration temperature 0.9, three downstream continuations, and one
-retained pair per pool. The existing defaults target 30 retained pairs, cap 200
-question/component pools, and require a mean-score difference greater than 0.01.
-If fewer than 30 usable pairs are found, a nonempty set is used. No usable pairs
-causes a clear initialization error rather than fabricated preferences.
+The temperature is the changed branch's actual setting, not a lower bound.
+Components whose current temperature already equals it need an alternate declared
+configuration to be eligible. `temperature: null` disables temperature changes
+but still permits alternate discrete configurations. The collector stops at its
+pair target, attempt cap or run budget. With `initial_preference_attempts: -1`, it
+visits at most `initial_preference_pairs` distinct training inputs once, selecting
+one random component per sample. A nonempty smaller collection is usable.
 
-`initial_preference_attempts: -1` performs one pass through all components on up to
-`initial_preference_pairs` distinct training questions, still stopping at the
-retained-pair target. `preference_collection.mode: rerun` is the earlier collector:
-two full runs of one unchanged configuration, with its original attempt policy.
-Explicit `caiso.preferences_path` data bypasses either collector. Existing run
-checkpoints retain their saved preferences; start a new output directory for the
-new resolved configuration.
+`mode: rerun` retains the original two-full-run ablation, which skips ties and
+uses `initial_preference_min_margin`. That margin does not affect the default
+configuration-pair collector. The former `candidates`, `downstream_rollouts` and
+`pairs_per_context` controls are removed because the requested procedure always
+uses exactly two configurations and one run per branch.
 
-The run's `setup/bootstrap_comparisons.jsonl` records candidate pools, sampling
-settings, each real continuation, individual task rewards, means, retained pair
-IDs and abstention reasons. Retained preferences are saved in `setup.json` and
-checkpoints. Their candidate records contain the sampled prefix plus all actual
-continuations. Their metadata holds the mean scores, per-run scores, label source
-and changed configuration. DICAI's existing evidence projection strips reward,
-target, gold, seed and evaluation metadata from every continuation before
-reasoning or blind reconstruction. Component coverage includes observed IDs in
-both the prefix and continuations. The 15 DICAI prompt files are unchanged.
+Supplied `caiso.preferences_path` data bypasses collection. Start a new output
+directory for this protocol; previous checkpoints retain their saved datasets.
+The optional block-constitution collector remains separate and disabled by
+default.
 
-Only fresh calls charge component execution cost; replayed records increment the
-reuse counter, and each completed continuation counts as a completed system
-execution. A sampling call stopping at its producer does not count as a completed
-system execution. The reference baseline also consumes the normal budget.
+## Evidence and accounting
 
-This collector is for initial system-constitution induction through the benchmark
-`UpstreamRuntime`. The separate optional block-constitution collector continues
-to compare proposed block configurations and remains disabled by default. Its
-existing constitution-based tie handling is not used by this initial collector.
+Retained pairs contain two full recorded trajectories, not scores attached to
+representative draws. A is the unchanged branch; B is the changed branch. Pair
+metadata records the changed component/parameter, task scores, whether the scores
+were tied, and `label_source: random_task_tie` or `training_task_metric`.
+`setup/bootstrap_comparisons.jsonl` records each collected pair and filtered
+comparison. Preferences also appear in `setup.json` and run checkpoints.
+DICAI's existing projection hides task scores, targets, gold and evaluation
+metadata from model requests. The 15 DICAI prompt templates are unchanged.
 
-## Validation
+Only fresh component calls consume execution cost; prefix replay increments the
+reuse counter. Each suffix completion counts as one completed system execution;
+prefix capture does not. Only training inputs can use this sampling path.
+Variables, generation settings and call observers are restored after every
+branch, including failures. Explicit policy rejections skip the comparison
+without replacement draws. Service and budget failures propagate through normal
+initialization error handling.
 
-`tests/test_preference_collection.py` exercises actual synthetic upstream
-components, including a branch not downstream of the sampled producer. It checks
-generation-setting restoration, alternate hyperparameters, frozen candidates,
-fresh continuations, averaged labels, policy/service/budget failures, score
-redaction, and training-only execution. No paid model calls are needed.
+`tests/test_preference_collection.py` verifies two actual configuration runs,
+shared upstream execution, random component selection, single-run metric labels,
+random exact ties including identical outputs, score redaction, parameter
+restoration, error handling and optimizer integration without paid model calls.

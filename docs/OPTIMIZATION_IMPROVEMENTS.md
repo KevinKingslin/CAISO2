@@ -1,5 +1,10 @@
 # Search protocol v3
 
+Initial preference collection now uses the requested
+[configuration-pair protocol](PREFERENCE_COLLECTION.md), including random exact
+score ties. Bootstrap abstention below describes the retained `mode: rerun`
+ablation and the earlier search-protocol migration.
+
 These changes implement the optimization audit's requested repairs. They change
 the optimization protocol, while retaining benchmark factories, initial prompts,
 task inference interfaces, datasets, scorers and model choices. Pre-v3 checkpoints

@@ -187,16 +187,15 @@ STaRK and BigCodeBench evaluation configurations are also included.
 ```
 
 These dispatch to `scripts/optimize_system.py` with `configs/experiments/*.yaml`.
-Initial DICAI preferences now use [component candidate sampling](docs/PREFERENCE_COLLECTION.md):
-shared upstream executions, higher-temperature or alternate-configuration outputs,
-and fresh downstream continuations scored by the task metric. The default is four
-candidates including the original, three continuations per distinct output, and
-at most one retained pair per question/component pool. Exploration settings are
-restored before downstream execution and benchmark evaluation. Use a new run
-directory; `preference_collection.mode: rerun` provides the earlier collector for
-ablations, and supplied preference files still bypass collection.
-The current [search protocol](docs/OPTIMIZATION_IMPROVEMENTS.md) skips ambiguous
-bootstrap pairs, uses deterministic discrete selection, supplies training-error
+Initial DICAI preferences use [configuration pairs](docs/PREFERENCE_COLLECTION.md).
+For each sample, randomly select one component, freeze its upstream execution,
+and run the unchanged configuration and one temperature/hyperparameter change
+once each. The higher task score wins; exact ties choose a random winner,
+including identical outputs. The collection seed controls component selection and
+tie-breaking. Start a new run directory; supplied preferences still bypass
+collection and `preference_collection.mode: rerun` retains the earlier ablation.
+The [search protocol](docs/OPTIMIZATION_IMPROVEMENTS.md) uses deterministic
+discrete selection, supplies training-error
 feedback and checkpointed prompt history, and screens joint candidates before
 full training evaluation. Recorded component observations are reused within
 training proposals; acceptance runs stay fresh. HotpotQA accepts on 50 seeded

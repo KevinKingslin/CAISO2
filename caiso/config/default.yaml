@@ -6,14 +6,11 @@ max_iterations: null  # Continue until a run, time, or model-call budget is exha
 execution:
   max_workers: 10  # Independent system runs; provider concurrency/RPM limits still apply.
 initial_preference_pairs: 30
-initial_preference_attempts: 200  # Bounded question/component pools; equal-score outputs abstain.
-initial_preference_min_margin: 0.01
+initial_preference_attempts: 200  # Bounded sample comparisons; exact score ties choose a random winner.
+initial_preference_min_margin: 0.01  # Used only by the legacy rerun collector.
 preference_collection:
-  mode: component  # Frozen component outputs scored by fresh downstream continuations; rerun is the legacy ablation.
-  candidates: 4  # Original output plus up to three higher-temperature/alternate-configuration samples.
-  temperature: 0.9  # Minimum exploration temperature for the sampled LLM only; null preserves its normal setting.
-  downstream_rollouts: 3
-  pairs_per_context: 1  # Cap retained pairs per question/component pool.
+  mode: component  # One unchanged/changed configuration pair per sample; one run per branch.
+  temperature: 0.9  # Changed temperature for a randomly selected LLM without an alternate discrete configuration.
 dicai:
   personas: 3
   max_workers: 10  # Concurrent independent debates for both system and block induction.

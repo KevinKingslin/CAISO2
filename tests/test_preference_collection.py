@@ -1,4 +1,4 @@
-"""Real upstream execution: fixed producer draws, fresh descendants, objective labels."""
+"""One unchanged/changed run per sample, random components and random metric ties."""
 
 from copy import deepcopy
 import json
@@ -80,130 +80,151 @@ def fixture(mode="temperature", noisy=False):
     return runtime, examples
 
 
-def collect(runtime, examples, **kwargs):
-    return initial_preferences(runtime, runtime.initial_state, examples, 1, 1, 42,
-                               collection={"mode": "component", "candidates": 3,
-                                           "downstream_rollouts": 3, "temperature": 0.9}, **kwargs)
+def collect(runtime, examples, temperature=0.9, count=1, attempts=1, seed=42, **kwargs):
+    return initial_preferences(runtime, runtime.initial_state, examples, count, attempts, seed,
+                               collection={"mode": "component", "temperature": temperature}, **kwargs)
 
 
 @pytest.mark.parametrize("mode", ["temperature", "hyperparameter"])
-def test_frozen_outputs_shared_non_descendants_normal_downstream_and_real_accounting(mode, tmp_path):
+def test_exactly_two_configuration_runs_share_only_the_upstream_prefix(mode, tmp_path):
     runtime, examples = fixture(mode)
     state = runtime.initial_state.model_copy(deep=True)
     components = runtime.engine.components
     original_call = runtime.engine._single_call
     path = tmp_path / "comparisons.jsonl"
     pair, = collect(runtime, examples, comparison_path=path)
-    assert observed_components(pair) == set(components)
-    assert pair.metadata["mean_scores"] == ([0, 1] if pair.preferred == "B" else [1, 0])
-    assert components["source"].calls == components["independent"].calls == 1
-    assert components["producer"].calls == 3
-    assert sum(components["consumer"].calls.values()) == 7  # baseline + two frozen outputs × three runs
-    assert components["consumer"].temperatures == [0.2] * 7
-    assert components["producer"].temperatures == [0, 0.9, 0.9]
+    assert pair.preferred == "B"
+    assert pair.metadata["global_scores"] == [0, 1]
+    assert pair.metadata["candidate_roles"] == {"A": "unchanged", "B": "changed"}
+    assert components["source"].calls == 1
+    assert components["producer"].calls == components["independent"].calls == 2
+    assert sum(components["consumer"].calls.values()) == 2
+    assert components["consumer"].temperatures == [0.2, 0.2]
+    assert components["producer"].temperatures == ([0, 0.9] if mode == "temperature" else [0, 0])
     assert components["producer"].config.temperature == 0
     assert components["producer"].variable == state.configurations["producer"].value
     assert runtime.initial_state == state
     assert runtime.engine._single_call == original_call
-    assert runtime.budget.usage.component_executions == 12
-    assert runtime.budget.usage.equivalent_full_system_runs == pytest.approx(3)
+    assert runtime.budget.usage.component_executions == 7
+    assert runtime.budget.usage.full_system_runs == 2
+    assert runtime.budget.usage.equivalent_full_system_runs == pytest.approx(1.75)
+    assert observed_components(pair) == set(components)
     for candidate in (pair.candidate_a, pair.candidate_b):
-        output = candidate["trajectory"]["executions"][-1]["component_output"]
-        assert len(candidate["continuations"]) == 3
-        for continuation in candidate["continuations"]:
-            assert continuation["executions"][1]["component_output"] == output
-            assert continuation["metadata"]["preference_replayed_components"] == ["source", "independent", "producer"]
+        assert "continuations" not in candidate
+        assert candidate["trajectory"]["metadata"]["preference_replayed_components"] == ["source"]
+    assert pair.candidate_a["trajectory"]["executions"][0] == pair.candidate_b["trajectory"]["executions"][0]
     view = json.dumps([task_view(pair.context), *candidate_views(pair)])
-    assert all(f'"{key}"' not in view for key in ("reward", "gold", "target", "metadata", "mean_scores", "rollout_scores"))
-    log = json.loads(path.read_text())
-    assert log["status"] == "labeled" and len(log["candidates"]) == 2
-    assert all(len(row["scores"]) == 3 for row in log["candidates"])
+    assert all(f'"{key}"' not in view for key in ("reward", "gold", "target", "metadata", "global_scores"))
+    assert json.loads(path.read_text())["preference"]["preferred"] == "B"
 
 
-def test_labels_use_mean_continuation_scores_instead_of_first_observed_answers():
-    runtime, examples = fixture(noisy=True)
-    pair, = collect(runtime, examples)
-    chosen = pair.candidate_a if pair.preferred == "A" else pair.candidate_b
-    rejected = pair.candidate_b if pair.preferred == "A" else pair.candidate_a
-    assert chosen["continuations"][0]["reward"] == 0
-    assert rejected["continuations"][0]["reward"] == 1
-    assert sorted(pair.metadata["mean_scores"]) == [1 / 3, 2 / 3]
-    assert chosen["trajectory"]["executions"][-1]["component_output"] == {"result": "2"}
-
-
-def test_original_candidate_can_be_chosen_regardless_of_array_index():
+def test_unchanged_configuration_is_preferred_when_its_metric_is_higher():
     runtime, examples = fixture()
     examples[0].target = {"gd_answer": "1"}
     pair, = collect(runtime, examples)
-    chosen = pair.candidate_a if pair.preferred == "A" else pair.candidate_b
-    assert chosen["trajectory"]["executions"][-1]["component_output"] == {"result": "1"}
+    assert pair.preferred == "A" and pair.metadata["global_scores"] == [1, 0]
 
 
-@pytest.mark.parametrize("temperature,expected_reason", [(None, "identical_component_outputs"), (0.9, "equal_or_insufficient_score_margin")])
-def test_identical_outputs_and_equal_objective_scores_abstain(temperature, expected_reason, tmp_path):
+@pytest.mark.parametrize("target,score", [("neither", 0), ("1", 1)])
+def test_equal_metrics_and_identical_outputs_are_retained_with_random_winners(target, score):
+    results = []
+    for _ in range(2):
+        runtime, examples = fixture()
+        examples[0].target = {"gd_answer": target}
+        pairs = collect(runtime, examples, temperature=0.1, count=20, attempts=20)
+        assert len(pairs) == 20
+        assert all(pair.metadata["task_score_tied"] for pair in pairs)
+        assert all(pair.metadata["label_source"] == "random_task_tie" for pair in pairs)
+        assert all(pair.metadata["global_scores"] == [score, score] for pair in pairs)
+        assert all(pair.candidate_a["trajectory"]["final_output"] == pair.candidate_b["trajectory"]["final_output"] for pair in pairs)
+        results.append([pair.preferred for pair in pairs])
+    assert set(results[0]) == {"A", "B"}
+    assert results[0] == results[1]  # Collection RNG, not model generations, is reproducible.
+
+
+def test_score_margin_does_not_override_a_strictly_higher_metric(monkeypatch):
     runtime, examples = fixture()
-    examples[0].target = {"gd_answer": "neither"}
-    path = tmp_path / "pools.jsonl"
-    with pytest.raises(ModelResponseError, match="No usable unequal-score"):
-        initial_preferences(runtime, runtime.initial_state, examples, 1, 1, 42, comparison_path=path,
-                            collection={"mode": "component", "candidates": 2, "temperature": temperature,
-                                        "downstream_rollouts": 1})
-    assert json.loads(path.read_text())["abstention_reason"] == expected_reason
+    original = runtime.run_preference_configuration
+
+    def score(*args):
+        result = original(*args)
+        result.reward = 0.505 if args[-1] == 0.9 else 0.5
+        return result
+
+    monkeypatch.setattr(runtime, "run_preference_configuration", score)
+    pair, = collect(runtime, examples, min_margin=1)
+    assert pair.preferred == "B" and not pair.metadata["task_score_tied"]
 
 
-def test_filtered_sampling_context_is_not_resampled(monkeypatch, tmp_path):
+def test_component_is_randomly_selected_per_sample_instead_of_cycled():
+    class OtherProducer(BaseComponent):
+        def __init__(self):
+            super().__init__("Other LLM", ["number"], ["extra"], variable="fixed prompt",
+                             config={"temperature": 0.0}, num_retry=1, retry_after=0)
+
+        def forward(self, **inputs):
+            return {"extra": str(self.config.temperature) + self.variable}
+
+    runtime, _ = fixture()
+    runtime.engine.components["other"] = OtherProducer()
+    runtime.engine.components["consumer"].input_fields.append("extra")
+    runtime.engine.execution_order = ["source", "producer", "other", "independent", "consumer"]
+    runtime = UpstreamRuntime(runtime.engine, ProviderRegistry({}), BudgetTracker(5))
+    examples = adapt_examples(runtime.engine, [Example(question="1", gd_answer="2")], "train")
+    pairs = collect(runtime, examples, count=20, attempts=20)
+    selected = [pair.metadata["component_id"] for pair in pairs]
+    assert set(selected) == {"producer", "other"}
+    assert any(a == b for a, b in zip(selected, selected[1:]))
+
+
+def test_first_component_needs_no_prefix_and_is_executed_twice():
+    component = Producer()
+    system = CompoundAISystem({"producer": component}, final_output_fields=["result"],
+                              ground_fields=["gd_answer"], eval_func=lambda result, gd_answer: float(result == gd_answer))
+    runtime = UpstreamRuntime(system, ProviderRegistry({}), BudgetTracker(1))
+    examples = adapt_examples(system, [Example(number="1", gd_answer="2")], "train")
+    pair, = collect(runtime, examples)
+    assert pair.preferred == "B" and component.calls == 2
+    assert runtime.budget.usage.component_executions == 2
+
+
+def test_filtered_changed_branch_is_not_retried(monkeypatch, tmp_path):
     runtime, examples = fixture()
     calls = []
+    original = runtime.run_preference_configuration
 
     def filtered(*args):
         calls.append(args)
-        raise ContentFilteredError("blocked sample")
-
-    monkeypatch.setattr(runtime, "sample_preference_candidate", filtered)
-    with pytest.raises(ModelResponseError, match="No usable unequal-score"):
-        initial_preferences(runtime, runtime.initial_state, examples, 1, 3, 42,
-                            collection={"mode": "component"}, comparison_path=tmp_path / "pools.jsonl")
-    assert len(calls) == 1
-
-
-def test_filtered_continuation_is_excluded_without_a_replacement(monkeypatch, tmp_path):
-    runtime, examples = fixture()
-    calls = []
-    original = runtime.continue_preference_candidate
-
-    def filtered(*args):
-        output = args[3][-1].component_output["result"]
-        calls.append(output)
-        if output == "2":
-            raise ContentFilteredError("blocked continuation")
+        if args[-1] == 0.9:
+            raise ContentFilteredError("blocked changed configuration")
         return original(*args)
 
-    monkeypatch.setattr(runtime, "continue_preference_candidate", filtered)
-    with pytest.raises(ModelResponseError, match="No usable unequal-score"):
-        collect(runtime, examples, comparison_path=tmp_path / "pools.jsonl")
-    assert calls.count("1") == 3 and calls.count("2") == 1
-    log = json.loads((tmp_path / "pools.jsonl").read_text())
-    assert log["excluded_candidates"][0]["status"] == "skipped_content_filter"
+    monkeypatch.setattr(runtime, "run_preference_configuration", filtered)
+    path = tmp_path / "comparisons.jsonl"
+    with pytest.raises(ModelResponseError, match="No unfiltered configuration"):
+        collect(runtime, examples, attempts=3, comparison_path=path)
+    assert len(calls) == 2
+    assert json.loads(path.read_text())["status"] == "skipped_content_filter"
 
 
 @pytest.mark.parametrize("split", ["validation", "test"])
 def test_training_only_before_any_sampling_calls(split):
     runtime, examples = fixture()
-    reference = runtime.execute(runtime.initial_state, examples[0], 42)
+    prefix = runtime.preference_prefix(runtime.initial_state, examples[0], "producer", 42)
     example = examples[0].model_copy(update={"split": split})
     with pytest.raises(ValueError, match="training"):
         collect(runtime, [example])
     with pytest.raises(ValueError, match="training"):
-        runtime.sample_preference_candidate(runtime.initial_state, example, reference, "producer", 43, 0.9)
+        runtime.preference_prefix(runtime.initial_state, example, "producer", 43)
     with pytest.raises(ValueError, match="training"):
-        runtime.continue_preference_candidate(runtime.initial_state, example, reference, reference.executions[:2], "producer", 44)
-    assert runtime.engine.components["producer"].calls == 1
+        runtime.run_preference_configuration(runtime.initial_state, example, prefix, "producer", 44)
+    assert runtime.engine.components["producer"].calls == 0
 
 
 @pytest.mark.parametrize("error", [RuntimeError("service unavailable"), BudgetExceeded("budget"), ContentFilteredError("filtered")])
-def test_sampling_failure_restores_generation_settings_variables_and_observer(error):
+def test_branch_failure_restores_generation_settings_variables_and_observer(error):
     runtime, examples = fixture("hyperparameter")
-    reference = runtime.execute(runtime.initial_state, examples[0], 42)
+    prefix = runtime.preference_prefix(runtime.initial_state, examples[0], "producer", 42)
     producer = runtime.engine.components["producer"]
     original = runtime.engine._single_call
     candidate = runtime.initial_state.model_copy(deep=True)
@@ -216,23 +237,25 @@ def test_sampling_failure_restores_generation_settings_variables_and_observer(er
 
     producer.forward = fail
     with pytest.raises(type(error), match=str(error)):
-        runtime.sample_preference_candidate(candidate, examples[0], reference, "producer", 43, 0.9)
+        runtime.run_preference_configuration(candidate, examples[0], prefix, "producer", 43, 0.9)
     assert producer.variable == {"multiplier": 1}
     assert producer.config.temperature == 0
     assert runtime.engine._single_call == original
 
 
-def test_replay_rejects_mismatched_inputs():
+def test_replay_rejects_mismatched_inputs_and_incomplete_prefixes():
     runtime, examples = fixture()
-    reference = runtime.execute(runtime.initial_state, examples[0], 42)
-    candidate = deepcopy(reference.executions[:2])
-    candidate[-1].component_input = {"number": "different"}
+    prefix = runtime.preference_prefix(runtime.initial_state, examples[0], "producer", 42)
+    invalid = deepcopy(prefix)
+    invalid[0].component_input = {"question": "different"}
     with pytest.raises(ValueError, match="mismatch"):
-        runtime.continue_preference_candidate(runtime.initial_state, examples[0], reference, candidate, "producer", 43)
+        runtime.run_preference_configuration(runtime.initial_state, examples[0], invalid, "producer", 43)
+    with pytest.raises(ValueError, match="exactly the shared"):
+        runtime.run_preference_configuration(runtime.initial_state, examples[0], [], "producer", 43)
 
 
-@pytest.mark.parametrize("settings", [None, {"mode": "unknown"}, {"candidates": 1}, {"candidates": True},
-                                     {"downstream_rollouts": 0}, {"pairs_per_context": None},
+@pytest.mark.parametrize("settings", [None, {"mode": "unknown"}, {"candidates": 4},
+                                     {"downstream_rollouts": 3}, {"pairs_per_context": 1},
                                      {"temperature": float("nan")}, {"temperature": 3}, {"temperature": True}])
 def test_invalid_sampling_config_fails_before_execution(settings):
     with pytest.raises(ValueError, match="preference_collection"):
@@ -240,13 +263,10 @@ def test_invalid_sampling_config_fails_before_execution(settings):
 
 
 def test_new_collector_is_the_resolved_default():
-    assert load_method({})["preference_collection"] == {
-        "mode": "component", "candidates": 4, "temperature": 0.9,
-        "downstream_rollouts": 3, "pairs_per_context": 1,
-    }
+    assert load_method({})["preference_collection"] == {"mode": "component", "temperature": 0.9}
 
 
-def test_optimizer_collects_component_preferences_before_induction(tmp_path):
+def test_optimizer_collects_configuration_preferences_before_induction(tmp_path):
     from caiso.optim.optimizer import CaisoOptimizer
     from tests.offline import OfflineEmbeddings, OfflineProvider
 
@@ -268,7 +288,6 @@ def test_optimizer_collects_component_preferences_before_induction(tmp_path):
     optimizer.optimize()
     setup = json.loads((tmp_path / "setup.json").read_text())
     pair, = setup["preferences"]
-    assert pair["metadata"]["protocol"] == "component-continuations-v1"
+    assert pair["metadata"]["protocol"] == "configuration-pair-v2"
     assert setup["system_constitution"]["source_preference_pair_ids"] == [pair["pair_id"]]
     assert runtime.engine.components["producer"].config.temperature == 0
-    assert runtime.engine.components["consumer"].temperatures == [0.2] * len(runtime.engine.components["consumer"].temperatures)
