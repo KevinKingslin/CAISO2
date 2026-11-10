@@ -62,8 +62,17 @@ def attribution_batch(examples, size, seed, previous_effects):
     return unseen + batch(repeated, size - len(unseen), seed)
 
 
-def initial_preferences(runtime, state, train, count, attempts, seed, comparison_path=None, min_margin=0):
+def initial_preferences(runtime, state, train, count, attempts, seed, comparison_path=None, min_margin=0, collection=None, progress=None):
     """Collect strict task preferences; ties and indistinguishable outputs abstain."""
+    if collection is not None:
+        validate_method({"preference_collection": collection})
+    if collection and collection.get("mode", "component") == "component":
+        from .preference_collection import collect_preferences
+
+        return collect_preferences(
+            runtime, state, train, count, attempts, seed, settings=collection,
+            comparison_path=comparison_path, min_margin=min_margin, progress=progress,
+        )
     if not train or count < 1:
         raise ValueError("Initial preferences require training samples and a positive sample count")
     if isinstance(min_margin, bool) or not isinstance(min_margin, (int, float)) or not isfinite(min_margin) or min_margin < 0:
@@ -327,6 +336,10 @@ class Algorithm:
                 seed,
                 comparison_path=self.output / "setup/bootstrap_comparisons.jsonl",
                 min_margin=cfg.get("initial_preference_min_margin", 0),
+                collection=cfg.get("preference_collection"),
+                progress=lambda done, total, retained, target: self.report.update(
+                    progress=f"Preference pools: {done}/{total}; retained pairs: {retained}/{target}"
+                ),
             )
             update_result(
                 self.output / "setup.json",

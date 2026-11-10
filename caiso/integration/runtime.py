@@ -27,6 +27,10 @@ from caiso.wrappers.example import Example as BenchmarkExample
 WIKIPEDIA_RETRIEVER = "examples.systems.hotpotqa.five_components.WikipediaRetriever"
 
 
+class _SampleComplete(Exception):
+    """Stop a training execution immediately after the sampled component."""
+
+
 def adapt_examples(system, examples, split):
     """Keep all inputs and all ground-truth fields; never re-split or re-score data."""
     return [
@@ -220,8 +224,44 @@ class UpstreamRuntime(CompoundAISystem):
                 "Benchmark parity requires the original workflow; workflow search is disabled"
             )
 
+    def sample_preference_candidate(self, state, example, reference, component_id, seed, temperature):
+        """Sample one component against its recorded prefix, without a downstream run."""
+        self._validate_preference_reference(example, reference)
+        order = state.workflow.topological_order()
+        prefix = reference.executions[:order.index(component_id)]
+        return self._execute(
+            state, example, seed, replay={e.component_id: e for e in prefix},
+            stop_after=component_id, sample_temperature=temperature,
+        )
+
+    def continue_preference_candidate(self, state, example, reference, candidate, component_id, seed):
+        """Freeze the candidate and all non-descendants; execute fresh descendants."""
+        self._validate_preference_reference(example, reference)
+        order = state.workflow.topological_order()
+        if [e.component_id for e in candidate] != order[:order.index(component_id) + 1]:
+            raise ValueError("Preference candidate must contain the complete prefix and sampled component")
+        descendants = {component_id}
+        for cid in state.workflow.topological_order():
+            if any(e.source in descendants and e.target == cid for e in state.workflow.edges):
+                descendants.add(cid)
+        replay = {e.component_id: e for e in reference.executions if e.component_id not in descendants}
+        replay.update({e.component_id: e for e in candidate})
+        return self._execute(state, example, seed, replay=replay)
+
+    @staticmethod
+    def _validate_preference_reference(example, reference):
+        if reference.input_id != example.example_id or digest(reference.inputs) != digest(example.inputs):
+            raise ValueError("Preference reference must belong to the same training example")
+
     def execute(self, state, example, seed, intervention=None, use_cache=False):
+        return self._execute(state, example, seed, intervention=intervention)
+
+    def _execute(self, state, example, seed, intervention=None, replay=None, stop_after=None, sample_temperature=None):
         self._validate_workflow(state)
+        if replay is not None and example.split != "train":
+            raise ValueError("Preference sampling and replay are restricted to training examples")
+        if replay is not None and self._component_cache is not None:
+            raise ValueError("Preference continuations cannot reuse the training-search cache")
         if self._component_cache is not None and example.split != "train":
             raise ValueError("Component observation reuse is restricted to training searches")
         edge = None
@@ -246,6 +286,16 @@ class UpstreamRuntime(CompoundAISystem):
             def observed_call(component, inputs):
                 cid = self._component_ids[id(component)]
                 values = deepcopy(inputs)
+                if replay is not None and cid in replay:
+                    record = replay[cid]
+                    if digest(values) != digest(record.component_input) or record.config_hash != digest(state.configurations[cid]):
+                        raise ValueError(f"Preference replay input/configuration mismatch for {cid}")
+                    outputs = deepcopy(record.component_output)
+                    component.traj = {"input": values, "output": deepcopy(outputs), "variable": deepcopy(component.variable)}
+                    executions.append(record.model_copy(deep=True, update={"seconds": 0}))
+                    with self.budget.lock:
+                        self.budget.usage.reused_component_executions += 1
+                    return outputs
                 if edge is not None and cid == edge.target:
                     for field, baseline in edge.baselines.items():
                         values[field] = (
@@ -319,7 +369,13 @@ class UpstreamRuntime(CompoundAISystem):
                                 "variable": deepcopy(component.variable),
                             }
                         else:
-                            outputs = original_call(component, values)
+                            if cid == stop_after and sample_temperature is not None and hasattr(component.config, "temperature"):
+                                # Exploration affects only this producer; downstream settings are restored.
+                                temperature = max(component.config.temperature or 0, sample_temperature)
+                                with component.context(temperature=temperature):
+                                    outputs = original_call(component, values)
+                            else:
+                                outputs = original_call(component, values)
                     for field in required_queries:
                         value = outputs.get(field)
                         if not isinstance(value, str) or not value.strip():
@@ -360,6 +416,8 @@ class UpstreamRuntime(CompoundAISystem):
                         seconds=elapsed,
                     )
                 )
+                if cid == stop_after:
+                    raise _SampleComplete()
                 return outputs
 
             self.engine._single_call = observed_call
@@ -367,6 +425,8 @@ class UpstreamRuntime(CompoundAISystem):
                 prediction = self.engine(**deepcopy(example.inputs))
                 reference = BenchmarkExample(**example.inputs, **example.target)
                 reward = float(self.engine.evaluate(reference, prediction=prediction))
+            except _SampleComplete:
+                return executions
             finally:
                 self.engine._single_call = original_call
             if not math.isfinite(reward):
@@ -389,6 +449,7 @@ class UpstreamRuntime(CompoundAISystem):
                     "intervention": intervention,
                     "cache_hit": False,
                     "task_generation_seeded": False,
+                    **({"preference_replayed_components": list(replay)} if replay is not None else {}),
                     **({
                         "reused_components": reused_components,
                         "observation_reuse": "shared_training_search",

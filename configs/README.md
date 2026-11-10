@@ -218,6 +218,32 @@ DICAI uses the supplied original code-based prompts documented in
 [`docs/PROMPT_AUDIT.md`](../docs/PROMPT_AUDIT.md). Configured self-consistency
 samples, refinement steps, reconstruction votes and debate gates are active.
 
+Initial preference generation uses the training-only component collector:
+
+```yaml
+preference_collection:
+  mode: component
+  candidates: 4
+  temperature: 0.9
+  downstream_rollouts: 3
+  pairs_per_context: 1
+```
+
+`candidates` includes the original output. Exploration raises only the sampled
+component's temperature to at least the configured value, when that component
+exposes a temperature setting; `null` preserves its setting. Declared discrete
+search spaces supply alternate model/hyperparameter configurations. Prompts stay
+fixed. The prefix and non-descendants are replayed; each candidate output stays
+fixed across fresh downstream continuations at normal settings. Equal mean task
+scores and differences at or below `initial_preference_min_margin` abstain.
+`initial_preference_attempts` caps question/component pools, rather than single
+two-run comparisons. `-1` visits every component on at most
+`initial_preference_pairs` distinct training questions once. The target count is
+still a maximum retained-pair count; a nonempty smaller collection is usable.
+`mode: rerun` restores the earlier full-system two-run collector and its attempt
+semantics. See [collection details](../docs/PREFERENCE_COLLECTION.md) for evidence,
+budget accounting, supplied datasets, and the separate optional block collector.
+
 CAISO's semantic one-quality check is configured under the shared `dicai` section
 (or under an experiment's `method.dicai` override):
 

@@ -10,6 +10,8 @@ def response_view(value):
 
     Projection avoids dropping legitimate task fields inside component outputs.
     """
+    if "continuations" in value:
+        value = {**value, "continuations": [response_view(item) for item in value["continuations"]]}
     if "trajectory" in value:
         return {
             **{k: v for k, v in value.items() if k not in EVALUATION_KEYS | {"trajectory"}},

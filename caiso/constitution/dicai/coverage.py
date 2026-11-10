@@ -11,15 +11,16 @@ def observed_components(pair):
     """Read execution IDs, ignoring task text, outputs and evaluation metadata."""
     result = set()
     for candidate in (pair.candidate_a, pair.candidate_b):
-        trajectory = candidate.get("trajectory", candidate)
-        if not isinstance(trajectory, dict):
-            continue
-        for execution in trajectory.get("executions", []):
-            if not isinstance(execution, dict):
+        trajectories = [candidate.get("trajectory", candidate), *candidate.get("continuations", [])]
+        for trajectory in trajectories:
+            if not isinstance(trajectory, dict):
                 continue
-            component = execution.get("component_id")
-            if isinstance(component, str) and component.strip():
-                result.add(component)
+            for execution in trajectory.get("executions", []):
+                if not isinstance(execution, dict):
+                    continue
+                component = execution.get("component_id")
+                if isinstance(component, str) and component.strip():
+                    result.add(component)
     return result
 
 

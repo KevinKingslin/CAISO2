@@ -59,6 +59,21 @@ def validate_method(config):
         raise ValueError("validation_sampling must be seeded or first")
     if config.get("diagnostics_split", "validation") not in {"train", "validation"}:
         raise ValueError("diagnostics_split must be train or validation")
+    collection = config.get("preference_collection", {})
+    if not isinstance(collection, dict):
+        raise ValueError("preference_collection must be a configuration mapping")
+    if collection.get("mode", "component") not in ("component", "rerun"):
+        raise ValueError("preference_collection.mode must be component or rerun")
+    for key, default, minimum in (("candidates", 4, 2), ("downstream_rollouts", 3, 1), ("pairs_per_context", 1, 1)):
+        number = collection.get(key, default)
+        if isinstance(number, bool) or not isinstance(number, int) or number < minimum:
+            raise ValueError(f"preference_collection.{key} must be an integer >= {minimum}")
+    temperature = collection.get("temperature", 0.9)
+    if temperature is not None and (
+        isinstance(temperature, bool) or not isinstance(temperature, (int, float))
+        or not math.isfinite(temperature) or not 0 <= temperature <= 2
+    ):
+        raise ValueError("preference_collection.temperature must be between zero and two or null")
     if not isinstance(config.get("attribution", {}), dict):
         raise ValueError("attribution must be a configuration mapping")
     if not isinstance(config.get("block_constitution", {}), dict):

@@ -187,6 +187,14 @@ STaRK and BigCodeBench evaluation configurations are also included.
 ```
 
 These dispatch to `scripts/optimize_system.py` with `configs/experiments/*.yaml`.
+Initial DICAI preferences now use [component candidate sampling](docs/PREFERENCE_COLLECTION.md):
+shared upstream executions, higher-temperature or alternate-configuration outputs,
+and fresh downstream continuations scored by the task metric. The default is four
+candidates including the original, three continuations per distinct output, and
+at most one retained pair per question/component pool. Exploration settings are
+restored before downstream execution and benchmark evaluation. Use a new run
+directory; `preference_collection.mode: rerun` provides the earlier collector for
+ablations, and supplied preference files still bypass collection.
 The current [search protocol](docs/OPTIMIZATION_IMPROVEMENTS.md) skips ambiguous
 bootstrap pairs, uses deterministic discrete selection, supplies training-error
 feedback and checkpointed prompt history, and screens joint candidates before
