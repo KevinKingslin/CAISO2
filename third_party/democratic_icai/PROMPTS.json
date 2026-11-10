@@ -16,37 +16,37 @@
       "original": "third_party/democratic_icai/prompts/reasoning/cot.txt",
       "active": "caiso/prompts/dicai/reasoning/cot.txt",
       "original_sha256": "9f3fb7c82802d056cca57fed6801ed30fa4187272b546847951ba838e68bd173",
-      "active_sha256": "4f21115043408719ea05d60790ac6d216aab8a162f86a8bbf3ddec999896ce09"
+      "active_sha256": "a3a2550616bdbde81a4cc28a43ea088615fad3188e15fed86410fdae13a42531"
     },
     "reasoning.self_consistency": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_consistency.txt",
       "active": "caiso/prompts/dicai/reasoning/self_consistency.txt",
       "original_sha256": "0e77b0a4285618686e4c5dbfb5dbda8a599551fadeae6ea886223088beefc205",
-      "active_sha256": "acc10aae875c6df98068129020844de5ef15a1649def84e832b9443a6aa74a60"
+      "active_sha256": "3543db44f0e82b908835d9cde055f580330f74855b521885bbf86a2df709fbbf"
     },
     "reasoning.self_consistency_consensus": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_consistency_consensus.txt",
       "active": "caiso/prompts/dicai/reasoning/self_consistency_consensus.txt",
       "original_sha256": "718186adeab27c3709895c89018dc03e3a29a1862bd86060002061eaa2f2ed7b",
-      "active_sha256": "fdde6cc6854a89d33d7f62465bdb201962cdbfc517986c13940d2af82ab8d1d2"
+      "active_sha256": "81c5c61158b3ee6265c016fd290512bb904a3543046fd78c6ea87031e8277a3a"
     },
     "reasoning.self_refine": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_refine.txt",
       "active": "caiso/prompts/dicai/reasoning/self_refine.txt",
       "original_sha256": "ccc6174fef5e04eb07c74057ccef212da22e382e25db40a25f45f5f6107e6383",
-      "active_sha256": "2eb1dd5c3e6bddb1aa8fe7b063719d868b5dc065bbc010c91c366d06787bee42"
+      "active_sha256": "f1f4c5e1104776d448c8e558b67bf9ebbef843e53f98ae16d5b9545427d1f43f"
     },
     "reasoning.self_refine_critique": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_refine_critique.txt",
       "active": "caiso/prompts/dicai/reasoning/self_refine_critique.txt",
       "original_sha256": "12aac165baf6ca926b3bf8cd6cbf87e63a6c7d99c6159e4fae5c1c17e00f1e7f",
-      "active_sha256": "3e3abc807aea7625f9321859ad4e6e7320ed05fa860364b1a3d72cabafa85948"
+      "active_sha256": "9aaec690bc214d5a7be7f470ddcc0300a02904f9338c0605b1d14321e96757a3"
     },
     "reasoning.self_refine_revision": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_refine_revision.txt",
       "active": "caiso/prompts/dicai/reasoning/self_refine_revision.txt",
       "original_sha256": "800d98ee72219d30cd9e1b663f265194af8f2a5559dfa320eac92dc58de6e685",
-      "active_sha256": "bd33a41863efaef79f5976a2c263bc8f0d9868cb41ca1527d4355f1bf331728b"
+      "active_sha256": "8f819e735d239938d81db337e3f9201032876ecd30e749e46f9d5fe9539d7130"
     },
     "reconstruction": {
       "original": "third_party/democratic_icai/prompts/reconstruction.txt",
@@ -58,7 +58,7 @@
       "original": "third_party/democratic_icai/prompts/abstraction.txt",
       "active": "caiso/prompts/dicai/abstraction.txt",
       "original_sha256": "a628aa82dfd3b912b43b1a2273ac84f17bb3a9f54cd774ca750f92582162df39",
-      "active_sha256": "052d40b217841bc0bb8fac58a2e18cbf94fd90072fac6b4c6d630a4bfee100b4"
+      "active_sha256": "ebd005dfd741ac5ae09152714facd28a793141a22030e3b33bfd57f00a4e19a4"
     },
     "audit": {
       "original": "third_party/democratic_icai/prompts/audit.txt",
@@ -70,37 +70,37 @@
       "original": "third_party/democratic_icai/prompts/debate/debater.txt",
       "active": "caiso/prompts/dicai/debate/debater.txt",
       "original_sha256": "fd39ea8f218b3dbfe86b513a12d581357006331ff2f60b6d43af2f35a754a6fb",
-      "active_sha256": "6d1c7282bbc381c29feadd8c861f6548b4bd439fb0f642b18e86dd104a50b179"
+      "active_sha256": "c9d2b081fcadbe27aac9ac6b7dd9afeeeb8d9b1cb989032f7c4284fb3e7e8278"
     },
     "debate.chairperson": {
       "original": "third_party/democratic_icai/prompts/debate/chairperson.txt",
       "active": "caiso/prompts/dicai/debate/chairperson.txt",
       "original_sha256": "a633bdd4ec67d4376d374a7dcc8009efa6e2659fde6adad71da5a4738c8d8b56",
-      "active_sha256": "fd25d41de44e0249576ad721939eff584d0002deada42a6cffdc6fb99f31b2b4"
+      "active_sha256": "4a46ee9566600331b126374fcee9430a620f25692ec3c386daad21116e360d2b"
     },
     "debate.debater_reconstruction_failed": {
       "original": "third_party/democratic_icai/prompts/debate/debater_reconstruction_failed.txt",
       "active": "caiso/prompts/dicai/debate/debater_reconstruction_failed.txt",
       "original_sha256": "01bebbe69bf5f1318e297f8aad9c2d512b99a6de13ee1fc06b5f1d5b904bce6d",
-      "active_sha256": "33807086d53a74b3bafe791bc3fcdd3d117993ee0b53bee97c1c5e2df2ae17e2"
+      "active_sha256": "e997a05108e3dcadec3130cc2bb5e967fbc8ada386a8bf1d36029a0323707df5"
     },
     "debate.chairperson_reconstruction_failed": {
       "original": "third_party/democratic_icai/prompts/debate/chairperson_reconstruction_failed.txt",
       "active": "caiso/prompts/dicai/debate/chairperson_reconstruction_failed.txt",
       "original_sha256": "0ddb3ca4d4ceb6f2fbb2c698a46376f3603c19d84f326687eb80b7292f1f90e1",
-      "active_sha256": "464837cb66c169a3a9626a6dd011beb05d29c9c367c1fbf35f54472ecb85b5d3"
+      "active_sha256": "c15cba48331f3c50312647c1eefef8c2ab5b26662acd95f2fe88c0bbd84b7366"
     },
     "debate.debater_too_few": {
       "original": "third_party/democratic_icai/prompts/debate/debater_too_few.txt",
       "active": "caiso/prompts/dicai/debate/debater_too_few.txt",
       "original_sha256": "08518781693a1fe68047d420e0a2187ef075b789bac6ad57cc5f0c118d32055c",
-      "active_sha256": "c29f4a6def7184544dde730031c31ede0a877c9e17c0af0ecf161ae19c1f7a62"
+      "active_sha256": "8f8fa76feec81eb4893f1305244f194bbd7e2b1ae3637e08093e44ed56bf1cec"
     },
     "debate.chairperson_too_few": {
       "original": "third_party/democratic_icai/prompts/debate/chairperson_too_few.txt",
       "active": "caiso/prompts/dicai/debate/chairperson_too_few.txt",
       "original_sha256": "2cb51d3d1ab9c7b088157379afddf18bdeffa547bffa4342f976c5b181741107",
-      "active_sha256": "6e58978614457590304721d7bdbe10b471cd61ebea0d896c5bfc565dfdafcb57"
+      "active_sha256": "0f5e5bab96279f2520fdd3fd62463bedd478de2c6380de9e7615707de8b28ddc"
     }
   },
   "adaptations": [

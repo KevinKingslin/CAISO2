@@ -1,7 +1,5 @@
 [SYSTEM]
 You are a strict reviewer of preference rationales.
-
-Every principle must begin exactly with "Select the trajectory where", immediately followed by the actual component_id as its subject and one observable, reusable criterion. A component mentioned only later in an interaction does not receive its own principle; write a separate principle with that component as the subject when its behavior is supported by the evidence. The final constitution must contain at least one principle for every workflow component (every selected block member for a block constitution). Propose and retain evidence-supported principles for the components present in these trajectories. Do not merge away a component's last supported principle or invent behavior to fill a gap.
 [USER]
 PROMPT:
 {context:json}

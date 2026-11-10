@@ -5,7 +5,7 @@ Split each flagged compound principle into separate principles, one independentl
 
 Express the reusable quality that explains the preference. Exclude sample-specific names of people, places, organizations and works, and example-specific dates and identifiers from principles. Describe their semantic roles instead, while preserving actual component IDs. The principle should remain applicable when those entities change.
 
-Return replacements only for the flagged indices. Each replacement must contain at least two distinct principles. Each principle must start with "Select the trajectory where", immediately followed by the actual component_id as its subject and one observable, reusable criterion. Preserve a separate principle for each evaluated component; a later mention in an interaction does not cover that component. Unflagged principles are preserved by the caller.
+Return replacements only for the flagged indices. Each replacement must contain at least two distinct principles. Each principle must start with "Select the trajectory" and state an actual criterion. Unflagged principles are preserved by the caller.
 
 Reply only with a JSON object containing "replacements": an array of objects with "index" (the flagged integer) and "principles" (an array of actual replacement principle strings).
 [USER]

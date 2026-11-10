@@ -6,11 +6,8 @@ import re
 from caiso.core.recovery import ModelResponseError
 from caiso.providers.responses import json_object, unwrap
 
-PRINCIPLE_PREFIX = "Select the trajectory where"
+PRINCIPLE_PREFIX = "Select the trajectory"
 _PREFIX = re.compile(r"^select\s+the\s+trajectory\b", re.I)
-_COMPONENT_CRITERION = re.compile(
-    r"^select\s+the\s+trajectory\s+where\s+([\w]+(?:[./-][\w]+)*)\s+(.+)$", re.I | re.S
-)
 _HEADER = re.compile(r"^(?:UPDATED\s+WORKING|FINAL|WORKING)\s+LIST(?:\s+OF\s+(?:PRINCIPLES|QUESTIONS))?(?:\s*\([^\n)]*\))?\s*:?[ \t]*$", re.I)
 _LABEL = re.compile(r"^(?:(?:[-+•–—]|\d+[.):])\s+|Q\s*\d+\s*[:.)\-–—]?\s*)", re.I)
 
@@ -42,37 +39,29 @@ def clean_item(text):
     return text
 
 
-def normalize_principle(text, component_ids=None):
+def normalize_principle(text):
     value = clean_item(unwrap(text))
     while _LABEL.match(value):
         value = clean_item(_LABEL.sub("", value, count=1))
-    match = _COMPONENT_CRITERION.fullmatch(value)
-    if not match:
+    match = _PREFIX.match(value)
+    if not match or not value[match.end():].strip(" .:…<>"):
         raise ModelResponseError(
-            f'Begin each principle with "{PRINCIPLE_PREFIX}", immediately followed '
-            'by an actual component ID and one observable, reusable criterion.'
+            f'Return a nonempty principle beginning "{PRINCIPLE_PREFIX}" and stating an actual selection criterion.'
         )
-    component, criterion = match.groups()
-    if component_ids is not None and component not in component_ids:
-        raise ModelResponseError(
-            f'Unknown principle subject {component!r}. Immediately after '
-            f'"{PRINCIPLE_PREFIX}", use one of these exact component IDs: '
-            + ", ".join(sorted(component_ids))
-        )
-    if component.casefold() in {"the", "a", "an", "each", "all", "both", "component_id"}:
-        raise ModelResponseError("Name the actual component immediately after 'where'.")
-    if not criterion.strip(" .:…<>"):
+    # Only the selection target is structural. Preserve the condition's wording
+    # instead of rejecting English connectors such as "that", "which" or "with".
+    prefix = "Select the trajectory"
+    value = prefix + re.sub(r"^[*`_]+", "", value[match.end():])
+    if value[len(prefix):].strip(" .:").lower() in {
+        "that", "which", "where", "with", "whose", "in which", "for which",
+        "a", "b", "(a)", "(b)", "a or b", "output(a)", "output(b)",
+    }:
         raise ModelResponseError("The principle must state the actual selection criterion.")
     if len(re.findall(r"\bselect\s+the\s+(?:trajectory|response)\b", value, re.I)) != 1:
         raise ModelResponseError("Return one principle, not several principles in one item.")
-    if re.search(r"<(?:component_id|condition|actual criterion|criterion)>", value, re.I) or value.strip().endswith(("...", "…")):
+    if re.search(r"<(?:condition|actual criterion|criterion)>", value, re.I) or value.strip().endswith("..."):
         raise ModelResponseError("Return the actual preference criterion, not a placeholder.")
-    return re.sub(r"\s+", " ", f"{PRINCIPLE_PREFIX} {component} {criterion}").strip()
-
-
-def principle_component(text):
-    """Return the component evaluated as the subject, not incidental mentions."""
-    return normalize_principle(text)[len(PRINCIPLE_PREFIX) + 1:].split(" ", 1)[0]
+    return re.sub(r"\s+", " ", value).strip()
 
 
 def _structured(value):

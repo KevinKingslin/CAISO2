@@ -38,7 +38,7 @@
     "manifest": "third_party/democratic_icai/PROMPTS.json",
     "license": "MIT",
     "request_count": 15,
-    "principle_prefix": "Select the trajectory where",
+    "principle_prefix": "Select the trajectory",
     "adaptations": [
       "Response/story terminology becomes trajectory terminology.",
       "Human-label wording becomes provided preference-label wording.",
@@ -49,15 +49,20 @@
       "Abstraction preserves one shared quality, expresses sample-specific entities through semantic roles, and names evaluated components using actual IDs from the member principles.",
       "Principle output examples omit literal component-ID placeholders and request actual IDs from executions or member principles.",
       "Dynamic inputs use CAISO JSON execution records and renamed placeholders; raw evidence is preserved.",
-      "Reasoners and debaters inspect each component for preference-explaining differences; chairpersons retain supported component criteria; abstraction preserves exact IDs instead of generic aliases.",
-      "Principles require the exact trajectory-where prefix and an actual component ID as their subject; final constitutions require a separate supported principle for each workflow/block component."
+      "Reasoners and debaters inspect each component for preference-explaining differences; chairpersons retain supported component criteria; abstraction preserves exact IDs instead of generic aliases."
     ],
-    "protocol": "democratic-icai-c8d5-source-trajectory-v6-required-component-principles",
+    "protocol": "democratic-icai-c8d5-source-trajectory-v5-component-coverage",
     "runtime_extensions": {
       "atomicity": "CAISO-authored semantic check/revision prompts under caiso/prompts/method/constitution_atomicity, separate from the 15 source-derived requests.",
       "configuration": "dicai.atomicity.enabled (default true), max_revisions (default 2), batch_size (default 20 principles/request)",
-      "component_coverage": "After abstraction/minimization, restore missing component-subject criteria from settled debate principles with observed source execution IDs; save diagnostics and reject induction if any target remains uncovered. Interaction mentions do not cover other components. See docs/CONSTITUTION_COVERAGE.md.",
-      "reasoning_questions": "Actual component-attributed questions are required; dimensions alone no longer create generic fallback criteria."
+      "component_coverage": "After abstraction/minimization, restore missing workflow/block component criteria from settled debate principles with observed source execution IDs; report insufficient evidence without inventing rules. See docs/CONSTITUTION_COVERAGE.md."
+    },
+    "component_principle_prompt_revision": {
+      "date": "2026-11-10",
+      "scope": "All six debate variants and cluster abstraction only.",
+      "format": "Select the trajectory where, immediately followed by actual component IDs and one reusable criterion.",
+      "coverage": "Debate requests at least one separate supported principle per component and retains a component's sole supported rule. Abstraction preserves all evaluated IDs and roles in its existing single output per cluster.",
+      "runtime": "Unchanged from before 33ca2a6; parser flexibility, reasoning schema/fallback, coverage restoration/reporting and stopping behavior are retained. This is prompt guidance, not a runtime guarantee."
     }
   }
 }

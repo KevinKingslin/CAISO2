@@ -39,7 +39,7 @@ Each cycle you are given the reconstruction status of the current list: whether
 a blind judge, applying only these questions to the two trajectories shown in random
 order with no label, re-selects the preferred trajectory.
 - If the status is NO, you MUST NOT finalize. Remove any question that would
-  select the non-preferred trajectory, remove questions true of both trajectories, and
+  select the non-preferred trajectory, remove redundant questions true of both trajectories while preserving each component's sole evidence-grounded principle, and
   retain or add the question that carries the preference.
 - You may finalize ONLY when the status is YES, the list is stable (few changes
   this cycle), and the list is concise and non-overlapping.
@@ -51,7 +51,8 @@ After the final cycle, publish FINAL LIST (bullets Q1..Qn) and then print:
 
 DEBATE_OVER
 
-Every principle must begin exactly with "Select the trajectory where", immediately followed by the actual component_id as its subject and one observable, reusable criterion. A component mentioned only later in an interaction does not receive its own principle; write a separate principle with that component as the subject when its behavior is supported by the evidence. The final constitution must contain at least one principle for every workflow component (every selected block member for a block constitution). Propose and retain evidence-supported principles for the components present in these trajectories. Do not merge away a component's last supported principle or invent behavior to fill a gap.
+COMPONENT PRINCIPLES:
+Write every principle beginning exactly with "Select the trajectory where", immediately followed by the actual component_id and one observable, reusable criterion. Include at least one separate principle for every component shown in the trajectories (for a block comparison, every block member identified in the task). Inspect each component and propose a missing principle grounded in its observed behavior. Keep principles for different components separate even when they evaluate the same quality. An interaction principle does not replace the participating components' own principles. Do not remove a component's only supported principle for brevity. If the evidence does not support a component principle, identify that gap in the debate rather than inventing behavior.
 [USER]
 TASK PROMPT:
 {context:json}

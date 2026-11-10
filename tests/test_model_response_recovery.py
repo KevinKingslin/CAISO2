@@ -78,12 +78,6 @@ def test_invalid_principles_are_not_fabricated(answer):
     "Select the trajectory A",
     "Select the trajectory B.",
     "Select the trajectory where ...",
-    "Select the trajectory where answer_generator",
-    "Select the trajectory where <component_id> supports its answer.",
-    "Select the trajectory where answer_generator <actual criterion>.",
-    "Select the trajectory where the final answer is concise.",
-    "Select the trajectory where answer_generator ...",
-    "Select the trajectory where answer_generator …",
     "Select the trajectory that <condition>.",
     "Select the trajectory which <actual criterion>.",
     "Select the trajectory where answer_generator is concise. Select the trajectory where hint_generator is detailed.",
@@ -96,7 +90,7 @@ def test_trajectory_prefix_requires_one_actual_criterion(principle):
 def test_trajectory_normalization_preserves_component_identifiers():
     assert normalize_principle(
         "- **Q2:** SELECT  THE trajectory WHERE hint_generator passes detailed hints to answer_generator."
-    ) == "Select the trajectory where hint_generator passes detailed hints to answer_generator."
+    ) == "Select the trajectory WHERE hint_generator passes detailed hints to answer_generator."
 
 
 @pytest.mark.parametrize("original", [
@@ -107,27 +101,25 @@ def test_trajectory_normalization_preserves_component_identifiers():
     "Select the trajectory whose answer_generator uses evidence from info_extractor.",
     "Select the trajectory in which answer_generator uses evidence from info_extractor.",
 ])
-def test_trajectory_format_requires_where_followed_by_the_component(original):
-    if original.startswith("Select the trajectory where answer_generator"):
-        assert normalize_principle(original) == original
-        assert parse_principles(f"| Question | Principle |\n|---|---|\n| Q1 | {original} |") == [original]
-    else:
-        with pytest.raises(ModelResponseError):
-            normalize_principle(original)
-        with pytest.raises(ModelResponseError):
-            parse_principles(f"- Q1: {original}")
+def test_trajectory_relative_clauses_preserve_the_actual_criterion(original):
+    assert normalize_principle(original) == original
+    assert parse_principles(f"| Question | Principle |\n|---|---|\n| Q1 | {original} |") == [original]
 
 
-def test_seed_questions_with_old_wording_retry_with_format_feedback():
-    old = ["Select the trajectory that ensures the final answer is supported by evidence."]
-    questions = ["Select the trajectory where answer_generator supports its answer with evidence."]
-    def response(items):
-        return json.dumps({"reasoning": "The preferred trajectory uses supporting evidence.", "dimensions": ["evidence support"], "questions": items})
-    provider = SequenceProvider([response(old), response(questions)])
-    result = registry(provider).complete("test", [{"role": "user", "content": "Draft candidate questions."}], seed=7143, schema=Reasoning)
+def test_reported_seed_questions_accept_equivalent_wording_without_retries():
+    questions = [
+        "Select the trajectory where the retrieved evidence explicitly confirms the actress's involvement.",
+        "Select the trajectory that ensures the final answer is supported by accurate and verifiable information.",
+    ]
+    provider = SequenceProvider([json.dumps({"reasoning": "The preferred trajectory uses supporting evidence.", "dimensions": ["evidence support"], "questions": questions})] * 3)
+    models = registry(provider)
+    events = []
+    models.recovery.on_error = events.append
+    result = models.complete("test", [{"role": "user", "content": "Draft candidate questions."}], seed=7143, schema=Reasoning)
     assert [q.select_prompt for q in result.questions] == questions
-    assert len(provider.calls) == 2
-    assert 'Select the trajectory where' in provider.calls[1][0][-1]['content']
+    assert len(provider.calls) == 1
+    assert events == []
+    assert parse_principles("FINAL LIST:\n" + "\n".join(f"- Q{i}: {p}" for i, p in enumerate(questions, 1))) == questions
 
 
 @pytest.mark.parametrize("answer", [
@@ -261,14 +253,6 @@ def test_bad_first_round_can_recover_without_seed_questions():
     assert principles == [ONE]
 
 
-def test_chairperson_unknown_subject_cannot_become_a_settled_principle():
-    comparison = pair()
-    comparison.candidate_a["executions"] = [{"component_id": "answer_generator"}]
-    values, history = debate(comparison, catalog(), DebateProvider([f"- Q1: {ONE}", f"- Q1: {TWO}"]), "test", 42, rounds=2)
-    assert values == [TWO]
-    assert any(row["speaker"] == "chairperson_format_error" for row in history)
-
-
 def test_all_bad_rounds_never_create_fake_or_unsettled_principles():
     with pytest.raises(ModelResponseError, match="No constitution was fabricated"):
         debate(pair(), catalog(), DebateProvider([ModelResponseError("bad")] * 3), "test", 42, rounds=3)
@@ -338,28 +322,6 @@ def test_seed_drafting_rejects_missing_or_fake_criteria(questions):
         Reasoning(reasoning="Rationale", questions=questions)
 
 
-def test_dimensions_alone_cannot_become_unattributed_principles():
-    from pydantic import ValidationError
-
-    with pytest.raises(ValidationError):
-        Reasoning(reasoning="Rationale", dimensions=["evidence support"])
-
-
-def test_reasoning_retries_unknown_component_subjects_using_execution_ids():
-    comparison = pair()
-    comparison.candidate_a["executions"] = [{"component_id": "answer_generator"}]
-    def response(subject):
-        return json.dumps({"reasoning": "Evidence supports the answer.", "questions": [
-            f"Select the trajectory where {subject} supports its answer with evidence."
-        ]})
-    source = SequenceProvider([response("imaginary_component"), response("answer_generator")])
-    result = assemble(comparison, assign_personas(["One", "Two", "Three"], 42)[:1], registry(source), "test", 42)
-    assert result[0]["principles"] == ["Select the trajectory where answer_generator supports its answer with evidence."]
-    assert len(source.calls) == 2
-    assert "Unknown principle subject" in source.calls[1][0][-1]["content"]
-    assert "answer_generator" in source.calls[1][0][-1]["content"]
-
-
 @pytest.mark.parametrize("error", [BudgetExceeded("cap"), TransportExhausted("quota"), TransportRequestError("auth")])
 def test_chairperson_fallback_never_hides_service_or_budget_errors(error):
     with pytest.raises(type(error)):
@@ -373,22 +335,14 @@ def test_judge_accepts_only_presentation_variations(answer):
 
 @pytest.mark.parametrize("principle", [
     "Select the trajectory where info_extractor preserves API_key values.",
-    "Select the trajectory where info_extractor preserves user_id values.",
+    "Select the trajectory that preserves API_key values from info_extractor.",
+    "Select the trajectory which preserves API_key values from info_extractor.",
 ])
 def test_abstraction_accepts_markdown_and_typographic_quotes(principle):
     class Provider:
         def complete(self, role, messages, *, validate, **kwargs):
             return validate(f'“**{principle}**”')
     assert abstract_clusters([ONE, TWO], [0, 0], Provider(), "test", 42) == [principle]
-
-
-def test_abstraction_retries_old_format_and_unknown_subjects():
-    source = SequenceProvider([
-        "Select the trajectory that preserves its input.", ONE, TWO,
-    ])
-    assert abstract_clusters([TWO], [0], registry(source), "test", 42, component_ids={"answer_generator"}) == [TWO]
-    assert len(source.calls) == 3
-    assert "Unknown principle subject" in source.calls[-1][0][-1]["content"]
 
 
 def test_successful_requests_resume_after_a_later_failure(tmp_path):

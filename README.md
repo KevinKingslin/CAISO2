@@ -381,34 +381,32 @@ Their editable trajectory versions are in `caiso/prompts/dicai/`. The
 CAISO also enforces the existing one-quality rule with a semantic check after
 new chairperson lists and after abstraction. Compound debate principles receive
 bounded split revisions; compound abstractions are revised to one shared quality
-per cluster. Complete check/revision prompts are in `caiso/prompts/method/constitution_atomicity/`.
+per cluster. The 15 source-derived DICAI prompts remain unchanged. Complete
+check/revision prompts are in `caiso/prompts/method/constitution_atomicity/`.
 The existing induction model is used; `dicai.atomicity.enabled` defaults to `true`
 and `max_revisions` to `2`. Reviews, repairs and verified fallbacks are recorded.
 See [configuration](configs/README.md) for the optional original-behavior ablation.
 
-Principles use **"Select the trajectory where"**, followed immediately by the
-actual component ID and one observable, reusable criterion. Every accepted
-system constitution contains at least one principle for each workflow component;
-a block constitution covers each selected block member. Missing criteria are
-restored from settled debate rules after abstraction/minimization; induction
-fails with a coverage report if a component still lacks a supported rule.
-Interaction mentions cover only the component named as the principle's subject.
-See [component coverage](docs/CONSTITUTION_COVERAGE.md). Original instructions are
+Debate and abstraction prompts request **"Select the trajectory where"**, followed
+by the actual component ID and a reusable criterion. Debate asks for a separate
+principle per component; abstraction preserves the component references in each
+cluster. These instructions add no runtime validation or coverage failure.
+
+Principles start with **"Select the trajectory"**. Original instructions are
 retained apart from response/story terminology, provided preference labels,
 structured execution evidence and the documented guidance for component criteria
 and reusable principles. Constitutions remain lists of strings. No dataset-specific
 answer-style requirements are added.
 
-Reasoning returns the `reasoning`, `dimensions`, and `questions` fields. Actual
-questions are required; dimensions alone no longer create generic fallback rules.
+Reasoning returns the original `reasoning`, `dimensions`, and `questions` fields.
 CoT uses one request; self-consistency samples independent chains and synthesizes
 recurring dimensions; self-refinement alternates critique and revision. The
 existing settings control these stages. The separate CAISO seed-drafting call
 has been removed because the original rationales already supply questions.
 Debate retains the source's one-quality rules, reconstruction feedback and
 finalization gates. The blind judge uses the original JSON choice `1` / `2`
-format, adapted to trajectory evidence. Every cluster, including singletons,
-receives an abstraction request.
+format, adapted to trajectory evidence. Singleton clusters retain their principle
+without an abstraction call, as in the source.
 
 The audit prompt is included as a complete template; no new auditor model or
 automatic audit stage is enabled. Dataset personas, model routes, transport

@@ -6,7 +6,7 @@ import json
 import pytest
 
 from caiso.constitution.dicai import pipeline
-from caiso.constitution.dicai.coverage import ComponentCoverageError, coverage_targets, observed_components, preserve_component_coverage
+from caiso.constitution.dicai.coverage import coverage_targets, observed_components, preserve_component_coverage
 from caiso.constitution.models import PreferencePair
 from caiso.core.budget import BudgetTracker
 from caiso.evaluation.iteration_report import IterationReport
@@ -72,18 +72,9 @@ def test_generic_aliases_and_partial_ids_do_not_count_as_component_coverage():
     generic = "Select the trajectory where the final answer uses the retrieved content."
     values, report = preserve([text, generic], [], [], [pair(components=components)], components)
     assert values == [text, generic]
-    assert report["covered_after"] == ["wikipedia_retriever"]
-    assert report["missing_components"] == ["encoder", "encoder.layer", "retriever", "search", "search-v2"]
+    assert report["covered_after"] == ["encoder.layer", "search-v2", "wikipedia_retriever"]
+    assert report["missing_components"] == ["encoder", "retriever", "search"]
     assert report["unattributed_principle_indices"] == [2]
-
-
-def test_each_exact_subject_has_its_own_principle_even_for_overlapping_ids():
-    components = ["encoder", "encoder.layer", "search", "search-v2", "tools/search"]
-    settled = [f"Select the trajectory where {cid} preserves its input." for cid in components]
-    values, report = preserve([], settled, ["p1"] * len(settled), [pair(components=components)], components)
-    assert set(values) == set(settled)
-    assert report["status"] == "complete"
-    assert all(len(indices) == 1 for indices in report["principle_indices_by_component"].values())
 
 
 def test_unsupported_or_unobserved_component_mentions_are_not_restored():
@@ -98,12 +89,11 @@ def test_unsupported_or_unobserved_component_mentions_are_not_restored():
     assert report["unobserved_components"] == ["imaginary_component"]
 
 
-def test_interaction_covers_only_its_subject_and_restores_a_separate_rule_for_the_other_component():
+def test_one_supported_interaction_can_cover_both_components():
     rule = "Select the trajectory where answer_generator uses evidence from hint_generator."
-    values, report = preserve([rule], [rule, RULES["hint_generator"]], ["p1", "p1"], [pair()], ["answer_generator", "hint_generator"])
-    assert values == [rule, RULES["hint_generator"]]
-    assert report["restored"][0]["restored_for"] == ["hint_generator"]
-    assert report["principle_indices_by_component"] == {"answer_generator": [1], "hint_generator": [2]}
+    values, report = preserve([], [rule], ["p1"], [pair()], ["answer_generator", "hint_generator"])
+    assert values == [rule]
+    assert report["restored"][0]["restored_for"] == ["answer_generator", "hint_generator"]
     assert report["missing_components"] == []
 
 
@@ -211,34 +201,7 @@ def test_real_induction_restores_coverage_after_abstraction_and_minimization(tmp
     assert json.loads((tmp_path / f"results/iterations/0001/{phase}/component_coverage.json").read_text()) == coverage
 
     if scope == "system" and not minimize:
-        with pytest.raises(ComponentCoverageError, match="unobserved_component") as error:
-            induce([*targets, "unobserved_component"])
-        assert error.value.report["missing_components"] == ["unobserved_component"]
-        failed = [p for p in (tmp_path / "cache").iterdir() if p.is_dir() and p != path]
-        assert len(failed) == 1
-        assert not (failed[0] / "constitution.json").exists()
-        assert json.loads((failed[0] / "component_coverage.json").read_text()) == error.value.report
-
-
-@pytest.mark.parametrize("atomicity", [True, False])
-def test_induction_cannot_publish_a_constitution_with_an_uncovered_component(tmp_path, atomicity):
-    class MissingComponentProvider(CollapsingProvider):
-        def complete(self, messages, **kwargs):
-            result = super().complete(messages, **kwargs)
-            if "You are the Moderator/Judge." in messages[0]["content"]:
-                return "FINAL LIST\n- Q1: " + RULES["answer_generator"] + "\nDEBATE_OVER"
-            return result
-
-    budget = BudgetTracker(3)
-    source = MissingComponentProvider(budget)
-    dicai = pipeline.DICAI(ProviderRegistry({"test": source}), OfflineEmbeddings(budget), ["One", "Two", "Three"], {
-        "max_workers": 1, "reasoning_workers": 1, "debate_rounds": 1,
-        "self_consistency_samples": 1, "self_refine_steps": 0,
-        "atomicity": {"enabled": atomicity},
-        "clustering": {"min_clusters": 2, "max_clusters": 2},
-    }, role="test")
-    with pytest.raises(ComponentCoverageError, match="hint_generator") as error:
-        dicai.induce([pair()], 42, output_dir=tmp_path, component_ids=list(RULES))
-    assert error.value.report["status"] == "insufficient_evidence"
-    assert not list(tmp_path.glob("*/constitution.json"))
-    assert json.loads((tmp_path / "component_coverage.json").read_text()) == error.value.report
+        changed = induce([*targets, "unobserved_component"])
+        assert changed.metadata["provenance"] != constitution.metadata["provenance"]
+        assert changed.metadata["component_coverage"]["missing_components"] == ["unobserved_component"]
+        assert changed.principles == constitution.principles

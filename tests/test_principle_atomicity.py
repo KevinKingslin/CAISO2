@@ -92,15 +92,6 @@ def test_repairs_cannot_drop_a_compound_quality_or_edit_an_unflagged_item(bad):
     assert len(source.calls) == 2
 
 
-def test_semantic_repairs_cannot_introduce_unknown_component_subjects():
-    providers, source = registry([review(False), replacement(1, [PARTS[0],
-        "Select the trajectory where imaginary_component preserves evidence.",
-    ])])
-    with pytest.raises(AtomicityError, match="Unknown principle subject"):
-        ensure_atomic([BUNDLE], providers, "test", 42, component_ids={"hint_generator", "answer_generator"})
-    assert len(source.calls) == 2
-
-
 @pytest.mark.parametrize("limit", [0, 2])
 def test_semantic_revisions_are_bounded_and_unverified_results_are_not_returned(limit):
     replies = [review(False)]
@@ -274,11 +265,6 @@ def test_induction_checks_abstracted_outputs_and_uses_verified_medoids_on_failur
         "atomicity": {"max_revisions": 1}, "clustering": {"min_clusters": 2, "max_clusters": 2},
     }, role="test")
     pair, _ = pair_and_catalog()
-    for candidate in (pair.candidate_a, pair.candidate_b):
-        candidate["executions"] = [{
-            "component_id": "transform", "component_input": {"number": 1},
-            "component_output": {"result": 2},
-        }]
     constitution = induction.induce([pair], 42, scope=scope, output_dir=tmp_path)
     assert compound not in constitution.principles
     audit = constitution.metadata["abstraction_atomicity"]

@@ -6,9 +6,8 @@ from caiso.prompts import render_messages
 from .personas import Persona
 from .atomicity import AtomicityError, enabled as atomicity_enabled, ensure_atomic
 from .preferences import candidate_views, task_view
-from .coverage import observed_components
 from .reconstruction import reconstructs
-from .parsing import dedupe, explicitly_unchanged, normalize_principle, parse_principles
+from .parsing import dedupe, explicitly_unchanged, parse_principles
 from .parsing import principle_key as principle_key
 
 
@@ -26,7 +25,6 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
     if rounds < 1 or len(catalog) != 3:
         raise ValueError("DICAI requires three debaters and at least one round")
     working = dedupe([p for entry in catalog for p in entry.get("principles", [])])
-    components = observed_components(pair)
     history = [{"speaker": "initial_working_list", "content": render(working)}]
     a, b = candidate_views(pair)
     evidence = {
@@ -85,8 +83,7 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
         def valid_update(text):
             if working and explicitly_unchanged(text):
                 return text
-            for principle in parse_principles(text):
-                normalize_principle(principle, components or None)
+            parse_principles(text)
             return text
 
         try:
@@ -107,7 +104,6 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
                 proposed, atomicity = ensure_atomic(
                     proposed, providers, role, seed + 200000 + cycle * 100,
                     config=config, context={"pair_id": pair.pair_id},
-                    component_ids=components or None,
                 )
         except AtomicityError as error:
             history.append({

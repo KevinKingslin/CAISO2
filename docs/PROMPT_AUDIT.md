@@ -88,9 +88,8 @@ The principle should remain applicable when those entities change.
 The reasoning and critique versions scope the exclusion to proposed questions
 or criteria and dimensions. The instruction concerns generated rules; raw
 trajectories and supporting comparison evidence retain their facts. Criteria
-remain grounded in the paired executions, with no per-pair component quota.
-The final constitution must cover every target component with a separate
-subject-attributed principle. The debate structure, reconstruction objective and one-quality rule remain intact.
+remain grounded in the paired executions, with no per-component quota. The
+debate structure, reconstruction objective and one-quality rule remain intact.
 
 This prompt-only revision was applied on 2026-11-09 following observed
 sample-specific principles. It adds no validation gate, retry policy, model route
@@ -99,15 +98,33 @@ guaranteed by the runtime checks. Every cluster, including singletons, receives
 a model abstraction request. Failed abstraction repairs can still use an atomic
 medoid, so producing reusable rules during debate remains essential.
 
-As of 2026-11-10, every principle must use `Select the trajectory where`, followed
-immediately by an actual component ID and one observable, reusable criterion.
-Equivalent connectors now trigger format repair. Capitalization and whitespace
-are normalized; IDs and criteria retain their spelling. Component subjects are
-validated against execution IDs in reasoning, debate, abstraction and semantic
-revision. Actual reasoning questions are required; dimensions alone no longer
-produce generic fallback criteria. Complete generating and repair requests
-state this format and the final per-component coverage requirement without a
-literal component-ID placeholder. Constitutions remain lists of strings.
+Each principle starts with `Select the trajectory`. Its following grammar is
+preserved: `that`, `where`, `which`, `with` and `in which` are all valid. Empty
+criteria, bare choices, trailing ellipses and the existing condition/criterion
+placeholder forms fail format validation. The constitution remains a list of
+strings; no component-scope JSON schema or task-specific answer style is
+introduced.
+
+## Component principle prompt revision, 2026-11-10
+
+The debate prompts request principles in the form "Select the trajectory where",
+followed immediately by the actual component ID and one reusable criterion. They
+ask for at least one separate principle for each component shown in the
+trajectories (each identified block member for a block comparison), and preserve
+a component's last supported principle when editing or merging. Abstraction
+prompts preserve exact evaluated component IDs and their roles. They still
+return one principle per cluster, including when a cluster spans components.
+These are prompt instructions: parsing, reasoning, clustering, abstraction
+outputs, coverage reporting and stopping behavior are unchanged. Prompt compliance
+and one separate final principle per component are not runtime guarantees.
+
+The runtime changes introduced in `33ca2a6` were reverted: no component-subject
+validator, required-question schema, new coverage failure or subject-based
+coverage count remains. Reasoning and atomicity repair prompts also retain their
+pre-revision text. The existing one-quality rule and reconstruction objective
+remain; debate may retain an evidence-grounded principle shared by both
+trajectories when it is a component's sole principle, while decisive criteria
+still explain the preference. No new call stage or finalization gate is added.
 
 ## Runtime alignment with those prompts
 
@@ -116,7 +133,7 @@ literal component-ID placeholder. Constitutions remain lists of strings.
 | CoT | One structured `reasoning` / `dimensions` / `questions` response |
 | Self-consistency | Configured independent samples, recurring-dimension count and consensus request |
 | Self-refinement | Draft followed by configured critique/revision iterations |
-| Candidate questions | Taken from each rationale; actual component-attributed questions are required |
+| Candidate questions | Taken from each rationale; named dimensions provide the original fallback if questions are absent |
 | Debate | Three debaters then Moderator/Judge, one quality per question, reconstruction status and moderator rejection feedback |
 | Finalization | Reconstruction must succeed, minimum question/round counts must hold, and the judge must declare `DEBATE_OVER` |
 | Round cap | Original best-effort list retained, with `finalized: false` if gates fail |
@@ -142,7 +159,7 @@ source-based trajectory adaptation, not a claim to reproduce every setting or
 published score of DICAI. Report the adapted prompts and resolved experiment
 settings in research.
 
-The protocol identifier is `democratic-icai-c8d5-source-trajectory-v6-required-component-principles`.
+The protocol identifier is `democratic-icai-c8d5-source-trajectory-v5-component-coverage`.
 Source, prompt and schema fingerprints invalidate earlier induction caches.
 Start a new optimization run: old checkpoints retain constitutions generated
 under their previous protocol. Successful requests within a matching induction
@@ -161,12 +178,9 @@ quota is imposed, and reconstruction/audit request text is unchanged.
 
 After abstraction and optional minimization, CAISO restores settled debate rules
 for missing workflow/block component IDs when their source trajectories executed
-those components. Coverage counts only the exact component ID immediately after the required
-prefix, so an interaction mentioning another component does not cover it.
-Induction saves a diagnostic report and raises `ComponentCoverageError` if any
-target remains uncovered; no incomplete constitution is published. This gate
-remains enabled with atomicity disabled. The final reconstruction report
-evaluates the complete restored list. This is a deterministic CAISO runtime
+those components. It records explicit coverage and source provenance, and leaves
+unsupported components marked as insufficient evidence. The final reconstruction
+report evaluates the restored list. This is a deterministic CAISO runtime
 extension, distinct from the original DICAI procedure and from semantic atomicity
 checking. It introduces no additional model-call stage and leaves silhouette
 clustering unchanged. See [CONSTITUTION_COVERAGE.md](CONSTITUTION_COVERAGE.md).

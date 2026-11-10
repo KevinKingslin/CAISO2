@@ -156,17 +156,43 @@ def trajectory_adaptation(key, original):
         text = text.replace('Each has the form "Select the trajectory that <condition>".', 'Each begins with "Select the trajectory" and names the component whose behavior it evaluates.')
         text = text.replace('Use the exact format: "Select the trajectory that <condition>."', 'Begin with "Select the trajectory where", followed by the actual component ID and the reusable condition.')
         text = text.replace('\nCLUSTER:', '\nPreserve the single quality shared by the principles. ' + general + ' Name the component or components whose behavior the shared rule evaluates, using exact component IDs from the member principles. Do not replace exact component IDs with generic references such as "final answer", "rewritten query", or "retrieved content".\n\nCLUSTER:')
-    if key.startswith(('reasoning.', 'debate.')) or key == 'abstraction':
-        format_rule = (
-            'Every principle must begin exactly with "Select the trajectory where", '
-            'immediately followed by the actual component_id as its subject and one observable, reusable criterion. '
-            'A component mentioned only later in an interaction does not receive its own principle; '
-            'write a separate principle with that component as the subject when its behavior is supported by the evidence. '
-            'The final constitution must contain at least one principle for every workflow component '
-            '(every selected block member for a block constitution). '
-            'Propose and retain evidence-supported principles for the components present in these trajectories. '
-            'Do not merge away a component\'s last supported principle or invent behavior to fill a gap.'
+    if key.startswith('debate.'):
+        component_rule = (
+            'Write every principle beginning exactly with "Select the trajectory where", '
+            'immediately followed by the actual component_id and one observable, reusable criterion. '
+            'Include at least one separate principle for every component shown in the trajectories '
+            '(for a block comparison, every block member identified in the task). '
+            'Inspect each component and propose a missing principle grounded in its observed behavior. '
+            'Keep principles for different components separate even when they evaluate the same quality. '
+            'An interaction principle does not replace the participating components\' own principles. '
+            'Do not remove a component\'s only supported principle for brevity. '
+            'If the evidence does not support a component principle, identify that gap in the debate rather than inventing behavior.'
         )
         text = text.replace('"Select the trajectory"', '"Select the trajectory where"')
-        text = text.replace('\n[USER]\n', '\n\n' + format_rule + '\n[USER]\n', 1)
+        text = text.replace('\n[USER]\n', '\n\nCOMPONENT PRINCIPLES:\n' + component_rule + '\n[USER]\n', 1)
+    if key.startswith('debate.debater'):
+        text = text.replace(
+            '- A question true of BOTH trajectories discriminates nothing and must be attacked.',
+            '- A question true of BOTH trajectories does not explain this pair\'s preference. '
+            'Retain it only when it provides the sole evidence-grounded principle for a component; '
+            'the list must also retain decisive criteria that reconstruct the preference.',
+        )
+    if key.startswith('debate.chairperson'):
+        text = text.replace(
+            'select the non-preferred trajectory, remove questions true of both trajectories, and',
+            'select the non-preferred trajectory, remove redundant questions true of both trajectories '
+            'while preserving each component\'s sole evidence-grounded principle, and',
+        )
+    if key == 'abstraction':
+        component_rule = (
+            'Preserve component coverage during abstraction. The constitution should retain a principle '
+            'for every component represented in the source principles. '
+            'Begin exactly with "Select the trajectory where", followed immediately by the actual component_id '
+            'whose behavior the shared criterion evaluates. For a cluster about one component, preserve that '
+            'component as the subject. For a cluster spanning different components, explicitly retain every '
+            'evaluated component ID and its role in the single shared condition; do not silently narrow the '
+            'rule to one component or replace IDs with generic aliases. '
+            'Keep one shared quality and return exactly one principle for this cluster.'
+        )
+        text = text.replace('\nCLUSTER:', '\n' + component_rule + '\n\nCLUSTER:')
     return text

@@ -17,11 +17,10 @@ def abstract_clusters(
     progress=None,
     temperature=0.2,
     config=None,
-    component_ids=None,
 ):
     def valid_abstract(text):
         try:
-            return valid_principle(text.strip().strip('"'), component_ids)
+            return valid_principle(text.strip().strip('"'))
         except ValueError as exc:
             raise ModelResponseError("Invalid DICAI abstraction output: " + str(exc)) from exc
 

@@ -1,32 +1,10 @@
 """Preserve explicit component coverage supported by settled debate principles.
 
-Coverage means an exact component-ID subject, not a semantic correctness
+Coverage means an exact component-ID reference, not a semantic correctness
 judgment. No principle is drafted, renamed or inferred from a generic alias.
 """
 
 import re
-
-from caiso.core.recovery import ModelResponseError
-
-from .parsing import principle_component
-
-
-class ComponentCoverageError(ModelResponseError):
-    """An incomplete list cannot be published as a constitution."""
-
-    def __init__(self, report):
-        super().__init__(
-            "Constitution requires at least one principle beginning 'Select the trajectory where ' "
-            "followed by each component's exact ID. Missing supported principles for: "
-            + ", ".join(report["missing_components"])
-            + ". Supply preference trajectories and settled principles covering these components, then retry."
-        )
-        self.report = report
-
-
-def require_component_coverage(report):
-    if report["missing_components"]:
-        raise ComponentCoverageError(report)
 
 
 def observed_components(pair):
@@ -79,28 +57,21 @@ def preserve_component_coverage(principles, settled, origins, pairs, expected, *
     def references(text):
         return {cid for cid, pattern in patterns.items() if pattern.search(text)}
 
-    def subject(text):
-        try:
-            return principle_component(text)
-        except ModelResponseError:
-            return None
-
     def covered(values):
-        return {subject(text) for text in values} & set(expected) & observed
+        return set().union(*(references(text) for text in values)) & observed
 
     before = covered(outputs)
     missing = set(expected) - before
     pool = {}
     for index, (text, pair_id) in enumerate(zip(settled, origins, strict=True), 1):
         supported = references(text)
-        component = subject(text)
-        if component not in expected or not supported <= observed_by_pair.get(pair_id, set()):
+        if not supported or not supported <= observed_by_pair.get(pair_id, set()):
             continue
         entry = pool.setdefault(text, {
             "principle": text, "components": set(), "source_pair_ids": set(),
             "settled_principle_indices": [],
         })
-        entry["components"].add(component)
+        entry["components"].update(supported)
         entry["source_pair_ids"].add(pair_id)
         entry["settled_principle_indices"].append(index)
 
@@ -128,15 +99,15 @@ def preserve_component_coverage(principles, settled, origins, pairs, expected, *
     return outputs, {
         "status": "not_applicable" if not expected else "insufficient_evidence" if missing else "complete",
         "scope": scope, "target_source": target_source,
-        "coverage_definition": "exact_component_id_as_principle_subject_and_observed_execution",
+        "coverage_definition": "exact_component_id_in_principle_and_observed_execution",
         "expected_components": expected, "observed_components": sorted(observed),
         "covered_before": sorted(before), "covered_after": sorted(after),
         "restored": restored, "missing_components": sorted(missing),
         "insufficient_evidence_components": sorted(missing),
         "unobserved_components": sorted(set(expected) - observed),
         "principle_indices_by_component": {
-            cid: [i for i, text in enumerate(outputs, 1) if cid == subject(text) and cid in observed]
+            cid: [i for i, text in enumerate(outputs, 1) if cid in references(text) and cid in observed]
             for cid in expected
         },
-        "unattributed_principle_indices": [i for i, text in enumerate(outputs, 1) if subject(text) not in expected],
+        "unattributed_principle_indices": [i for i, text in enumerate(outputs, 1) if not references(text)],
     }
