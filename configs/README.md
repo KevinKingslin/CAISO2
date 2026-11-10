@@ -49,21 +49,26 @@ the maximum number of components in a block; `0` disables the cap. Singleton
 blocks remain allowed. The cap is enforced during Leiden optimization, including
 when the workflow is repartitioned. Use a new run when changing this setting.
 
-To replace the default validation prefix with a reproducible random subset,
-change these keys inside the experiment's existing `method` block:
+The active HotpotQA profile uses a fixed seeded 50-question acceptance sample,
+and PubMedQA/Amazon use the complete validation set. Each comparison uses two
+fresh repetitions. Attribution and block-selection diagnostics use training
+questions (`diagnostics_split: train`), keeping acceptance examples out of prompt
+feedback and scheduling. The corresponding settings are:
 
 ```yaml
 method:
   validation_sampling: seeded
-  validation_batch_size: 10
+  validation_batch_size: 50
   seed: 42
+  block_optimization:
+    validation_repeats: 2
 ```
 
 The subset is sampled from the complete validation split and stays fixed for the
 initial baseline and every current/candidate acceptance comparison. Keep your
 existing `validation_batch_size` to retain its sample count; change `seed` to
-choose a different subset. Attribution and block-selection diagnostics sample
-their independently configured mini-batches from the full validation pool.
+choose a different subset. `diagnostics_split: validation` explicitly restores
+the historical validation-based scheduling behavior for ablations.
 
 For acceptance on the complete validation split, set
 `method.validation_batch_size: all`. `validation_sampling: first` retains the
@@ -83,8 +88,9 @@ The default is `true`. With `false`, block selection receives an empty history
 object. Its constitution, diagnostic trajectories and available blocks remain
 available. All other stages keep their history:
 
-- Prompt generation retains earlier candidate instructions and task scores
-  within each proposal call, including during workflow compatibility search.
+- Prompt generation retains a checkpointed archive of earlier instructions and
+  rescores up to three on the current screening batch before showing their scores.
+  Within-call feedback and the current instruction's baseline score are retained.
 - Earlier rejections still filter candidates in the same system context,
   including preliminary candidates used to induce a block constitution.
 - Workflow proposals retain recent-performance feedback (workflow search
@@ -136,11 +142,12 @@ method:
 ```
 
 The default `true` evaluates current and candidate systems on each acceptance
-comparison. With `false`, the initial baseline is still evaluated once and every
+comparison. With `false`, the initial baseline is still evaluated with the
+configured repetition count and every
 candidate is evaluated normally. Accepted candidate scores become the saved
 current score; rejections retain the previous score, including after resume.
-For 25 questions and one pass, an acceptance comparison then uses 25 fresh
-system runs instead of 50. Attribution and diagnostic evaluations keep their
+For 50 questions and two passes, an acceptance comparison then uses 100 fresh
+system runs instead of 200. Attribution and diagnostic evaluations keep their
 own batches. Reuse retains a historical measurement of stochastic task outputs.
 
 The phase's `validation_metrics.json` marks current scores with `reused: true`
@@ -213,7 +220,8 @@ consume the existing model-call budget and are checkpointed. `enabled: false`
 is available for ablations. `batch_size` limits principles per semantic request;
 it is unrelated to the number of validation questions. Disabling the check
 restores the original format/reconstruction-only behavior for ablations. The
-original DICAI prompts and random task-tie policy are unchanged. Changing this
+original DICAI prompts are unchanged. Bootstrap ties now abstain under the
+[current search protocol](../docs/OPTIMIZATION_IMPROVEMENTS.md). Changing this
 configuration requires a new run/output directory.
 
 ```sh

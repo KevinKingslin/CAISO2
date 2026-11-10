@@ -50,11 +50,15 @@ def validate_method(config):
         raise ValueError("Top-level use_history was removed; use block_selection.use_history instead")
     if config.get("validation_sampling", "seeded") not in {"seeded", "first"}:
         raise ValueError("validation_sampling must be seeded or first")
+    if config.get("diagnostics_split", "validation") not in {"train", "validation"}:
+        raise ValueError("diagnostics_split must be train or validation")
     if not isinstance(config.get("block_constitution", {}), dict):
         raise ValueError("block_constitution must be a configuration mapping")
     if not isinstance(config.get("block_optimization", {}), dict):
         raise ValueError("block_optimization must be a configuration mapping")
     task_scoring_settings(config.get("block_optimization", {}))
+    if not isinstance(config.get("block_optimization", {}).get("screening", {}), dict):
+        raise ValueError("block_optimization.screening must be a configuration mapping")
     if not isinstance(config.get("block_selection", {}), dict):
         raise ValueError("block_selection must be a configuration mapping")
     if not isinstance(config.get("leiden", {}), dict):
@@ -88,6 +92,12 @@ def validate_method(config):
         "block_selection.diagnostic_batch_size",
         "block_constitution.preference_pairs",
         "block_optimization.max_joint_candidates",
+        "block_optimization.validation_repeats",
+        "block_optimization.screening.batch_size",
+        "block_optimization.screening.finalists",
+        "block_optimization.feedback_examples",
+        "block_optimization.feedback_max_chars",
+        "block_optimization.prompt_archive_size",
         "workflow.candidates",
         "workflow.trigger_every_k_accepted_blocks",
         "workflow.plateau_patience",
@@ -102,6 +112,8 @@ def validate_method(config):
     )
     nonnegative = (
         "max_iterations",
+        "initial_preference_min_margin",
+        "block_optimization.prompt_history_limit",
         "dicai.self_refine_steps",
         "dicai.atomicity.max_revisions",
         "dicai.minimization.sample_size",
@@ -136,6 +148,20 @@ def validate_method(config):
         or (attempts != -1 and attempts < 1)
     ):
         raise ValueError("initial_preference_attempts must be -1 or a positive integer")
+    for path in (
+        "initial_preference_min_margin", "block_optimization.validation_repeats",
+        "block_optimization.screening.batch_size", "block_optimization.screening.finalists",
+        "block_optimization.feedback_examples", "block_optimization.feedback_max_chars",
+        "block_optimization.prompt_archive_size", "block_optimization.prompt_history_limit",
+    ):
+        node = config
+        for part in path.split("."):
+            if not isinstance(node, dict) or part not in node:
+                break
+            node = node[part]
+        else:
+            if node is None:
+                raise ValueError(f"{path} cannot be null")
 
     for path in (*positive, *nonnegative):
         number = value(path)
@@ -161,6 +187,7 @@ def validate_method(config):
     ]
     integers += [
         "max_iterations",
+        "block_optimization.prompt_history_limit",
         "dicai.self_refine_steps",
         "dicai.atomicity.max_revisions",
         "dicai.minimization.sample_size",
@@ -224,6 +251,10 @@ def validate_method(config):
         "block_optimization.reevaluate_current",
         "block_optimization.include_current_configuration",
         "block_selection.use_history",
+        "block_optimization.sample_discrete",
+        "block_optimization.reuse_component_executions",
+        "block_optimization.screening.enabled",
+        "attribution.reuse_unchanged",
     ):
         if value(path) is not None and not isinstance(value(path), bool):
             raise ValueError(f"{path} must be true or false")
@@ -265,7 +296,12 @@ def validate_method(config):
         "block_optimization.reevaluate_current",
         "block_optimization.include_current_configuration",
         "block_selection.use_history",
+        "block_optimization.sample_discrete",
+        "block_optimization.reuse_component_executions",
+        "attribution.reuse_unchanged",
     ):
         section, key = path.split(".")
         if key in config.get(section, {}) and value(path) is None:
             raise ValueError(f"{path} cannot be null; omit it to use its default")
+    if "enabled" in config.get("block_optimization", {}).get("screening", {}) and value("block_optimization.screening.enabled") is None:
+        raise ValueError("block_optimization.screening.enabled cannot be null")

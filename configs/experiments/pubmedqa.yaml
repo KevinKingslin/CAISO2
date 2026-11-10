@@ -1,4 +1,4 @@
-# Current CAISO settings, reorganized without changing their effective values.
+# Current CAISO search protocol; benchmark systems, prompts and datasets are unchanged.
 dataset: pubmed
 system: pubmed_system
 method_config: ../method/default.yaml
@@ -11,7 +11,7 @@ optimization:
   output_dir: outputs/optim
   wandb_run_name: iter100-valsize20-trainsize20
   max_sample_workers: 4
-  num_repeat: 1
+  num_repeat: 3
 
 evaluation:
   run_name: unoptimized
@@ -26,8 +26,8 @@ evaluation:
 method:
   max_iterations: 100
   training_batch_size: 20
-  validation_batch_size: 10
-  validation_sampling: first
+  validation_batch_size: all
+  validation_sampling: seeded
   attribution:
     batch_size: 20
   block_selection:

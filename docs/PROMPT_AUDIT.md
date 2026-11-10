@@ -205,6 +205,15 @@ not an original DICAI stage. Report the setting for research comparisons.
 
 ## Preserved history and runtime safeguards
 
+The later [search protocol v3](OPTIMIZATION_IMPROVEMENTS.md) changes CAISO's
+`method/prompt_optimizer/prompt.txt` to request explicit training-error repairs,
+with reference targets, downstream outputs and freshly comparable archived
+instruction scores. Its complete-request snapshots and the method prompt hash
+were updated intentionally. The 29 protected benchmark prompt entries and all
+15 source-derived DICAI requests remain unchanged. Bootstrap label ties now
+abstain; the earlier descriptions of unchanged tie policy refer to the source
+and atomicity migrations, not protocol v3.
+
 The paper Appendix G source and `tests/fixtures/dicai_paper_prompts.json` remain
 unmodified historical references. They were the active source before the user
 supplied this checkout. The earlier anonymous-source audit and 51-request /

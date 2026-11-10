@@ -56,6 +56,7 @@ def inspect_run(directory):
         members = blocks.get(row.get("selected_block"), [])
         memberships[",".join(sorted(members)) or "unknown"] += 1
         task_scores = [item["task_score"] for item in candidates if item.get("task_score") is not None]
+        search = read(phase / "candidate_search.json", {})
         iterations.append({
             "directory": path.parent.name,
             "status": row.get("status"),
@@ -66,6 +67,8 @@ def inspect_run(directory):
             "best_training_task_score_in_saved_candidates": max(task_scores) if task_scores else None,
             "selected_training_task_score": chosen.get("task_score"),
             "equivalent_runs": row.get("budget_delta", {}).get("equivalent_full_system_runs"),
+            "screened_candidates": len(search.get("screened_candidates", [])),
+            "finalist_states": len(search.get("finalist_states", [])),
             "error": row.get("error"),
         })
     evaluations = {}
@@ -85,7 +88,7 @@ def inspect_run(directory):
             "validation_sampling", "initial_preference_attempts", "budget",
         )},
         "candidate_selection": {key: method.get("block_optimization", {}).get(key) for key in (
-            "sample_discrete", "softmax_temperature", "prompt_candidates", "task_scoring",
+            "sample_discrete", "softmax_temperature", "prompt_candidates", "task_scoring", "validation_repeats", "screening",
         )},
         "stop_reason": run.get("metrics", {}).get("stop_reason"),
         "budget": budget,
@@ -94,6 +97,7 @@ def inspect_run(directory):
         "bootstrap": {
             "comparisons_logged": len(bootstrap), "labeled": len(labeled),
             "label_sources": dict(Counter(row.get("label_source", "unknown") for row in labeled)),
+            "abstention_reasons": dict(Counter(row.get("abstention_reason", "unknown") for row in bootstrap if row.get("status") == "abstained")),
             "random_tie_fraction": sum(row.get("label_source") == "random_task_tie" for row in labeled) / len(labeled) if labeled else None,
         },
         "constitution_training_reconstruction": constitution.get("metadata", {}).get("reconstruction", {}).get("accuracy"),
@@ -105,9 +109,9 @@ def inspect_run(directory):
 
 def run_probes():
     from caiso.attribution.estimator import estimate_all_edges
-    from caiso.constitution.dicai.preferences import candidate_views
     from caiso.core.budget import BudgetTracker
-    from caiso.evaluation.evaluator import evaluate
+    from caiso.core.recovery import ModelResponseError
+    from caiso.core.serialization import digest
     from caiso.integration.config import load_experiment, load_method
     from caiso.integration.runtime import UpstreamRuntime, adapt_examples
     from caiso.integration.services import MethodProvider
@@ -115,7 +119,7 @@ def run_probes():
     from caiso.method.block_optimization import validate_candidate
     from caiso.optim.optimizer import CaisoOptimizer
     from caiso.optimizers.joint_block_optimizer import JointBlockOptimizer
-    from caiso.optimizers.model_selector import probabilities
+    from caiso.optimizers.model_selector import ModelSelectorOptimizer
     from caiso.providers.base import ProviderRegistry
     from caiso.wrappers.example import Example
     from examples.systems.hotpotqa.five_components import system_engine
@@ -142,7 +146,10 @@ def run_probes():
             def forward(self, **inputs):
                 # Keep the real input/output interfaces, but make no external calls.
                 _ = self.variable, self.config
-                return {field: f"audit {field}" for field in self.output_fields}
+                return {
+                    field: "audit answer" if field == "answer" else f"audit {field} {digest([self.variable, inputs])[:12]}"
+                    for field in self.output_fields
+                }
 
             component.forward = MethodType(forward, component)
             component.num_retry, component.retry_after = 1, 0
@@ -162,14 +169,16 @@ def run_probes():
 
     runtime, _ = runtime_factory()
     train, validation = examples(runtime, 50, "train"), examples(runtime, 250, "validation")
-    pairs = initial_preferences(runtime, runtime.initial_state, train, 50, -1, 42)
+    try:
+        initial_preferences(runtime, runtime.initial_state, train, 50, -1, 42)
+    except ModelResponseError:
+        rejected_tied_bootstrap = True
+    else:
+        raise AssertionError("An all-tied bootstrap must not induce preferences")
     bootstrap_runs = runtime.budget.usage.full_system_runs
     tie_probe = {
-        "pairs": len(pairs),
-        "label_sources": dict(Counter(pair.metadata["label_source"] for pair in pairs)),
-        "indistinguishable_label_free_pairs": sum(
-            candidate_views(pair)[0] == candidate_views(pair)[1] for pair in pairs
-        ),
+        "pairs": 0,
+        "all_tied_bootstrap_rejected": rejected_tied_bootstrap,
         "full_system_runs": bootstrap_runs,
     }
 
@@ -186,6 +195,8 @@ def run_probes():
             "loader_validation_size": len(validation),
             "optimizer_validation_pool_size": len(pool),
             "acceptance_size": len(subset),
+            "acceptance_repeats": method["block_optimization"]["validation_repeats"],
+            "diagnostics_split": method["diagnostics_split"],
             "acceptance_ids": [item.example_id for item in subset],
             "effective_attribution_batch_size": min(len(pool), method["attribution"]["batch_size"]),
             "effective_diagnostic_batch_size": min(len(pool), method["block_selection"]["diagnostic_batch_size"]),
@@ -200,18 +211,20 @@ def run_probes():
     }.items():
         runtime, provider = runtime_factory()
         state = runtime.initial_state
-        train, val = examples(runtime, 20, "train"), examples(runtime, 10, "validation")
+        train, val = examples(runtime, 20, "train"), examples(runtime, 50, "validation")
         before = 0
         phases = {}
 
         def record(phase):
             nonlocal before
-            now = runtime.budget.usage.full_system_runs
+            now = runtime.budget.usage.equivalent_full_system_runs
             phases[phase], before = now - before, now
 
-        estimate_all_edges(runtime, state, val, [42], bootstrap_samples=200)
+        normal = {}
+        estimate_all_edges(runtime, state, train[:10], [42], bootstrap_samples=200, normal=normal)
         record("attribution")
-        evaluate(runtime, state, val, [42])
+        assert len([trajectory for trajectory in normal.values() if trajectory is not None]) == 10
+        # The scheduler reads these same normal trajectories instead of rerunning them.
         record("diagnostics")
         search = JointBlockOptimizer(runtime, None, method["block_optimization"], Path("unused"))
         constitution = SimpleNamespace(principles=["Select the trajectory with a concise correct answer."])
@@ -219,19 +232,21 @@ def run_probes():
         record("proposals_and_candidate_scoring")
         changed = [c for c in scored if state.with_configs(c.configurations) != state]
         chosen = search.select(changed, state, members, 42)
-        validate_candidate(runtime, state, state.with_configs(chosen.configurations), val, [42])
+        validate_candidate(runtime, state, state.with_configs(chosen.configurations), val, [42, 104771])
         record("acceptance")
         total = sum(phases.values())
         costs[label] = {
             "members": members,
-            "distinct_joint_states_scored": len(scored),
-            "phases_full_system_runs": phases,
-            "total_full_system_runs": total,
+            "joint_states_screened": len(search.last_search_report["screened_candidates"]),
+            "finalist_states": len(scored),
+            "phases_equivalent_full_runs": {key: round(value, 8) for key, value in phases.items()},
+            "logical_completed_system_runs": runtime.budget.usage.full_system_runs,
+            "reused_component_executions": runtime.budget.usage.reused_component_executions,
             "equivalent_full_system_runs": round(runtime.budget.usage.equivalent_full_system_runs, 8),
-            "complete_iterations_after_110_setup_runs": math.floor((2000 - 110) / total),
+            "complete_iterations_after_160_setup_runs": math.floor((2000 - 160) / total),
         }
         if label == "single_prompt":
-            # A second proposal call starts another empty prompt-score history.
+            # A second proposal call rescoring its archive starts with prior evidence.
             search.propose(state, members, constitution, train, 20042)
             users = [request[-1]["content"] for request in provider.requests]
 
@@ -257,23 +272,43 @@ def run_probes():
     }
     scores = [0.42, 0.45, 0.48, 0.50]
     probability_probe = {
-        "scores": scores, "temperature": 0.5,
-        "probabilities": probabilities(scores, 0.5).tolist(),
-        "best_candidate_probability": float(probabilities(scores, 0.5)[-1]),
+        "scores": scores,
+        "configured_sample_discrete": method["block_optimization"]["sample_discrete"],
+        "selected_index": ModelSelectorOptimizer().select(list(range(4)), scores),
     }
-    assert tie_probe["indistinguishable_label_free_pairs"] == 50
-    assert validation_probe["optimizer_validation_pool_size"] == 10
-    assert costs["single_prompt"]["total_full_system_runs"] == 200
-    assert costs["two_prompts"]["total_full_system_runs"] == 440
-    assert prompt_probe["history_sizes_over_two_proposal_calls"] == [0, 1, 2, 0, 1, 2]
-    assert not wire_probe["seed_forwarded"]
+    # Isolate candidate-search savings under the same 20 training questions.
+    search_costs = {}
+    for label, settings in {
+        "baseline_reuse_only": {"reuse_component_executions": False, "screening": {"enabled": False}},
+        "staged_no_prefix_reuse": {"reuse_component_executions": False, "screening": {"enabled": True, "batch_size": 5, "finalists": 3}},
+        "staged_with_prefix_reuse": method["block_optimization"],
+    }.items():
+        runtime, _ = runtime_factory()
+        search = JointBlockOptimizer(runtime, None, settings, Path("unused"))
+        search.propose(runtime.initial_state, ["hint_generator", "answer_generator"], constitution, examples(runtime, 20, "train"), 10042)
+        search_costs[label] = round(runtime.budget.usage.equivalent_full_system_runs, 8)
+    assert validation_probe["optimizer_validation_pool_size"] == 250
+    assert search_costs["baseline_reuse_only"] == 320
+    assert search_costs["staged_no_prefix_reuse"] == 140
+    assert search_costs["staged_with_prefix_reuse"] < 140
+    assert prompt_probe["history_sizes_over_two_proposal_calls"] == [1, 2, 3, 4, 5, 6]
+    assert wire_probe["seed_forwarded"] and wire_probe["schema_free_response_format_forwarded"]
+    source_files = [
+        "caiso/optimizers/joint_block_optimizer.py", "caiso/optimizers/prompt_optimizer.py",
+        "caiso/integration/runtime.py", "caiso/method/algorithm.py", "configs/method/default.yaml",
+        "configs/experiments/hotpotqa.yaml", "scripts/audit_optimization.py",
+    ]
     return {
         "scope": "Offline execution/control-flow probes, not measured HotpotQA performance",
-        "analyzed_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+        "base_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+        "source_fingerprint": digest({name: (ROOT / name).read_text() for name in source_files}),
+        "source_files": source_files,
         "hotpotqa_edges": [edge.edge_id for edge in runtime.initial_state.workflow.edges],
         "validation": validation_probe,
         "bootstrap_ties": tie_probe,
         "per_iteration_cost": costs,
+        "two_prompt_training_search_equivalent_runs": search_costs,
+        "setup_assumption": "60 successful bootstrap runs plus 100 initial validation runs; real bootstrap may need more attempts",
         "prompt_feedback": prompt_probe,
         "method_request_forwarding": wire_probe,
         "discrete_selection": probability_probe,

@@ -15,11 +15,20 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 @pytest.mark.parametrize("name,label", [("amazon", "amazon"), ("hotpotqa", "hotpotqa"), ("pubmed", "pubmedqa")])
-def test_experiment_migration_keeps_all_effective_parameters(name, label):
+def test_current_profiles_upgrade_search_without_changing_benchmarks(name, label):
     original = load_experiment(ROOT / f"scripts/configs/optimize/{name}.yaml")
     current = load_experiment(ROOT / f"configs/experiments/{label}.yaml")
-    assert load_method(current) == load_method(original)
-    for key in ("dataset", "system", "max_sample_workers", "num_repeat", "dotenv_path", "output_dir", "wandb_run_name"):
+    active, legacy = load_method(current), load_method(original)
+    assert active["validation_sampling"] == "seeded"
+    assert active["validation_batch_size"] == (50 if label == "hotpotqa" else "all")
+    assert active["block_optimization"]["validation_repeats"] == 2
+    assert active["block_optimization"]["sample_discrete"] is False
+    for method in (active, legacy):
+        for key in ("validation_sampling", "validation_batch_size", "attribution", "block_selection"):
+            method.pop(key)
+    assert active == legacy
+    assert current["num_repeat"] == 3
+    for key in ("dataset", "system", "max_sample_workers", "dotenv_path", "output_dir", "wandb_run_name"):
         assert current[key] == original[key]
     assert load_experiment(ROOT / f"configs/experiments/{label}.yaml", "evaluate") == load_experiment(ROOT / f"scripts/configs/eval/{name}_vanilla.yaml", "evaluate")
     assert not any(key.startswith("ppo_") for key in current)

@@ -31,6 +31,7 @@ class Checkpoint(Record):
     pending_refresh: bool = False
     consecutive_errors: int = 0
     optimization_history: OptimizationHistory = Field(default_factory=OptimizationHistory)
+    optimizer_state: dict = Field(default_factory=dict)
 
     def save(self, path):
         path = Path(path)

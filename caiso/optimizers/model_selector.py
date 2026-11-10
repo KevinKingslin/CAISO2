@@ -12,7 +12,7 @@ def probabilities(scores, temperature=1.0):
 
 
 class ModelSelectorOptimizer(ConfigurationOptimizer):
-    def __init__(self, temperature=1.0, sample=True):
+    def __init__(self, temperature=1.0, sample=False):
         self.temperature, self.sample = temperature, sample
 
     def propose(self, component, context):
@@ -25,7 +25,9 @@ class ModelSelectorOptimizer(ConfigurationOptimizer):
         return filter_current_configuration(current, candidates, context.config)
 
     def select(self, candidates, scores, seed=0, final=False):
-        p = probabilities(scores, self.temperature)
+        if not candidates or len(candidates) != len(scores) or not np.isfinite(scores).all():
+            raise ValueError("Candidates and finite scores must be nonempty and aligned")
         if final or not self.sample:
             return candidates[int(np.argmax(scores))]
+        p = probabilities(scores, self.temperature)
         return candidates[int(np.random.default_rng(seed).choice(len(candidates), p=p))]

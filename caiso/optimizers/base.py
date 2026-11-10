@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
+
+from pydantic import Field
 
 from caiso.core.configuration import Configuration
 from caiso.core.serialization import Record, digest
@@ -23,6 +25,7 @@ class CandidateScore(Record):
     constitution_score: float | None = None
     task_score: float | None = None
     score: float
+    evaluation: dict[str, Any] = Field(default_factory=dict)
 
 
 @dataclass
@@ -37,6 +40,8 @@ class OptimizationContext:
     config: dict
     output_dir: Path
     score_config: Callable | None = None
+    prompt_history: list[dict] = field(default_factory=list)
+    record_prompt: Callable | None = None
 
 
 class ConfigurationOptimizer(ABC):

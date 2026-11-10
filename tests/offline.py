@@ -4,6 +4,24 @@ import json
 import numpy as np
 
 
+def training_preferences(optimizer):
+    """Real unequal-score arithmetic variants, supplied as labeled training data."""
+    from caiso.constitution.models import PreferencePair
+
+    runtime, current = optimizer.runtime, optimizer.runtime.initial_state
+    changed = current.model_copy(deep=True)
+    changed.configurations["transform"].value = "double"
+    example = optimizer.train[0]
+    a, b = runtime.execute(current, example, 42), runtime.execute(changed, example, 43)
+    assert a.reward != b.reward
+    return [PreferencePair(
+        pair_id="provided-training-operation", context=example.inputs,
+        candidate_a={"trajectory": a.model_dump()}, candidate_b={"trajectory": b.model_dump()},
+        preferred="A" if a.reward > b.reward else "B",
+        metadata={"label_source": "provided_training_task_metric"},
+    )]
+
+
 def atomicity_review_fixture(messages):
     """Atomic fixtures only; compound/revision cases use scripted semantic reviews."""
     values = json.loads(messages[-1]["content"].split("PRINCIPLES:\n", 1)[1])

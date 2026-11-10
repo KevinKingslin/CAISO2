@@ -8,7 +8,7 @@ from caiso.optim.optimizer import CaisoOptimizer
 from caiso.optimizers.joint_block_optimizer import JointBlockOptimizer
 from caiso.providers.base import ProviderRegistry
 from caiso.wrappers.example import Example
-from tests.offline import OfflineEmbeddings, OfflineProvider
+from tests.offline import OfflineEmbeddings, OfflineProvider, training_preferences
 from tests.test_runtime import make_system
 
 
@@ -38,6 +38,7 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch
                 "block_optimization": {
                     "prompt_candidates": 1, "max_joint_candidates": 4,
                     "reevaluate_current": reevaluate_current, "include_current_configuration": include_current_configuration,
+                    "validation_repeats": 1,
                 },
                 "dicai": {"clustering": {"min_clusters": 2, "max_clusters": 4}},
                 "reporting": {"cli": False, "capture_model_output": False},
@@ -98,7 +99,7 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch
         embeddings=embeddings,
     )
     provider.budget = embeddings.budget = optimizer.budget
-    result, metrics = optimizer.optimize()
+    result, metrics = optimizer.optimize(preferences=training_preferences(optimizer))
     assert result is system
     expected_config = "double" if accept_update else "identity"
     assert result.components["transform"].variable == expected_config

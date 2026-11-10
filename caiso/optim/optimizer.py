@@ -58,13 +58,18 @@ class CaisoOptimizer:
                 providers, embeddings, personas, self.config["dicai"], role="block_constitution"
             )
 
-    def optimize(self, resume=None):
+    def optimize(self, resume=None, preferences=None):
         self.output.mkdir(parents=True, exist_ok=True)
         save_json(self.output / "experiment.json", self.experiment)
         save_json(self.output / "method.json", self.config)
         initial = self.runtime.initial_state
         algorithm = Algorithm(self.runtime, self.dicai, self.block_dicai, self.config, self.output)
-        best = algorithm.run(initial, self.train, self.validation, resume=resume)
+        preference_path = self.experiment.get("caiso", {}).get("preferences_path")
+        if preferences is None and preference_path and not resume:
+            from caiso.constitution.dicai.data import load_pairs
+
+            preferences = load_pairs(preference_path, seed=self.config["seed"])
+        best = algorithm.run(initial, self.train, self.validation, preferences=preferences, resume=resume)
         self.runtime.apply_state(best)
         run = read_json(self.output / "run.json")
         if run["metrics"].get("stop_reason") in {

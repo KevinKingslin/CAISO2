@@ -14,6 +14,7 @@ from threading import RLock
 from time import monotonic
 
 from caiso.core.component import Component
+from caiso.core.content_filter import ContentFilteredError
 from caiso.core.configuration import Configuration, ConfigurationType as Kind
 from caiso.core.execution import CompoundAISystem
 from caiso.core.recovery import ModelResponseError
@@ -140,6 +141,7 @@ class UpstreamRuntime(CompoundAISystem):
         self.engine = system
         self.initial_state, library = describe_system(system, edge_baselines)
         self._lock = RLock()
+        self._component_cache = None
         self._component_ids = {id(comp): cid for cid, comp in system.components.items()}
         super().__init__(
             library,
@@ -154,6 +156,24 @@ class UpstreamRuntime(CompoundAISystem):
         if config.kind == Kind.MODEL_WEIGHTS:
             return Path(config.value["adapter"])
         return deepcopy(config.value)
+
+    @contextmanager
+    def reuse_component_executions(self):
+        """Share recorded training observations within one candidate search only.
+
+        This is common evidence, not independent stochastic repetitions. Keys
+        include the example, repeat ID, actual inputs and execution configuration.
+        Never enable this scope around acceptance or benchmark evaluation.
+        """
+        with self._lock:
+            if self._component_cache is not None:
+                raise RuntimeError("Component reuse scopes cannot be nested")
+            self._component_cache = {}
+        try:
+            yield
+        finally:
+            with self._lock:
+                self._component_cache = None
 
     @contextmanager
     def _configuration(self, configs):
@@ -202,6 +222,8 @@ class UpstreamRuntime(CompoundAISystem):
 
     def execute(self, state, example, seed, intervention=None, use_cache=False):
         self._validate_workflow(state)
+        if self._component_cache is not None and example.split != "train":
+            raise ValueError("Component observation reuse is restricted to training searches")
         edge = None
         if intervention is not None:
             edge = next((e for e in state.workflow.edges if e.edge_id == intervention), None)
@@ -218,7 +240,7 @@ class UpstreamRuntime(CompoundAISystem):
                 self.budget.usage.system_attempts += 1
                 self.budget.usage.causal_intervention_runs += int(edge is not None)
             executions = []
-            blank_inputs, empty_query_retrievals = [], []
+            blank_inputs, empty_query_retrievals, reused_components = [], [], []
             original_call = self.engine._single_call
 
             def observed_call(component, inputs):
@@ -240,6 +262,29 @@ class UpstreamRuntime(CompoundAISystem):
                         if isinstance(value, str) and value == "":
                             values[field] = " "
                             blank_inputs.append(f"{cid}.{field}")
+                # Interventions always execute fresh. The training-only cache
+                # shares a component draw only when every execution input agrees.
+                cache = self._component_cache if edge is None and not getattr(component.config, "randomize_variable", False) else None
+                key = digest([
+                    example.example_id, example.inputs, seed, cid, values,
+                    state.configurations[cid].kind, state.configurations[cid].value,
+                    repr(vars(component.config)),
+                ]) if cache is not None else None
+                if cache is not None and key in cache:
+                    cached = cache[key]
+                    if isinstance(cached, ContentFilteredError):
+                        raise cached
+                    outputs = deepcopy(cached["outputs"])
+                    component.traj = deepcopy(cached["trajectory"])
+                    executions.append(ComponentExecution(
+                        component_id=cid, component_input=values, component_output=deepcopy(outputs),
+                        seed=seed, config_hash=digest(state.configurations[cid]), seconds=0,
+                    ))
+                    reused_components.append(cid)
+                    with self.budget.lock:
+                        self.budget.usage.cache_hits += 1
+                        self.budget.usage.reused_component_executions += 1
+                    return outputs
                 self.budget.component(self.library[cid].cost_weight)
                 started = monotonic()
                 # A normal keyword-generation failure belongs to its producer.
@@ -294,6 +339,12 @@ class UpstreamRuntime(CompoundAISystem):
                         )
                         if required_queries else generate(0, None)
                     )
+                    if cache is not None:
+                        cache[key] = {"outputs": deepcopy(outputs), "trajectory": deepcopy(component.traj)}
+                except ContentFilteredError as error:
+                    if cache is not None:
+                        cache[key] = error  # A policy rejection must not trigger resampling.
+                    raise
                 finally:
                     elapsed = monotonic() - started
                     with self.budget.lock:
@@ -338,6 +389,10 @@ class UpstreamRuntime(CompoundAISystem):
                     "intervention": intervention,
                     "cache_hit": False,
                     "task_generation_seeded": False,
+                    **({
+                        "reused_components": reused_components,
+                        "observation_reuse": "shared_training_search",
+                    } if self._component_cache is not None else {}),
                     **({
                         "blank_intervention_inputs": blank_inputs,
                         "empty_query_retrievals": empty_query_retrievals,

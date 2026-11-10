@@ -2,9 +2,11 @@
 
 import random
 from itertools import count
+from math import isfinite
 from pathlib import Path
 from time import monotonic
 
+from caiso.attribution.estimator import EdgeEffect
 from caiso.constitution.dicai.judge import ConstitutionJudge
 from caiso.constitution.models import PreferencePair
 from caiso.core.budget import BudgetExceeded
@@ -49,10 +51,12 @@ def validation_batch(examples, config, seed):
     return batch(examples, size, seed)
 
 
-def initial_preferences(runtime, state, train, count, attempts, seed, comparison_path=None):
-    """Compare training trajectories; -1 uses one pass with seeded random tie labels."""
+def initial_preferences(runtime, state, train, count, attempts, seed, comparison_path=None, min_margin=0):
+    """Collect strict task preferences; ties and indistinguishable outputs abstain."""
     if not train or count < 1:
         raise ValueError("Initial preferences require training samples and a positive sample count")
+    if isinstance(min_margin, bool) or not isinstance(min_margin, (int, float)) or not isfinite(min_margin) or min_margin < 0:
+        raise ValueError("Initial preference margin must be finite and nonnegative")
     if (
         isinstance(attempts, bool)
         or not isinstance(attempts, int)
@@ -81,7 +85,6 @@ def initial_preferences(runtime, state, train, count, attempts, seed, comparison
     if comparison_path:
         save_jsonl(comparison_path, [])
     result = []
-    tie_rng = random.Random(seed)
     for i, example in enumerate(comparisons()):
         a = execute_example(runtime, state, example, seed + i * 2)
         b = execute_example(runtime, state, example, seed + i * 2 + 1) if a is not None else None
@@ -100,11 +103,15 @@ def initial_preferences(runtime, state, train, count, attempts, seed, comparison
                 )
             continue
         tied = a.reward == b.reward
-        if tied:
-            preferred = tie_rng.choice(["A", "B"]) if single_pass else None
-        else:
-            preferred = "A" if a.reward > b.reward else "B"
-        label_source = "random_task_tie" if tied else "training_task_metric"
+        def observable(trajectory):
+            return [trajectory.final_output, [
+                [execution.component_id, execution.component_input, execution.component_output]
+                for execution in trajectory.executions
+            ]]
+        identical = observable(a) == observable(b)
+        ambiguous = identical or tied or abs(a.reward - b.reward) <= min_margin
+        preferred = None if ambiguous else ("A" if a.reward > b.reward else "B")
+        label_source = "training_task_metric"
         if comparison_path:
             append_jsonl(
                 comparison_path,
@@ -115,6 +122,11 @@ def initial_preferences(runtime, state, train, count, attempts, seed, comparison
                     "candidate_b": b,
                     "preferred": preferred,
                     "task_score_tied": tied,
+                    "status": "abstained" if ambiguous else "labeled",
+                    "abstention_reason": (
+                        "identical_trajectories" if identical else "task_score_tie" if tied
+                        else "insufficient_margin" if ambiguous else None
+                    ),
                     "label_source": label_source if preferred is not None else None,
                 },
             )
@@ -134,7 +146,7 @@ def initial_preferences(runtime, state, train, count, attempts, seed, comparison
             break
     if not result:
         raise ModelResponseError(
-            "No unequal-score training pairs were observed, or all examples were content-filtered. Supply preferences_path "
+            "No usable unequal-score training pairs were observed. Supply caiso.preferences_path "
             "with labeled PreferencePair JSON data; tied scores cannot induce preferences."
         )
     return result
@@ -247,6 +259,9 @@ class Algorithm:
     def _run(self, initial, train, validation, preferences=None, resume=None):
         cfg = self.config
         seed = cfg["seed"]
+        validation_seeds = [seed + repeat * 104729 for repeat in range(
+            cfg["block_optimization"].get("validation_repeats", 1)
+        )]
         if any(x.split != "train" for x in train) or any(
             x.split != "validation" for x in validation
         ):
@@ -279,6 +294,8 @@ class Algorithm:
             blocks, effects = cp.blocks, cp.attribution
             pending_refresh = cp.pending_refresh
             optimization_history = cp.optimization_history
+            if hasattr(self.optimizer, "load_state_dict"):
+                self.optimizer.load_state_dict(cp.optimizer_state)
             self.runtime.budget.usage = cp.budget.model_copy(deep=True)
             self.runtime.budget.previous_seconds = cp.budget.elapsed_seconds
         else:
@@ -293,6 +310,7 @@ class Algorithm:
                 cfg["initial_preference_attempts"],
                 seed,
                 comparison_path=self.output / "setup/bootstrap_comparisons.jsonl",
+                min_margin=cfg.get("initial_preference_min_margin", 0),
             )
             update_result(
                 self.output / "setup.json",
@@ -325,7 +343,7 @@ class Algorithm:
                 self.runtime,
                 current,
                 validation_batch(validation, cfg, seed),
-                [seed],
+                validation_seeds,
                 progress=lambda done, total: self.report.update(
                     progress=f"Baseline validation: {done}/{total} system runs"
                 ),
@@ -333,7 +351,7 @@ class Algorithm:
             best_score = score
             update_result(
                 self.output / "setup.json",
-                baseline={"score": score, "seed": seed, "trajectories": baseline_trajectories},
+                baseline={"score": score, "seeds": validation_seeds, "trajectories": baseline_trajectories},
                 status="completed",
             )
 
@@ -362,6 +380,7 @@ class Algorithm:
                 pending_refresh=pending_refresh,
                 consecutive_errors=consecutive_errors,
                 optimization_history=optimization_history,
+                optimizer_state=self.optimizer.state_dict() if hasattr(self.optimizer, "state_dict") else {},
             ).save(self.output / "checkpoint")
 
         checkpoint(start)
@@ -398,25 +417,30 @@ class Algorithm:
                         self.report.save_system_induction(qsys, preferences)
                         pending_refresh = False
                     self.report.update("Causal edge attribution", phase_dir="01_attribution")
-                    attr = batch(validation, cfg["attribution"]["batch_size"], step_seed)
+                    # Scheduling evidence comes from training; acceptance questions
+                    # are never exposed to prompt proposals or block selection.
+                    diagnostic_pool = train if cfg.get("diagnostics_split", "validation") == "train" else validation
+                    attr = batch(diagnostic_pool, cfg["attribution"]["batch_size"], step_seed)
                     attr_seeds = [
                         step_seed + r for r in range(cfg["attribution"]["stochastic_repeats"])
                     ]
-                    attribution = estimate_all_edges(
-                        self.runtime,
-                        current,
-                        attr,
-                        attr_seeds,
-                        None,
+                    normal_trajectories = {}
+                    reuse_effects = bool(effects) and cfg["attribution"].get("reuse_unchanged", False) and all(
+                        effect["state_hash"] == current.fingerprint() for effect in effects
+                    )
+                    attribution = [EdgeEffect.model_validate(effect) for effect in effects] if reuse_effects else estimate_all_edges(
+                        self.runtime, current, attr, attr_seeds, None,
                         cfg["attribution"]["bootstrap_samples"],
                         confidence_level=cfg["attribution"].get("confidence_level", 0.95),
+                        normal=normal_trajectories,
                     )
                     effects = [e.model_dump() for e in attribution]
                     self.report.save_phase(
                         "01_attribution",
                         edge_effects=effects,
                         settings=cfg["attribution"],
-                        seeds=attr_seeds,
+                        seeds=sorted({value for effect in attribution for value in effect.seeds}),
+                        evidence_reused=reuse_effects,
                     )
                     self.report.update("Discovering blocks with Leiden", phase_dir="02_blocks")
                     blocks = discover_blocks(
@@ -439,15 +463,25 @@ class Algorithm:
                         phase_dir="03_selection",
                         blocks=blocks,
                     )
-                    _, diagnostics = evaluate(
+                    diagnostic_examples = batch(
+                        diagnostic_pool, cfg["block_selection"]["diagnostic_batch_size"], step_seed
+                    )
+                    cached = {}
+                    for example in diagnostic_examples:
+                        key = digest([current, example, step_seed, self.runtime.providers.fingerprint()])
+                        if key in normal_trajectories:
+                            cached[example.example_id] = normal_trajectories[key]
+                    missing = [example for example in diagnostic_examples if example.example_id not in cached]
+                    _, fresh_diagnostics = evaluate(
                         self.runtime,
                         current,
-                        batch(
-                            validation, cfg["block_selection"]["diagnostic_batch_size"], step_seed
-                        ),
+                        missing,
                         [step_seed],
                         None,
-                    )
+                    ) if missing else (0, [])
+                    cached.update({trajectory.input_id: trajectory for trajectory in fresh_diagnostics})
+                    diagnostics = [cached[example.example_id] for example in diagnostic_examples
+                                   if cached.get(example.example_id) is not None]
                     use_selection_history = cfg["block_selection"].get("use_history", True)
                     self.report.save_phase(
                         "03_selection",
@@ -607,9 +641,20 @@ class Algorithm:
                             constitution_source="block" if block_constitution_enabled else "system",
                             history_enabled=True,
                         )
-                        scored = self.optimizer.propose(
-                            current, members, optimization_constitution, local_train, step_seed + 10000
+                        validation_allowance = (
+                            len(val) * len(validation_seeds)
+                            * (2 if cfg["block_optimization"].get("reevaluate_current", True) else 1)
+                            * sum(self.runtime.library[node].cost_weight for node in current.workflow.nodes)
+                            / self.runtime.budget.full_cost
                         )
+                        with self.runtime.budget.reserve(validation_allowance):
+                            scored = self.optimizer.propose(
+                                current, members, optimization_constitution, local_train, step_seed + 10000
+                            )
+                        if isinstance(self.optimizer, JointBlockOptimizer):
+                            self.report.save_phase(
+                                "05_block_optimization", search_metrics=self.optimizer.last_search_report
+                            )
                         self.report.configuration_state(status="Local candidates evaluated")
                         scored = [
                             c
@@ -643,17 +688,17 @@ class Algorithm:
                                 current,
                                 candidate,
                                 val,
-                                [seed],
+                                validation_seeds,
                                 cfg["block_optimization"]["acceptance_epsilon"],
                                 reevaluate_current=cfg["block_optimization"].get("reevaluate_current", True),
                                 current_score=score,
                                 on_current_reuse=lambda value: self.report.save_phase(
                                     "05_block_optimization",
                                     current_validation={
-                                        "score": value, "seeds": [seed], "reused": True,
+                                        "score": value, "seeds": validation_seeds, "reused": True,
                                         "source": "saved_current_score",
                                         "state_fingerprint": current.fingerprint(),
-                                        "validation_fingerprint": digest([val, [seed]]),
+                                        "validation_fingerprint": digest([val, validation_seeds]),
                                     },
                                 ),
                                 progress=lambda label, done, total: self.report.update(
@@ -665,16 +710,16 @@ class Algorithm:
                                         **{
                                             f"{label}_validation": {
                                                 "score": value,
-                                                "seeds": [seed],
+                                                "seeds": validation_seeds,
                                                 "reused": False,
                                                 "source": "fresh_validation",
                                                 "state_fingerprint": (current if label == "current" else candidate).fingerprint(),
-                                                "validation_fingerprint": digest([validation, [seed]]),
+                                                "validation_fingerprint": digest([validation, validation_seeds]),
                                                 "trajectories": trajectories,
                                                 "coverage": {
-                                                    "requested": len(validation),
+                                                    "requested": len(validation) * len(validation_seeds),
                                                     "completed": len(trajectories),
-                                                    "skipped_content_filter": len(validation)
+                                                    "skipped_content_filter": len(validation) * len(validation_seeds)
                                                     - len(trajectories),
                                                 },
                                             }

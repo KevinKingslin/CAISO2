@@ -187,6 +187,16 @@ STaRK and BigCodeBench evaluation configurations are also included.
 ```
 
 These dispatch to `scripts/optimize_system.py` with `configs/experiments/*.yaml`.
+The current [search protocol](docs/OPTIMIZATION_IMPROVEMENTS.md) skips ambiguous
+bootstrap pairs, uses deterministic discrete selection, supplies training-error
+feedback and checkpointed prompt history, and screens joint candidates before
+full training evaluation. Recorded component observations are reused within
+training proposals; acceptance runs stay fresh. HotpotQA accepts on 50 seeded
+validation questions with two repetitions. PubMedQA/Amazon use their complete
+validation sets with two repetitions. All three profiles run three final test
+repetitions. Start these changes in a new output directory; earlier checkpoints
+use a different protocol and fail the resume fingerprint check.
+
 `run` is an alias for `optimize`, so `./scripts/caiso run amazon` also works.
 Omitting `--output` restores `results/<dataset>-<config-hash>/`, where the hash
 reflects the current experiment and resolved method configuration. An existing
@@ -316,7 +326,8 @@ optimization attempts from block-selection requests only. This is the only
 history toggle; the duplicate top-level `use_history` setting has been removed.
 
 Prompt optimization always retains candidate instructions and task-score
-feedback within each proposal call. Rejected-candidate filtering, workflow
+feedback within each proposal call. Its checkpointed archive also supplies prior
+instructions rescored on the current training batch. Rejected-candidate filtering, workflow
 performance feedback, and DICAI debate history remain enabled regardless of the
 selection-history setting. Block preference generation also retains rejection
 filtering when enabled. Phase status files record the
@@ -351,8 +362,9 @@ their required values. The current system remains a scoring reference, and
 acceptance validation still decides whether to install the proposed changes.
 Use a new run when changing this search setting.
 
-The original `scripts/configs/` files and `caiso/config/default.yaml` remain intact
-and supported by direct Python commands. Their reward-model/PPO parameters belong
+The original `scripts/configs/` files remain intact and supported by direct Python
+commands. Packaged `caiso/config/default.yaml` mirrors the current shared method.
+The original profiles' reward-model/PPO parameters belong
 to the legacy OPTIMAS utilities and are unused by CAISO. CAISO weight optimization
 uses its existing `block_optimization.dpo` settings; reward-model training is not
 needed. Credentials, model deployments, backend choices and service URLs stay in
@@ -393,7 +405,8 @@ without an abstraction call, as in the source.
 
 The audit prompt is included as a complete template; no new auditor model or
 automatic audit stage is enabled. Dataset personas, model routes, transport
-limits and all existing numeric configuration values are retained. The paper
+limits and DICAI reasoning/debate settings are retained by that source migration.
+Current search defaults are documented in [protocol v3](docs/OPTIMIZATION_IMPROVEMENTS.md). The paper
 Appendix G transcriptions remain historical references, not active prompts.
 Start a new optimization run after this migration: prompt schemas, call counts
 and reconstruction behavior differ, and old checkpoints retain old constitutions.

@@ -1,11 +1,12 @@
 import math
 import random
+from contextlib import nullcontext
 
 from caiso.core.budget import BudgetExceeded
 from caiso.core.configuration import ConfigurationType
 from caiso.core.content_filter import ContentFilteredError, record_skip
 from caiso.core.recovery import ModelResponseError
-from caiso.core.serialization import digest
+from caiso.core.serialization import digest, plain
 from caiso.evaluation.evaluator import evaluate
 from caiso.method.config import task_scoring_settings
 
@@ -19,7 +20,7 @@ from .weight_optimizer import WeightOptimizer
 def default_optimizers(config):
     kwargs = {
         "temperature": config.get("softmax_temperature", 1),
-        "sample": config.get("sample_discrete", True),
+        "sample": config.get("sample_discrete", False),
     }
     return {
         ConfigurationType.PROMPT: PromptOptimizer(),
@@ -51,6 +52,28 @@ class JointBlockOptimizer:
         self.on_candidate = on_candidate
         self.task_scoring, self.constitution_weight, self.task_weight = task_scoring_settings(config)
         self.constitution_scoring = not self.task_scoring or self.constitution_weight > 0
+        self.prompt_archive = {}
+        self.last_search_report = {}
+
+    def state_dict(self):
+        return {"prompt_archive": plain(self.prompt_archive)}
+
+    def load_state_dict(self, state):
+        archive = state.get("prompt_archive", {})
+        if not isinstance(archive, dict) or any(
+            cid not in self.runtime.library or not isinstance(values, list)
+            or any(not isinstance(value, str) or not value.strip() for value in values)
+            for cid, values in archive.items()
+        ):
+            raise ValueError("Invalid optimizer prompt archive")
+        self.prompt_archive = {cid: list(values) for cid, values in archive.items()}
+
+    def remember_prompt(self, cid, prompt):
+        values = self.prompt_archive.setdefault(cid, [])
+        if prompt in values:
+            values.remove(prompt)
+        values.append(prompt)
+        del values[:-self.config.get("prompt_archive_size", 30)]
 
     def add_task_score(self, scored, state, examples, seed):
         if not self.task_scoring or scored.task_score is not None:
@@ -137,11 +160,22 @@ class JointBlockOptimizer:
         return self.add_task_score(scored, state, examples, seed) if include_task_score else scored
 
     def propose(self, state, members, constitution, examples, seed):
+        reuse = getattr(self.runtime, "reuse_component_executions", None)
+        scope = reuse() if reuse and self.config.get("reuse_component_executions", False) else nullcontext()
+        with scope:
+            return self._propose(state, members, constitution, examples, seed)
+
+    def _propose(self, state, members, constitution, examples, seed):
         if not examples:
             raise ValueError("Local optimization needs training examples")
+        if len({example.example_id for example in examples}) != len(examples):
+            raise ValueError("Training example IDs must be unique within a proposal")
         if not self.include_current and all(self.runtime.library[c].config_type == ConfigurationType.NONE for c in members):
             return []
-        _, references = evaluate(self.runtime, state, examples, [seed])
+        screening = self.config.get("screening", {})
+        staged = screening.get("enabled", False) and not self.constitution_scoring
+        screen_examples = examples[:screening.get("batch_size", 5)] if staged else examples
+        baseline_score, references = evaluate(self.runtime, state, screen_examples, [seed])
         if not references:
             raise ModelResponseError(
                 "No unfiltered training trajectories remain for local optimization"
@@ -156,6 +190,38 @@ class JointBlockOptimizer:
                 )
                 baseline_outputs.append(None)
         memo = {}
+        observations = {}
+        baseline_key = state.fingerprint()
+        if not self.constitution_scoring:
+            observations[baseline_key] = {example.example_id: None for example in screen_examples}
+            observations[baseline_key].update({trajectory.input_id: trajectory for trajectory in references})
+            memo[baseline_key] = CandidateScore(
+                configurations={}, score=baseline_score, task_score=baseline_score,
+            )
+
+        def task_score(updates, requested):
+            candidate = state.with_configs(updates)
+            key = candidate.fingerprint()
+            observed = observations.setdefault(key, {})
+            missing = [example for example in requested if example.example_id not in observed]
+            if missing:
+                if self.on_candidate:
+                    self.on_candidate(candidate.model_copy(deep=True))
+                _, trajectories = evaluate(self.runtime, candidate, missing, [seed])
+                observed.update({example.example_id: None for example in missing})
+                observed.update({trajectory.input_id: trajectory for trajectory in trajectories})
+            value = sum(
+                observed[example.example_id].reward if observed[example.example_id] is not None else 0
+                for example in requested
+            ) / len(requested)
+            return CandidateScore(configurations=updates, score=value, task_score=value, evaluation={
+                "examples": len(requested), "seed": seed,
+                "batch_fingerprint": digest(requested),
+                "stage": "full_training" if len(requested) == len(examples) else "screening",
+                "shared_component_observations": bool(
+                    getattr(self.runtime, "_component_cache", None) is not None
+                ),
+            })
 
         def candidate_key(updates):
             return (
@@ -165,6 +231,9 @@ class JointBlockOptimizer:
 
         def score(updates):
             key = candidate_key(updates)
+            if not self.constitution_scoring:
+                memo[key] = task_score(updates, screen_examples)
+                return memo[key].score
             if key not in memo:
                 memo[key] = self.score_candidate(
                     state,
@@ -190,13 +259,27 @@ class JointBlockOptimizer:
                 state,
                 constitution,
                 self.judge,
-                examples,
+                screen_examples,
                 references,
                 seed + i * 100,
                 self.config,
                 self.output_dir,
                 score,
             )
+            if comp.config_type == ConfigurationType.PROMPT:
+                history_limit = self.config.get("prompt_history_limit", 3)
+                previous = [value for value in self.prompt_archive.get(cid, [])
+                            if value != state.configurations[cid].value]
+                for value in previous[-history_limit:] if history_limit else []:
+                    configuration = state.configurations[cid].model_copy(deep=True)
+                    configuration.value = value
+                    context.prompt_history.append({"prompt": value, "score": score({cid: configuration})})
+                context.record_prompt = lambda value, cid=cid: self.remember_prompt(cid, value)
+            # DPO needs the complete training references even when prompt
+            # candidates are screened. Its preferences are not cache draws.
+            if comp.config_type == ConfigurationType.MODEL_WEIGHTS and len(screen_examples) < len(examples):
+                _, context.trajectories = evaluate(self.runtime, state, examples, [seed])
+                context.examples = examples
             try:
                 proposals = self.optimizers[comp.config_type].propose(comp, context)
             except ContentFilteredError as error:
@@ -248,6 +331,23 @@ class JointBlockOptimizer:
                 # Keep completed comparisons when a bounded search runs out of budget.
                 break
             scored.append(completed)
+        scored = sorted(scored, key=lambda c: (-c.score, digest(c.configurations)))
+        self.last_search_report = {
+            "screening_enabled": staged and len(screen_examples) < len(examples),
+            "screening_examples": len(screen_examples), "training_examples": len(examples),
+            "screened_candidates": plain(scored),
+            "history_rescored_on": digest(screen_examples),
+        }
+        if staged and len(screen_examples) < len(examples):
+            changed = [item for item in scored if state.with_configs(item.configurations) != state]
+            finalists = changed[:screening.get("finalists", 3)]
+            unchanged = [item for item in scored if state.with_configs(item.configurations) == state]
+            # Every returned score uses the same full batch. Screened-out states
+            # cannot compete against finalists with incomparable small-batch scores.
+            scored = [task_score(item.configurations, examples) for item in [*unchanged, *finalists]]
+            self.last_search_report["finalist_states"] = [
+                state.with_configs(item.configurations).fingerprint() for item in scored
+            ]
         return sorted(scored, key=lambda c: (-c.score, digest(c.configurations)))
 
     def select(self, scored, state, members, seed, final=False):
@@ -260,6 +360,6 @@ class JointBlockOptimizer:
         )
         if discrete:
             return ModelSelectorOptimizer(
-                self.config.get("softmax_temperature", 1), self.config.get("sample_discrete", True)
+                self.config.get("softmax_temperature", 1), self.config.get("sample_discrete", False)
             ).select(scored, [s.score for s in scored], seed, final)
         return scored[0]

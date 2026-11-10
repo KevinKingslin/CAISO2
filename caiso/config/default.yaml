@@ -1,10 +1,13 @@
 # Dataset/question batch sizes live in configs/experiments/*.yaml under method.
 seed: 42
+optimization_protocol: task-search-v3
+diagnostics_split: train  # Keep acceptance questions out of scheduling and prompt feedback.
 max_iterations: null  # Continue until a run, time, or model-call budget is exhausted.
 execution:
   max_workers: 10  # Independent system runs; provider concurrency/RPM limits still apply.
-initial_preference_pairs: 50  # One pair per distinct selected training question in -1 mode.
-initial_preference_attempts: -1  # Two runs per question; seeded random tie-break, no tie retries.
+initial_preference_pairs: 30
+initial_preference_attempts: 200  # Bounded comparisons; equal/indistinguishable pairs abstain.
+initial_preference_min_margin: 0.01
 dicai:
   personas: 3
   max_workers: 10  # Concurrent independent debates for both system and block induction.
@@ -42,6 +45,7 @@ dicai:
     strict: false
     sample_size: 0  # 0 uses all training preference pairs.
 attribution:
+  reuse_unchanged: true  # Reuse measured effects after rejection; refresh after accepted changes.
   stochastic_repeats: 1  # One paired normal/intervention seed per question.
   baseline_policy: per_edge
   bootstrap_samples: 200
@@ -63,11 +67,21 @@ block_optimization:
   include_current_configuration: true  # false: only changed values for optimizable block members are eligible.
   reevaluate_current: true  # false: reuse the saved current validation score; candidates are always evaluated.
   max_joint_candidates: 16
+  validation_repeats: 2  # Fresh executions; repeat IDs do not imply deterministic task generations.
+  reuse_component_executions: true  # Share training observations within a proposal only.
+  screening:
+    enabled: true
+    batch_size: 5
+    finalists: 3  # Changed states promoted, plus the unchanged reference.
+  prompt_history_limit: 3  # Archived prompts rescored on the current screening batch.
+  prompt_archive_size: 30
+  feedback_examples: 8
+  feedback_max_chars: 2000
   task_scoring:
     enabled: true  # Score candidates and prompt feedback end to end on the training batch.
     constitution_weight: 0.0  # Zero skips candidate constitution judging; positive enables mixed ranking.
     task_weight: 1.0  # Positive task weight; validation acceptance stays separate.
-  acceptance_epsilon: 0.000001
+  acceptance_epsilon: 0.005
   prompt_candidates: 3
   prompt_tips:
     - Don't be afraid to be creative when creating the new instruction!
@@ -75,7 +89,7 @@ block_optimization:
     - Make sure your instruction is very informative and descriptive.
     - The instruction should include specific details such as numbers or conditions.
   softmax_temperature: 0.5
-  sample_discrete: true
+  sample_discrete: false
   dpo:
     lora_rank: 16
     lora_alpha: 32

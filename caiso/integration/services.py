@@ -31,6 +31,9 @@ class MethodProvider:
                 )
             )
         with observe_transport(self.budget, self.on_error):
+            generation = {"seed": seed, **kwargs}
+            if schema is not None:
+                generation.setdefault("response_format", {"type": "json_object"})
             result = api.get_llm_output(
                 instructions,
                 model=self.model,
@@ -39,7 +42,7 @@ class MethodProvider:
                 # Keep the wire-level JSON mode but let the method registry
                 # parse/validate the original text and handle format retries.
                 json_object=False,
-                **({"response_format": {"type": "json_object"}} if schema is not None else {}),
+                **generation,
             )
         # Support test/custom API implementations that already return decoded JSON.
         return json.dumps(result) if schema is not None and isinstance(result, (dict, list)) else result

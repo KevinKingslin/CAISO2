@@ -25,7 +25,7 @@ from tests.test_runtime import make_runtime
 def test_prompt_feedback_is_always_scored_and_preserved(tmp_path):
     component, ctx = context(tmp_path, ConfigurationType.PROMPT, "Original instruction", True, count=3)
     feedback = []
-    scores = iter([0.3, 0.1, 0.2])
+    scores = iter([0.5, 0.3, 0.1, 0.2])
 
     def score(configs):
         feedback.append(configs[component.component_id].value)
@@ -38,9 +38,9 @@ def test_prompt_feedback_is_always_scored_and_preserved(tmp_path):
         for call in ctx.runtime.providers.calls
     ]
     assert len(candidates) == 4
-    assert len(feedback) == 3
+    assert len(feedback) == 4  # Include the current instruction's reference score.
     assert [[item["score"] for item in history] for history in histories] == (
-        [[], [0.3], [0.1, 0.3]]
+        [[0.5], [0.3, 0.5], [0.1, 0.3, 0.5]]
     )
 
 
@@ -82,7 +82,7 @@ def test_compatibility_prompt_feedback_is_preserved(monkeypatch, tmp_path):
         for call in provider.calls
     ]
     assert len(histories) == 2
-    assert histories[0] == []
+    assert histories[0] == [{"prompt": "identity", "score": 0.0}]
     assert histories[1][0]["score"] == 0.0
     assert "no_candidates" not in report
 

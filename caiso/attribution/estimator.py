@@ -120,9 +120,10 @@ def estimate_edge_effect(
 
 
 def estimate_all_edges(
-    runtime, state, examples, seeds, output=None, bootstrap_samples=0, confidence_level=0.95
+    runtime, state, examples, seeds, output=None, bootstrap_samples=0, confidence_level=0.95,
+    *, normal=None,
 ):
-    normal = {}
+    normal = {} if normal is None else normal
     effects = [
         estimate_edge_effect(
             runtime,

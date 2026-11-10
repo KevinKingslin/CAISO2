@@ -29,6 +29,7 @@ class BudgetUsage(Record):
     compatibility_adaptation_runs: int = 0
     tokens: int = 0
     cache_hits: int = 0
+    reused_component_executions: int = 0
     equivalent_full_system_runs: float = 0
     elapsed_seconds: float = 0
     component_seconds: dict[str, float] = Field(default_factory=dict)
@@ -108,6 +109,20 @@ class BudgetTracker:
             yield
         finally:
             self._component_call.reset(token)
+
+    @contextmanager
+    def reserve(self, runs):
+        """Keep an absolute run allowance available after a bounded search ends."""
+        if runs < 0:
+            raise ValueError("Reserved runs must be nonnegative")
+        with self.lock:
+            self.check(runs)
+            self.caps.append(min([self.max_runs, *self.caps]) - runs)
+        try:
+            yield
+        finally:
+            with self.lock:
+                self.caps.pop()
 
     @contextmanager
     def compatibility(self, extra_runs):

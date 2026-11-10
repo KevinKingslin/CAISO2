@@ -61,7 +61,8 @@ def test_task_only_feedback_ranking_and_joint_scores_skip_local_judging(monkeypa
     history = json.loads(messages[1][-1]["content"].split(
         "PREVIOUS INSTRUCTIONS AND SCORES:\n", 1,
     )[1].split("\n\nOPTIMIZATION TIP:", 1)[0])
-    assert history == [{"prompt": "double", "score": 1.0}]
+    assert history == [{"prompt": "identity", "score": 0.0}, {"prompt": "double", "score": 1.0}]
+    assert evaluations["identity"] == 1  # Reference execution is the baseline score.
 
 
 @pytest.mark.parametrize("mode,expected,task_score", [

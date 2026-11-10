@@ -11,7 +11,7 @@ from caiso.method.optimization_history import OptimizationHistory
 from caiso.optim.optimizer import CaisoOptimizer
 from caiso.providers.base import ProviderRegistry
 from caiso.wrappers.example import Example
-from tests.offline import OfflineEmbeddings, OfflineProvider
+from tests.offline import OfflineEmbeddings, OfflineProvider, training_preferences
 from tests.test_runtime import make_system
 
 
@@ -73,11 +73,14 @@ def test_history_controls_and_resume(tmp_path, monkeypatch, selection_history, b
         return result
 
     original = optimizer()
-    system, metrics = original.optimize()
+    system, metrics = original.optimize(preferences=training_preferences(original))
     assert metrics["completed_iterations"] == 2
     assert system.components["transform"].variable == "identity"
     calls = [messages for messages, _, schema in provider.calls if schema and schema.__name__ == "BlockVote"]
     assert len(calls) == 2
+    for messages in calls:
+        trajectory = json.JSONDecoder().raw_decode(messages[-1]["content"].split("EXECUTION TRAJECTORY:\n", 1)[1])[0]
+        assert trajectory["metadata"]["split"] == "train"
     histories = [json.loads(messages[-1]["content"].split("OPTIMIZATION HISTORY:\n", 1)[1]) for messages in calls]
     selection_enabled = selection_history
     assert len(summaries) == (2 if selection_enabled else 0)
@@ -107,6 +110,12 @@ def test_history_controls_and_resume(tmp_path, monkeypatch, selection_history, b
     assert any(prompt_histories)
     assert len(filters) == (3 if block_constitution else 2)
     checkpoint = Checkpoint.load(tmp_path / "checkpoint")
+    assert checkpoint.optimizer_state["prompt_archive"]["transform"] == ["double"]
+    second_attribution = json.loads((tmp_path / "iterations/0002/01_attribution/status.json").read_text())
+    assert second_attribution["evidence_reused"] is True
+    validation = json.loads((tmp_path / "iterations/0001/05_block_optimization/validation_metrics.json").read_text())
+    assert len(validation["candidate"]["seeds"]) == 2
+    assert validation["candidate"]["coverage"]["requested"] == 2
     assert [attempt.outcome for attempt in checkpoint.optimization_history.attempts] == ["validated", "no_new_candidate"]
     assert checkpoint.optimization_history.attempts[0].accepted is False
     phase = "04_block_constitution" if block_constitution else "05_block_optimization"

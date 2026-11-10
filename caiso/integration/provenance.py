@@ -36,6 +36,10 @@ def benchmark_manifest(system, splits, method):
             for name, examples in splits.items()
         },
         "validation_prefix_size": method["validation_batch_size"],
+        "validation_sampling": method.get("validation_sampling", "first"),
+        "validation_repeats": method.get("block_optimization", {}).get("validation_repeats", 1),
+        "diagnostics_split": method.get("diagnostics_split", "validation"),
+        "optimization_protocol": method.get("optimization_protocol", "legacy"),
         "components": {
             cid: {
                 "class": f"{type(comp).__module__}.{type(comp).__qualname__}",

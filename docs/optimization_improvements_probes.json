@@ -1,0 +1,202 @@
+{
+  "scope": "Offline execution/control-flow probes, not measured HotpotQA performance",
+  "base_commit": "4ea34455ee384a4dd5c49bfe47d3fe5425a328ba",
+  "source_fingerprint": "dcdd7d4c37fad7d7e5056817fc86bbcf4aa7d0a9bd8d977bf1a8882a5df525f9",
+  "source_files": [
+    "caiso/optimizers/joint_block_optimizer.py",
+    "caiso/optimizers/prompt_optimizer.py",
+    "caiso/integration/runtime.py",
+    "caiso/method/algorithm.py",
+    "configs/method/default.yaml",
+    "configs/experiments/hotpotqa.yaml",
+    "scripts/audit_optimization.py"
+  ],
+  "hotpotqa_edges": [
+    "question_rewriter->info_extractor",
+    "info_extractor->wikipedia_retriever",
+    "question_rewriter->hint_generator",
+    "wikipedia_retriever->hint_generator",
+    "question_rewriter->answer_generator",
+    "hint_generator->answer_generator"
+  ],
+  "validation": {
+    "loader_validation_size": 250,
+    "optimizer_validation_pool_size": 250,
+    "acceptance_size": 50,
+    "acceptance_repeats": 2,
+    "diagnostics_split": "train",
+    "acceptance_ids": [
+      "validation-163",
+      "validation-28",
+      "validation-6",
+      "validation-189",
+      "validation-70",
+      "validation-62",
+      "validation-57",
+      "validation-35",
+      "validation-188",
+      "validation-26",
+      "validation-173",
+      "validation-246",
+      "validation-228",
+      "validation-139",
+      "validation-22",
+      "validation-151",
+      "validation-108",
+      "validation-8",
+      "validation-7",
+      "validation-23",
+      "validation-55",
+      "validation-59",
+      "validation-129",
+      "validation-154",
+      "validation-247",
+      "validation-143",
+      "validation-50",
+      "validation-183",
+      "validation-166",
+      "validation-179",
+      "validation-236",
+      "validation-107",
+      "validation-56",
+      "validation-114",
+      "validation-150",
+      "validation-71",
+      "validation-207",
+      "validation-1",
+      "validation-194",
+      "validation-206",
+      "validation-40",
+      "validation-178",
+      "validation-233",
+      "validation-87",
+      "validation-214",
+      "validation-39",
+      "validation-229",
+      "validation-195",
+      "validation-86",
+      "validation-240"
+    ],
+    "effective_attribution_batch_size": 10,
+    "effective_diagnostic_batch_size": 10
+  },
+  "bootstrap_ties": {
+    "pairs": 0,
+    "all_tied_bootstrap_rejected": true,
+    "full_system_runs": 100
+  },
+  "per_iteration_cost": {
+    "single_prompt": {
+      "members": [
+        "answer_generator"
+      ],
+      "joint_states_screened": 4,
+      "finalist_states": 4,
+      "phases_equivalent_full_runs": {
+        "attribution": 70.0,
+        "diagnostics": 0.0,
+        "proposals_and_candidate_scoring": 32.0,
+        "acceptance": 200.0
+      },
+      "logical_completed_system_runs": 350,
+      "reused_component_executions": 240,
+      "equivalent_full_system_runs": 302.0,
+      "complete_iterations_after_160_setup_runs": 6
+    },
+    "retriever_only": {
+      "members": [
+        "wikipedia_retriever"
+      ],
+      "joint_states_screened": 4,
+      "finalist_states": 4,
+      "phases_equivalent_full_runs": {
+        "attribution": 70.0,
+        "diagnostics": 0.0,
+        "proposals_and_candidate_scoring": 56.0,
+        "acceptance": 200.0
+      },
+      "logical_completed_system_runs": 350,
+      "reused_component_executions": 120,
+      "equivalent_full_system_runs": 326.0,
+      "complete_iterations_after_160_setup_runs": 5
+    },
+    "two_prompts": {
+      "members": [
+        "hint_generator",
+        "answer_generator"
+      ],
+      "joint_states_screened": 16,
+      "finalist_states": 4,
+      "phases_equivalent_full_runs": {
+        "attribution": 70.0,
+        "diagnostics": 0.0,
+        "proposals_and_candidate_scoring": 53.0,
+        "acceptance": 200.0
+      },
+      "logical_completed_system_runs": 410,
+      "reused_component_executions": 435,
+      "equivalent_full_system_runs": 323.0,
+      "complete_iterations_after_160_setup_runs": 5
+    },
+    "prompt_and_retriever": {
+      "members": [
+        "info_extractor",
+        "wikipedia_retriever"
+      ],
+      "joint_states_screened": 16,
+      "finalist_states": 4,
+      "phases_equivalent_full_runs": {
+        "attribution": 70.0,
+        "diagnostics": 0.0,
+        "proposals_and_candidate_scoring": 98.0,
+        "acceptance": 200.0
+      },
+      "logical_completed_system_runs": 410,
+      "reused_component_executions": 210,
+      "equivalent_full_system_runs": 368.0,
+      "complete_iterations_after_160_setup_runs": 5
+    }
+  },
+  "two_prompt_training_search_equivalent_runs": {
+    "baseline_reuse_only": 320.0,
+    "staged_no_prefix_reuse": 140.0,
+    "staged_with_prefix_reuse": 53.0
+  },
+  "setup_assumption": "60 successful bootstrap runs plus 100 initial validation runs; real bootstrap may need more attempts",
+  "prompt_feedback": {
+    "history_sizes_over_two_proposal_calls": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "examples_payload_keys": [
+      "downstream_executions",
+      "executions",
+      "final_output",
+      "inputs",
+      "target",
+      "task_score"
+    ]
+  },
+  "method_request_forwarding": {
+    "seed_forwarded": true,
+    "schema_free_response_format_forwarded": true
+  },
+  "discrete_selection": {
+    "scores": [
+      0.42,
+      0.45,
+      0.48,
+      0.5
+    ],
+    "configured_sample_discrete": false,
+    "selected_index": 3
+  },
+  "test_repetitions": {
+    "automatic_post_optimization": 3,
+    "separate_evaluate_command_default": 3
+  }
+}

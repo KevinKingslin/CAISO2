@@ -42,6 +42,7 @@ PHASE_FILES = {
         "induction_metrics": "block_induction_metrics.json",
     },
     "05_block_optimization": {
+        "search_metrics": "candidate_search.json",
         "candidates": "candidates.json",
         "candidate_state": "block_candidate_state.json",
         "acceptance": "block_acceptance.json",
@@ -63,7 +64,7 @@ PHASE_FILES = {
     },
 }
 
-STATUS_FIELDS = {"phase", "status", "progress", "induction_skipped", "reason", "induction_activity", "constitution_source", "history_enabled"}
+STATUS_FIELDS = {"phase", "status", "progress", "induction_skipped", "reason", "induction_activity", "constitution_source", "history_enabled", "evidence_reused"}
 
 
 def edge_weight_csv(path, effects):

@@ -80,10 +80,11 @@ format validation still requires at least one usable chairperson turn.
     skips as zero, records coverage, and propagates other failures. It replaces the
     upstream helper that swallowed errors and excluded failed examples from means.
 
-The new active `configs/experiments/*.yaml` profiles use shared settings in
-`configs/method/default.yaml` with recursive experiment overrides. They resolve to
-exactly the same effective method and evaluation settings as the preserved profiles.
-No existing YAML values were edited. Legacy reward/PPO parameters remain in the
+The active `configs/experiments/*.yaml` profiles use shared settings in
+`configs/method/default.yaml` with recursive experiment overrides. Their current
+[search protocol](OPTIMIZATION_IMPROVEMENTS.md) intentionally upgrades validation,
+preference labels, candidate screening, history and observation reuse. The
+original `scripts/configs/*.yaml` profiles remain preserved. Legacy reward/PPO parameters remain in the
 original files but are absent from active CAISO profiles because CAISO does not use
 those OPTIMAS algorithms.
 
@@ -95,14 +96,14 @@ legacy scripts. They are **not** the optimizer used by CAISO's launcher.
 
 ## Dataset and optimization defaults
 
-| Dataset | Train / validation / test | Optimization train batch | Validation prefix |
+| Dataset | Train / validation / test | Optimization train batch | Active acceptance set |
 | --- | --- | --- | --- | --- |
-| HotpotQA | 5000 / 250 / 100 | 20 | 10 |
-| PubMedQA | 475 / 25 / 500 | 20 | 10 |
-| Amazon | 335 / 60 / 99 | 20 | 20 |
+| HotpotQA | 5000 / 250 / 100 | 20 | 50 seeded questions, 2 repetitions |
+| PubMedQA | 475 / 25 / 500 | 20 | all 25 questions, 2 repetitions |
+| Amazon | 335 / 60 / 99 | 20 | all 60 questions, 2 repetitions |
 
-These are the released loader/experiment defaults, not a claim that every default
-matches every version of the paper. HotpotQA uses the original DSPy loader and the
+Split sizes are the released loader defaults; acceptance settings are CAISO's
+current protocol, not a claim of matching the paper. HotpotQA uses the original DSPy loader and the
 bundled distractor test artifact. No new filtering, splitting, answer extraction,
 prompt formatting, token limit, model substitutions, or scoring functions are
 introduced. PubMedQA keeps the released first-substring answer matcher, including
@@ -110,16 +111,15 @@ its known behavior on words containing "no". Amazon keeps the original raw
 completion payload, including `max_new_tokens`. STaRK and BigCodeBench sources and
 evaluation profiles are also retained; their external environments are required.
 
-By default, all CAISO validation phases receive the same fixed validation prefix
-selected by the released optimization configuration (`validation_sampling: first`).
-The experiment override `method.validation_sampling: seeded` retains the complete
+The active profiles use `method.validation_sampling: seeded`, retaining the complete
 validation pool and draws a reproducible acceptance subset of
 `validation_batch_size` examples using the method seed. That acceptance subset
-stays fixed across iterations. Attribution and diagnostics draw their separate
-mini-batches from the complete pool in seeded mode. Setting
+stays fixed across iterations. Attribution and diagnostics use separate training
+mini-batches. Setting
 `method.validation_batch_size: all` uses the full pool for acceptance. These
 overrides change the protocol; start a new run instead of resuming a checkpoint
-created with another selection. The test set is never passed to CAISO's optimizer.
+created with another selection. The preserved direct-launch profiles explicitly
+retain their historical validation prefixes. The test set is never passed to CAISO's optimizer.
 Original preference-data/reward-model/PPO
 settings are not mapped onto a different CAISO mechanism: CAISO induces its own
 constitutions and uses constitution-labelled DPO for weight components.
@@ -133,6 +133,15 @@ Candidate configuration changes use the original component update callbacks,
 including actual adapter unload/load operations. Configuration changes are restored
 on success and failure. The selected state is installed into that same system
 before the original evaluation script runs.
+
+Candidate training searches can share recorded component observations keyed by
+example/repeat, actual inputs, configuration and generation settings. Changes to
+inputs/configuration invalidate the corresponding component; downstream execution
+uses the newly observed outputs. Replayed components restore trajectory entries,
+are marked in trajectory metadata and are counted separately from executed
+components. Scopes end before acceptance, which always runs fresh with the
+default reevaluation policy. Replay refuses validation/test examples. Filtered
+observations remain zero and are not silently resampled during promotion.
 
 CAISO's internal graph is inferred from the executor's last-producer field bindings.
 Fields retain their original values and types. Non-selector edge baselines use
@@ -179,7 +188,8 @@ versions and data hashes. Do not infer an exact historical reproduction from a
 matching source tree alone. Legacy reward-training scripts are retained as source;
 compatibility with their historical training environment is not asserted.
 
-CAISO seeds control its sampling, tie labels, and training. Benchmark generation
+CAISO seeds control its sampling, method requests and training. Bootstrap ties
+abstain. Benchmark generation
 requests retain their original unseeded behavior. CAISO's equivalent-run budget
 counts component executions across initialization, attribution, proposals, and
 validation. Partial block runs count by their fraction of full-system components.

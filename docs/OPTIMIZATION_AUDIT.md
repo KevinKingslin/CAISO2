@@ -1,5 +1,10 @@
 # Optimization quality audit
 
+This document records the pre-repair source below. The requested changes are now
+implemented in [search protocol v3](OPTIMIZATION_IMPROVEMENTS.md); its
+[new probe output](optimization_improvements_probes.json) is separate from the
+historical measurements retained here.
+
 Audited source: `250eb0b88f9ec2542bdd52e0f27d1e97bd474516` (2026-11-10).
 Reported symptom: HotpotQA, approximately 0.42, using the ordinary launcher and
 base configuration on another machine. That machine's resolved configuration,
