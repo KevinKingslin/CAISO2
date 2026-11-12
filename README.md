@@ -206,7 +206,8 @@ full training evaluation. Recorded component observations are reused within
 training proposals; acceptance runs stay fresh. Weight candidates collect fresh
 unchanged/changed configuration trajectories with changes restricted to the
 selected block. The system constitution labels those comparisons for DPO/LoRA
-training; the default target is 30 valid same-input pairs per weight component,
+training; by default, each weight component uses 20 distinct training samples
+with one comparison per sample and no replacement for skipped pairs,
 configured separately under `block_optimization.dpo`. See the
 [weight preference procedure](docs/PREFERENCE_COLLECTION.md#weight-candidate-preferences).
 HotpotQA accepts on 50 seeded

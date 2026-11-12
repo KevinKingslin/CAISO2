@@ -13,7 +13,7 @@ from caiso.constitution.models import Constitution
 from caiso.core.budget import BudgetExceeded, BudgetTracker
 from caiso.core.content_filter import ContentFilteredError
 from caiso.integration.runtime import UpstreamRuntime, adapt_examples
-from caiso.method.config import validate_method
+from caiso.method.config import validate_method, weight_preference_settings
 from caiso.optimizers import weight_optimizer
 from caiso.optimizers.base import OptimizationContext
 from caiso.optimizers.joint_block_optimizer import JointBlockOptimizer
@@ -115,6 +115,43 @@ def test_actual_configuration_branches_share_prefix_and_use_system_constitution(
     assert runtime.budget.usage.full_system_runs == 2
     assert runtime.initial_state == before
     assert runtime.engine.components["weight"].config.temperature == 0
+
+
+@pytest.mark.parametrize("pool_size,filtered", [(4, False), (25, False), (25, True)])
+def test_default_uses_twenty_distinct_samples_once_without_replacing_skips(tmp_path, pool_size, filtered):
+    runtime, component, context, judged = setup(tmp_path)
+    context.config = {}
+    context.preference_examples = adapt_examples(
+        runtime.engine, [Example(question=str(i), gd_answer=str(2 * i)) for i in range(1, pool_size + 1)],
+        "train",
+    )
+    original = context.judge.choose
+    calls = []
+
+    def choose(*args):
+        calls.append(args)
+        if filtered and len(calls) == 1:
+            raise ContentFilteredError("skip one sampled comparison")
+        return original(*args)
+
+    context.judge.choose = choose
+    pairs = weight_optimizer.generate_dpo_preferences(component, context)
+    samples = min(pool_size, 20)
+    assert len(calls) == samples
+    assert len(pairs) == len(judged) == samples - int(filtered)
+    assert runtime.budget.usage.full_system_runs == 2 * samples
+    inputs = [inputs["number"] for inputs, temperature in runtime.engine.components["weight"].calls
+              if temperature == 0]
+    assert len(inputs) == len(set(inputs)) == samples
+
+
+def test_packaged_shared_and_implicit_weight_defaults_use_twenty_samples():
+    import yaml
+
+    for config in [{}, *[yaml.safe_load(Path(path).read_text())["block_optimization"] for path in
+                        ("configs/method/default.yaml", "caiso/config/default.yaml")]]:
+        count, attempts, _ = weight_preference_settings(config)
+        assert (count, attempts) == (20, -1)
 
 
 def test_dataset_target_uses_training_pool_and_skips_different_component_inputs(tmp_path):

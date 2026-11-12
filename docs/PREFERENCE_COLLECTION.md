@@ -90,17 +90,19 @@ Collection samples the full training pool supplied by the optimization loop:
 ```yaml
 block_optimization:
   dpo:
-    preference_pairs: 30
-    preference_attempts: 200
+    preference_pairs: 20
+    preference_attempts: -1
     preference_temperature: 0.9
 ```
 
-The target is 30 valid pairs **per weight component**, with at most 200 comparison
-attempts. The seed-shuffled distinct inputs are visited before wrapping around
-for further comparisons. `preference_attempts: -1` visits at most
-`preference_pairs` distinct inputs once. A nonempty smaller dataset can train;
-filtered comparisons are not resampled for the same input/component context.
-These controls do not change the initial system-constitution dataset.
+By default, each weight component uses **20 distinct training samples**, selected
+by a seeded shuffle, and compares each sample once. This produces 40 completed
+trajectories and 20 preference pairs when every comparison is usable. A smaller
+training pool is visited once without repeating inputs. Skipped or unsuitable
+pairs are not replaced, so the retained dataset may contain fewer than 20 pairs.
+A nonempty smaller dataset can train. A positive `preference_attempts` override
+enables bounded additional comparisons until the pair target or attempt limit
+is reached. These controls do not change the initial system-constitution dataset.
 
 The existing DPO/LoRA trainer trains from the current adapter and returns one new
 adapter candidate. Its run directory retains `preferences.json` (training data),

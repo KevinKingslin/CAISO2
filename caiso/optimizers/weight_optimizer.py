@@ -176,8 +176,8 @@ class WeightOptimizer(ConfigurationOptimizer):
             "protocol": "weight-configuration-pair-v1", "component_id": component.component_id,
             "members": context.members or [component.component_id],
             "system_constitution": {"principles": constitution.principles},
-            "requested_pairs": cfg.get("preference_pairs", 30), "retained_pairs": len(pairs),
-            "attempt_limit": cfg.get("preference_attempts", 200),
+            "requested_pairs": cfg.get("preference_pairs", 20), "retained_pairs": len(pairs),
+            "attempt_limit": cfg.get("preference_attempts", -1),
             "temperature": cfg.get("preference_temperature", 0.9), "seed": context.seed,
         })
         adapter = train_dpo(

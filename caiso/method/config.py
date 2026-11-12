@@ -31,7 +31,7 @@ def weight_preference_settings(config):
     dpo = config.get("dpo", {})
     if not isinstance(dpo, dict):
         raise ValueError("block_optimization.dpo must be a configuration mapping")
-    count, attempts = dpo.get("preference_pairs", 30), dpo.get("preference_attempts", 200)
+    count, attempts = dpo.get("preference_pairs", 20), dpo.get("preference_attempts", -1)
     for key, value in (("preference_pairs", count), ("preference_attempts", attempts)):
         if (isinstance(value, bool) or not isinstance(value, int)
                 or (value < 1 and not (key == "preference_attempts" and value == -1))):
