@@ -582,7 +582,9 @@ class Algorithm:
                     if block_constitution_enabled:
                         # Seed proposals use Q_sys; optimization proposals later use the induced Q_B.
                         preliminary = self.optimizer.propose(
-                            current, members, qsys, local_train, step_seed
+                            current, members, qsys, local_train, step_seed,
+                            **({"system_constitution": qsys, "preference_examples": train}
+                               if isinstance(self.optimizer, JointBlockOptimizer) else {}),
                         )
                         self.report.configuration_state(status="Evaluated for preference generation")
                         preliminary = optimization_history.filter_candidates(current, preliminary)
@@ -717,7 +719,9 @@ class Algorithm:
                         )
                         with self.runtime.budget.reserve(validation_allowance + refresh_allowance):
                             scored = self.optimizer.propose(
-                                current, members, optimization_constitution, local_train, step_seed + 10000
+                                current, members, optimization_constitution, local_train, step_seed + 10000,
+                                **({"system_constitution": qsys, "preference_examples": train}
+                                   if isinstance(self.optimizer, JointBlockOptimizer) else {}),
                             )
                         if isinstance(self.optimizer, JointBlockOptimizer):
                             self.report.save_phase(

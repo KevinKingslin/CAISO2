@@ -1,45 +1,55 @@
 from pathlib import Path
 from time import monotonic
 
-from caiso.core.content_filter import ContentFilteredError, record_skip
+from caiso.constitution.dicai.preferences import response_view
 from caiso.core.serialization import digest, save_json
+from caiso.method.config import weight_preference_settings
+from caiso.method.preference_collection import collect_preferences
 
 from .base import ConfigurationOptimizer, filter_current_configuration
 
 
-def generate_dpo_preferences(component, context):
+def generate_dpo_preferences(component, context, *, records=None):
+    """Judge full unchanged/changed block trajectories, then project valid DPO pairs."""
+    count, attempts, settings = weight_preference_settings(context.config)
+    members = context.members or [component.component_id]
+    if component.component_id not in members:
+        raise ValueError("Weight component must belong to the selected block")
+    constitution = context.system_constitution if context.system_constitution is not None else context.constitution
+    if constitution is None:
+        raise ValueError("Weight preferences require the system constitution")
     cfg = context.state.configurations[component.component_id]
+    output = next(iter(component.output_fields))
+
+    def label(a, b, seed):
+        left, right = [next((e for e in t.executions if e.component_id == component.component_id), None)
+                       for t in (a, b)]
+        # DPO compares completions for ONE prompt. An upstream change can give
+        # this component different inputs; such a trajectory pair cannot train it.
+        if (left is None or right is None
+                or digest(left.component_input) != digest(right.component_input)
+                or left.component_output[output] == right.component_output[output]):
+            return None
+        return context.judge.choose(constitution, response_view(a.model_dump()),
+                                    response_view(b.model_dump()), seed)
+
+    examples = context.preference_examples if context.preference_examples is not None else context.examples
+    with context.runtime.fresh_preference_executions():
+        preferences = collect_preferences(
+            context.runtime, context.state, examples, count, attempts, context.seed,
+            settings=settings, component_ids=members, labeler=label, allow_empty=True,
+        )
+    if records is not None:
+        records.extend(preferences)
     pairs = []
-    for i, trajectory in enumerate(context.trajectories):
-        execution = next(
-            t for t in trajectory.executions if t.component_id == component.component_id
-        )
-        seed = context.seed + i * 2
-        try:
-            a, _ = context.runtime.execute_component(
-                component.component_id, execution.component_input, cfg, seed
-            )
-            b, _ = context.runtime.execute_component(
-                component.component_id, execution.component_input, cfg, seed + 1
-            )
-            if a == b:
-                continue
-            choice = context.judge.choose(
-                context.constitution,
-                {"input": execution.component_input, "output": a},
-                {"input": execution.component_input, "output": b},
-                seed,
-            )
-        except ContentFilteredError as error:
-            record_skip(
-                context.runtime.providers, error, "dpo_preferences", example_id=trajectory.input_id
-            )
-            continue
-        output = next(iter(component.output_fields))
-        chosen, rejected = (a[output], b[output]) if choice == "A" else (b[output], a[output])
+    for pair in preferences:
+        a, b = [next(e for e in c["trajectory"]["executions"] if e["component_id"] == component.component_id)
+                for c in (pair.candidate_a, pair.candidate_b)]
+        chosen, rejected = (a, b) if pair.preferred == "A" else (b, a)
         prompt = context.runtime.training_prompt(
-            component.component_id, execution.component_input, cfg
+            component.component_id, a["component_input"], cfg
         )
+        chosen, rejected = chosen["component_output"][output], rejected["component_output"][output]
         raw = component.settings.get("prompt_format") == "completion"
         pairs.append(
             {
@@ -145,7 +155,8 @@ def train_dpo(model_id, current_adapter, pairs, output_dir, config, budget, seed
 class WeightOptimizer(ConfigurationOptimizer):
     def propose(self, component, context):
         current = context.state.configurations[component.component_id]
-        pairs = generate_dpo_preferences(component, context)
+        records = []
+        pairs = generate_dpo_preferences(component, context, records=records)
         if not pairs:
             return filter_current_configuration(current, [current.model_copy(deep=True)], context.config)
         cfg = context.config.get("dpo", {})
@@ -159,6 +170,16 @@ class WeightOptimizer(ConfigurationOptimizer):
             / digest([pairs, current, cfg, context.seed])[:16]
         )
         save_json(directory / "preferences.json", pairs)
+        save_json(directory / "trajectory_preferences.json", records)
+        constitution = context.system_constitution if context.system_constitution is not None else context.constitution
+        save_json(directory / "preference_collection.json", {
+            "protocol": "weight-configuration-pair-v1", "component_id": component.component_id,
+            "members": context.members or [component.component_id],
+            "system_constitution": {"principles": constitution.principles},
+            "requested_pairs": cfg.get("preference_pairs", 30), "retained_pairs": len(pairs),
+            "attempt_limit": cfg.get("preference_attempts", 200),
+            "temperature": cfg.get("preference_temperature", 0.9), "seed": context.seed,
+        })
         adapter = train_dpo(
             provider.model_id,
             current.value.get("adapter"),

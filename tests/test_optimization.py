@@ -54,9 +54,11 @@ def test_complete_caiso_cycle_on_original_system_interface(tmp_path, monkeypatch
     proposal_constitutions = []
     propose = JointBlockOptimizer.propose
 
-    def observe_proposal(self, state, members, constitution, examples, seed):
+    def observe_proposal(self, state, members, constitution, examples, seed, **kwargs):
         proposal_constitutions.append(constitution)
-        return propose(self, state, members, constitution, examples, seed)
+        assert kwargs["system_constitution"].metadata["scope"] == "system"
+        assert kwargs["preference_examples"] is optimizer.train
+        return propose(self, state, members, constitution, examples, seed, **kwargs)
 
     monkeypatch.setattr(JointBlockOptimizer, "propose", observe_proposal)
     from caiso.method import block_optimization

@@ -42,6 +42,9 @@ class OptimizationContext:
     score_config: Callable | None = None
     prompt_history: list[dict] = field(default_factory=list)
     record_prompt: Callable | None = None
+    members: list[str] = field(default_factory=list)
+    system_constitution: Any = None
+    preference_examples: list | None = None
 
 
 class ConfigurationOptimizer(ABC):

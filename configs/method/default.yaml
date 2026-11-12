@@ -95,6 +95,9 @@ block_optimization:
   softmax_temperature: 0.5
   sample_discrete: false
   dpo:
+    preference_pairs: 30  # Valid same-input pairs per weight component, sampled from the training pool.
+    preference_attempts: 200  # Cap comparisons; -1 visits at most preference_pairs distinct inputs once.
+    preference_temperature: 0.9  # Changed setting when a block member has no alternate declared value.
     lora_rank: 16
     lora_alpha: 32
     lora_dropout: 0.05

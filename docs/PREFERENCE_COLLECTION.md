@@ -61,6 +61,54 @@ directory for this protocol; previous checkpoints retain their saved datasets.
 The optional block-constitution collector remains separate and disabled by
 default.
 
+## Weight candidate preferences
+
+Each selected weight component now collects its own adapter-training preferences
+with the same unchanged/changed configuration procedure. Only members of the
+selected block are eligible for the random one-component change. Upstream outputs
+are captured once for each comparison; the unchanged and changed suffixes each
+execute once, including downstream components in their accepted configurations.
+Search observation reuse is suspended during collection and restored afterward.
+
+The **system constitution** judges the two complete trajectories on every usable
+comparison, including unequal task scores. Task scores and reference answers are
+hidden from this judge. The constitution's choice supplies the chosen/rejected
+label; task scores and random task-tie labels do not override it. This also holds
+when optional block constitution induction is enabled for prompt optimization.
+
+For a given weight component, DPO needs two different completions for the same
+prompt. Comparisons with different inputs to that component (for example after
+changing an upstream block member), missing executions, or identical component
+outputs are skipped before judging. Remaining component outputs inherit their
+full trajectory's constitution preference. The training prompt is captured from
+the original benchmark component. Raw completion and chat dataset formats retain
+their existing handling. No usable pairs means no new adapter candidate.
+
+Dataset size is independent of prompt screening and the local training batch.
+Collection samples the full training pool supplied by the optimization loop:
+
+```yaml
+block_optimization:
+  dpo:
+    preference_pairs: 30
+    preference_attempts: 200
+    preference_temperature: 0.9
+```
+
+The target is 30 valid pairs **per weight component**, with at most 200 comparison
+attempts. The seed-shuffled distinct inputs are visited before wrapping around
+for further comparisons. `preference_attempts: -1` visits at most
+`preference_pairs` distinct inputs once. A nonempty smaller dataset can train;
+filtered comparisons are not resampled for the same input/component context.
+These controls do not change the initial system-constitution dataset.
+
+The existing DPO/LoRA trainer trains from the current adapter and returns one new
+adapter candidate. Its run directory retains `preferences.json` (training data),
+`trajectory_preferences.json` (the corresponding full comparisons and labels),
+and `preference_collection.json` (scope, constitution, requested/retained size,
+seed and collection settings). New default settings invalidate old run
+fingerprints; start a new optimization run for this collection procedure.
+
 ## Evidence and accounting
 
 Retained pairs contain two full recorded trajectories, not scores attached to

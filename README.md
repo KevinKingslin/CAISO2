@@ -203,7 +203,13 @@ The [search protocol](docs/OPTIMIZATION_IMPROVEMENTS.md) uses deterministic
 discrete selection, supplies training-error
 feedback and checkpointed prompt history, and screens joint candidates before
 full training evaluation. Recorded component observations are reused within
-training proposals; acceptance runs stay fresh. HotpotQA accepts on 50 seeded
+training proposals; acceptance runs stay fresh. Weight candidates collect fresh
+unchanged/changed configuration trajectories with changes restricted to the
+selected block. The system constitution labels those comparisons for DPO/LoRA
+training; the default target is 30 valid same-input pairs per weight component,
+configured separately under `block_optimization.dpo`. See the
+[weight preference procedure](docs/PREFERENCE_COLLECTION.md#weight-candidate-preferences).
+HotpotQA accepts on 50 seeded
 validation questions with two repetitions. PubMedQA/Amazon use their complete
 validation sets with two repetitions. All three profiles run three final test
 repetitions. Start these changes in a new output directory; earlier checkpoints

@@ -65,7 +65,7 @@ def test_weight_menus_exclude_current_adapter_without_changing_training_origin(m
     ctx.runtime.providers = ProviderRegistry({"local": SimpleNamespace(model_id="base-model")})
     ctx.runtime.budget = BudgetTracker(1)
     trained = []
-    monkeypatch.setattr(weight_optimizer, "generate_dpo_preferences", lambda *args: [{"prompt": "P", "chosen": "A", "rejected": "B"}] if has_pairs else [])
+    monkeypatch.setattr(weight_optimizer, "generate_dpo_preferences", lambda *args, **kwargs: [{"prompt": "P", "chosen": "A", "rejected": "B"}] if has_pairs else [])
     def train(model, current, *args):
         trained.append((model, current))
         return "new-adapter"

@@ -26,6 +26,26 @@ def task_scoring_settings(config):
     return enabled, *weights
 
 
+def weight_preference_settings(config):
+    """A separate, bounded configuration-pair collection for each weight component."""
+    dpo = config.get("dpo", {})
+    if not isinstance(dpo, dict):
+        raise ValueError("block_optimization.dpo must be a configuration mapping")
+    count, attempts = dpo.get("preference_pairs", 30), dpo.get("preference_attempts", 200)
+    for key, value in (("preference_pairs", count), ("preference_attempts", attempts)):
+        if (isinstance(value, bool) or not isinstance(value, int)
+                or (value < 1 and not (key == "preference_attempts" and value == -1))):
+            raise ValueError(f"block_optimization.dpo.{key} must be a positive integer"
+                             + (" or -1" if key == "preference_attempts" else ""))
+    temperature = dpo.get("preference_temperature", 0.9)
+    if temperature is not None and (
+        isinstance(temperature, bool) or not isinstance(temperature, (int, float))
+        or not math.isfinite(temperature) or not 0 <= temperature <= 2
+    ):
+        raise ValueError("block_optimization.dpo.preference_temperature must be between zero and two or null")
+    return count, attempts, {"mode": "component", "temperature": temperature}
+
+
 def resume_config_hashes(config):
     """Allow compatible implicit defaults without relaxing changed run settings."""
     from caiso.core.serialization import digest
@@ -80,6 +100,7 @@ def validate_method(config):
     if not isinstance(config.get("block_optimization", {}), dict):
         raise ValueError("block_optimization must be a configuration mapping")
     task_scoring_settings(config.get("block_optimization", {}))
+    weight_preference_settings(config.get("block_optimization", {}))
     if not isinstance(config.get("block_optimization", {}).get("screening", {}), dict):
         raise ValueError("block_optimization.screening must be a configuration mapping")
     if not isinstance(config.get("block_selection", {}), dict):

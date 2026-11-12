@@ -159,13 +159,17 @@ class JointBlockOptimizer:
         )
         return self.add_task_score(scored, state, examples, seed) if include_task_score else scored
 
-    def propose(self, state, members, constitution, examples, seed):
+    def propose(self, state, members, constitution, examples, seed, *, system_constitution=None,
+                preference_examples=None):
         reuse = getattr(self.runtime, "reuse_component_executions", None)
         scope = reuse() if reuse and self.config.get("reuse_component_executions", False) else nullcontext()
         with scope:
-            return self._propose(state, members, constitution, examples, seed)
+            return self._propose(state, members, constitution, examples, seed,
+                                 system_constitution=system_constitution,
+                                 preference_examples=preference_examples)
 
-    def _propose(self, state, members, constitution, examples, seed):
+    def _propose(self, state, members, constitution, examples, seed, *, system_constitution=None,
+                 preference_examples=None):
         if not examples:
             raise ValueError("Local optimization needs training examples")
         if len({example.example_id for example in examples}) != len(examples):
@@ -265,6 +269,9 @@ class JointBlockOptimizer:
                 self.config,
                 self.output_dir,
                 score,
+                members=list(members),
+                system_constitution=system_constitution if system_constitution is not None else constitution,
+                preference_examples=preference_examples if preference_examples is not None else examples,
             )
             if comp.config_type == ConfigurationType.PROMPT:
                 history_limit = self.config.get("prompt_history_limit", 3)
@@ -275,11 +282,6 @@ class JointBlockOptimizer:
                     configuration.value = value
                     context.prompt_history.append({"prompt": value, "score": score({cid: configuration})})
                 context.record_prompt = lambda value, cid=cid: self.remember_prompt(cid, value)
-            # DPO needs the complete training references even when prompt
-            # candidates are screened. Its preferences are not cache draws.
-            if comp.config_type == ConfigurationType.MODEL_WEIGHTS and len(screen_examples) < len(examples):
-                _, context.trajectories = evaluate(self.runtime, state, examples, [seed])
-                context.examples = examples
             try:
                 proposals = self.optimizers[comp.config_type].propose(comp, context)
             except ContentFilteredError as error:

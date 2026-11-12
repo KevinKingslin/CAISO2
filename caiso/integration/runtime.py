@@ -180,6 +180,17 @@ class UpstreamRuntime(CompoundAISystem):
                 self._component_cache = None
 
     @contextmanager
+    def fresh_preference_executions(self):
+        """Suspend search observation reuse while collecting actual preference draws."""
+        with self._lock:
+            previous = self._component_cache
+            self._component_cache = None
+            try:
+                yield
+            finally:
+                self._component_cache = previous
+
+    @contextmanager
     def _configuration(self, configs):
         """Apply and restore variables, including the real vLLM LoRA callbacks."""
         previous = {}

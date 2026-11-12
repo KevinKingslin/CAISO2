@@ -298,12 +298,12 @@ def test_amazon_dpo_candidate_uses_original_prompt_and_adapter_callbacks(
     context = OptimizationContext(
         runtime,
         runtime.initial_state,
-        None,
+        SimpleNamespace(principles=["Select the trajectory where session_analyzer captures the session intent."]),
         SimpleNamespace(choose=lambda *args: "A"),
         [example],
         [reference],
         42,
-        {"dpo": {"max_steps": 1}},
+        {"dpo": {"max_steps": 1, "preference_pairs": 1, "preference_attempts": 1}},
         tmp_path,
     )
     component = runtime.library["session_analyzer"]
