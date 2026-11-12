@@ -1,8 +1,41 @@
-"""Project CAISO outputs into label-free DICAI prompt/response comparisons."""
+"""Separate training score feedback from blind DICAI trajectory evidence."""
+
+import math
 
 from caiso.prompts import render_text
 
-EVALUATION_KEYS = {"reward", "target", "preferred", "gold", "global_scores", "metadata"}
+EVALUATION_KEYS = {
+    "reward", "target", "preferred", "gold", "global_scores", "metadata", "score_feedback",
+}
+
+
+def score_feedback(pair, metric="task_metric"):
+    """Read stored A/B scores without changing the supplied preference label.
+
+    Unscored preference datasets remain supported. A malformed score record is
+    an error, rather than silently turning a scored comparison into an unscored one.
+    """
+    if "global_scores" not in pair.metadata:
+        return None
+    scores = pair.metadata["global_scores"]
+    if (
+        not isinstance(scores, (list, tuple)) or len(scores) != 2
+        or any(
+            isinstance(score, bool) or not isinstance(score, (int, float))
+            or not math.isfinite(score) for score in scores
+        )
+    ):
+        raise ValueError(f"Pair {pair.pair_id}: global_scores must contain two finite A/B scores")
+    if not isinstance(metric, str) or not metric.strip():
+        raise ValueError("DICAI score metric must be a nonempty string")
+    a, b = map(float, scores)
+    return {
+        "metric": metric,
+        "score_a": a,
+        "score_b": b,
+        "delta_a_minus_b": a - b,
+        "relation": "tie" if a == b else "A_better" if a > b else "B_better",
+    }
 
 
 def response_view(value):
@@ -37,7 +70,7 @@ def task_view(context):
     return {
         k: v
         for k, v in context.items()
-        if k not in {"z_B_A", "z_B_B", "preferred", "gold", "target", "global_scores", "metadata"}
+        if k not in EVALUATION_KEYS | {"z_B_A", "z_B_B"}
     }
 
 

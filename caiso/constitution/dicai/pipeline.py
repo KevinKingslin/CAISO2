@@ -29,11 +29,12 @@ from .coverage import coverage_targets, preserve_component_coverage
 from .debate import debate, principle_key
 from .personas import assign_personas
 from .plotting import save_silhouette_artifacts
+from .preferences import score_feedback
 from .reasoning_assembly import assemble
 from .request_cache import RequestCache
 from .reconstruction import minimize_constitution, validate_constitution
 
-PROTOCOL = "democratic-icai-c8d5-source-trajectory-v5-component-coverage"
+PROTOCOL = "democratic-icai-c8d5-source-trajectory-v6-score-feedback"
 INDUCTION_METHOD_PROMPTS = ("providers.format_retry",)
 
 
@@ -60,6 +61,9 @@ class DICAI:
             raise ValueError("Constitution induction requires training preference pairs")
         if len({p.pair_id for p in pairs}) != len(pairs):
             raise ValueError("DICAI preference pair IDs must be unique")
+        score_metric = self.config.get("score_metric", "task_metric")
+        for pair in pairs:
+            score_feedback(pair, score_metric)  # Validate before any paid induction requests.
         expected_components, target_source = coverage_targets(pairs, scope, component_ids)
         method_prompts = INDUCTION_METHOD_PROMPTS + (ATOMICITY_PROMPTS if atomicity_enabled(self.config) else ())
         validate_resources({"dicai": None, "method": method_prompts})
@@ -331,6 +335,7 @@ class DICAI:
                 minimization.get("strict", False),
                 temperatures.get("reconstruction", 0.0),
                 max_workers=workers,
+                score_metric=score_metric,
             )
         outputs, coverage = preserve_component_coverage(
             outputs, settled, origins, pairs, expected_components,
@@ -343,6 +348,7 @@ class DICAI:
             temperatures.get("reconstruction", 0.0),
             progress=(lambda done, total: progress("reconstruction", done, total)) if progress else None,
             max_workers=workers,
+            score_metric=score_metric,
         )
         if progress:
             progress("reconstruction", len(pairs), len(pairs))

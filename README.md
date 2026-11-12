@@ -194,6 +194,11 @@ once each. The higher task score wins; exact ties choose a random winner,
 including identical outputs. The collection seed controls component selection and
 tie-breaking. Start a new run directory; supplied preferences still bypass
 collection and `preference_collection.mode: rerun` retains the earlier ablation.
+DICAI reasoning and debate receive both stored task scores as separate training
+feedback. Reconstruction stays blind and reports selected score and regret;
+optional constitution minimization preserves regret on fully scored data. Exact
+ties retain their existing labels and participation. See the
+[score-feedback details](docs/PREFERENCE_COLLECTION.md#evidence-and-accounting).
 The [search protocol](docs/OPTIMIZATION_IMPROVEMENTS.md) uses deterministic
 discrete selection, supplies training-error
 feedback and checkpointed prompt history, and screens joint candidates before

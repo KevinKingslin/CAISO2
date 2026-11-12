@@ -168,7 +168,7 @@ source-based trajectory adaptation, not a claim to reproduce every setting or
 published score of DICAI. Report the adapted prompts and resolved experiment
 settings in research.
 
-The protocol identifier is `democratic-icai-c8d5-source-trajectory-v5-component-coverage`.
+The current protocol identifier is `democratic-icai-c8d5-source-trajectory-v6-score-feedback`.
 Source, prompt and schema fingerprints invalidate earlier induction caches.
 Start a new optimization run: old checkpoints retain constitutions generated
 under their previous protocol. Successful requests within a matching induction
@@ -256,6 +256,25 @@ This semantic guard is a documented CAISO extension to the source DICAI runtime,
 not an original DICAI stage. Report the setting for research comparisons.
 
 ## Preserved history and runtime safeguards
+
+The current score-feedback adaptation updates the six reasoning requests and
+all six debate variants. Each receives a separate training-only object with
+stored task scores in A/B order, their signed gap and relation. Instructions
+distinguish benchmark performance from correctness, confidence and component
+causality, and require criteria applicable without scores or reference answers.
+Null feedback preserves unscored preference support. No original source or
+reference request is edited. `PROMPTS.json`, the AST-based trajectory adaptation
+check and complete-message fingerprints record these explicit changes.
+
+The shuffled reconstruction request is unchanged and stays blind. Its report
+adds post-inference selected-score/regret metrics; optional minimization uses
+regret when every comparison is scored, with accuracy fallback otherwise.
+Coverage restoration still follows minimization and the final report judges the
+restored list. Score ties remain in the dataset and debate with their existing
+random labels and label-reconstruction gate; either selected answer has zero
+score regret. See [preference collection](PREFERENCE_COLLECTION.md) for metric
+configuration, denominator counts and checkpoint migration. Statements below
+about unchanged source-derived requests describe the earlier migrations.
 
 The later [search protocol v3](OPTIMIZATION_IMPROVEMENTS.md) changes CAISO's
 `method/prompt_optimizer/prompt.txt` to request explicit training-error repairs,

@@ -128,6 +128,10 @@ def load_method(experiment):
         else files("caiso").joinpath("config/default.yaml").read_text()
     )
     config = yaml.safe_load(text)
+    # Only names the stored benchmark scores; never changes the task evaluator.
+    config["dicai"].setdefault(
+        "score_metric", "answer_f1" if experiment.get("dataset") == "hotpotqa" else "task_metric"
+    )
     # These sizes come from the SAME released experiment files, not CAISO copies.
     config = merge(
         config,

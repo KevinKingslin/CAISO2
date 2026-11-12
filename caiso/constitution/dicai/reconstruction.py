@@ -6,6 +6,7 @@ inference, never in the blind judge's messages.
 
 import random
 from collections import Counter
+from statistics import fmean
 
 from caiso.core.content_filter import ContentFilteredError, record_skip
 from caiso.core.parallel import ordered_map
@@ -13,7 +14,7 @@ from caiso.core.recovery import ModelResponseError
 from caiso.prompts import render_messages
 from caiso.providers.responses import json_object
 
-from .preferences import candidate_views, task_view
+from .preferences import candidate_views, score_feedback, task_view
 
 
 def parse_choice(text):
@@ -44,7 +45,24 @@ def apply_constitution(providers, role, pair, principles, seed=0, temperature=0.
     return choice, {"predicted": choice, "response": response, "swapped": swapped}
 
 
-def reconstructs(providers, role, pair, principles, votes=1, temperature=0.0):
+def _score_selection(pair, prediction, metric):
+    """Evaluate a mapped A/B choice after blind inference, including score ties."""
+    feedback = score_feedback(pair, metric)
+    if feedback is None:
+        return {}
+    oracle = max(feedback["score_a"], feedback["score_b"])
+    selected = feedback["score_a" if prediction == "A" else "score_b"] if prediction in {"A", "B"} else None
+    return {
+        "score_feedback": feedback,
+        "oracle_score": oracle,
+        "selected_score": selected,
+        "regret": oracle - selected if selected is not None else None,
+    }
+
+
+def reconstructs(
+    providers, role, pair, principles, votes=1, temperature=0.0, *, score_metric="task_metric"
+):
     if not principles:
         return {
             "id": pair.pair_id,
@@ -52,6 +70,7 @@ def reconstructs(providers, role, pair, principles, votes=1, temperature=0.0):
             "predicted": "",
             "reconstructed": False,
             "votes": [],
+            **_score_selection(pair, "", score_metric),
         }
     try:
         observations = [
@@ -69,15 +88,19 @@ def reconstructs(providers, role, pair, principles, votes=1, temperature=0.0):
         "predicted": prediction,
         "reconstructed": prediction == pair.preferred,
         "votes": observations,
+        **_score_selection(pair, prediction, score_metric),
     }
 
 
 def validate_constitution(
-    providers, role, pairs, principles, votes=1, temperature=0.0, progress=None, max_workers=1
+    providers, role, pairs, principles, votes=1, temperature=0.0, progress=None, max_workers=1,
+    *, score_metric="task_metric",
 ):
     def reconstruct(pair):
         try:
-            return reconstructs(providers, role, pair, principles, votes, temperature)
+            return reconstructs(
+                providers, role, pair, principles, votes, temperature, score_metric=score_metric
+            )
         except ContentFilteredError:
             return {
                 "id": pair.pair_id,
@@ -86,6 +109,7 @@ def validate_constitution(
                 "reconstructed": False,
                 "votes": [],
                 "skipped_content_filter": True,
+                **_score_selection(pair, "", score_metric),
             }
 
     results = ordered_map(
@@ -94,35 +118,70 @@ def validate_constitution(
         max_workers,
         progress,
     )
+    scored = [r for r in results if "score_feedback" in r]
+    selected = [r for r in scored if r["selected_score"] is not None]
+    non_tied = [r for r in scored if r["score_feedback"]["relation"] != "tie"]
     return {
         "accuracy": sum(r["reconstructed"] for r in results) / len(results) if results else 0,
         "n": len(results),
+        "score_metric": score_metric,
+        "scored_pairs": len(scored),
+        "scored_selections": len(selected),
+        "tied_pairs": len(scored) - len(non_tied),
+        "non_tied_n": len(non_tied),
+        "non_tied_accuracy": fmean(r["reconstructed"] for r in non_tied) if non_tied else None,
+        "mean_selected_score": fmean(r["selected_score"] for r in selected) if selected else None,
+        "mean_oracle_score": fmean(r["oracle_score"] for r in selected) if selected else None,
+        "mean_regret": fmean(r["regret"] for r in selected) if selected else None,
         "skipped_content_filter": sum(r.get("skipped_content_filter", False) for r in results),
         "results": results,
     }
 
 
 def minimize_constitution(
-    providers, role, pairs, principles, votes=1, strict=False, temperature=0.0, max_workers=1
+    providers, role, pairs, principles, votes=1, strict=False, temperature=0.0, max_workers=1,
+    *, score_metric="task_metric",
 ):
+    """Preserve score regret when every pair is scored, otherwise label accuracy.
+
+    A missing blind selection must never improve the regret objective by silently
+    shrinking its denominator. Keep principles if either comparison is incomplete.
+    """
     kept = list(principles)
     base = validate_constitution(
-        providers, role, pairs, kept, votes, temperature, max_workers=max_workers
-    )["accuracy"]
+        providers, role, pairs, kept, votes, temperature, max_workers=max_workers,
+        score_metric=score_metric,
+    )
+    use_regret = bool(pairs) and base["scored_pairs"] == len(pairs)
+    objective = "mean_regret" if use_regret else "accuracy"
     index, history = 0, []
     while index < len(kept):
         trial = kept[:index] + kept[index + 1 :]
-        accuracy = (
+        report = (
             validate_constitution(
-                providers, role, pairs, trial, votes, temperature, max_workers=max_workers
-            )["accuracy"]
+                providers, role, pairs, trial, votes, temperature, max_workers=max_workers,
+                score_metric=score_metric,
+            )
             if trial
-            else -1.0
+            else None
         )
-        drop = accuracy > base if strict else accuracy >= base
-        history.append({"principle": kept[index], "accuracy": accuracy, "dropped": drop})
+        drop = False
+        if report is not None:
+            if use_regret:
+                if base["scored_selections"] == report["scored_selections"] == len(pairs):
+                    drop = report[objective] < base[objective] if strict else report[objective] <= base[objective]
+            else:
+                drop = report[objective] > base[objective] if strict else report[objective] >= base[objective]
+        history.append({
+            "principle": kept[index], "objective": objective,
+            "accuracy": report["accuracy"] if report else -1.0,
+            "mean_regret": report["mean_regret"] if report else None,
+            "mean_selected_score": report["mean_selected_score"] if report else None,
+            "scored_selections": report["scored_selections"] if report else 0,
+            "dropped": drop,
+        })
         if drop:
-            kept, base = trial, accuracy
+            kept, base = trial, report
         else:
             index += 1
     return kept, history

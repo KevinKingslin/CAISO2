@@ -12,7 +12,7 @@ from caiso.core.parallel import ordered_map
 from caiso.core.serialization import Record
 from caiso.prompts import render_messages
 
-from .preferences import candidate_views, task_view
+from .preferences import candidate_views, score_feedback, task_view
 from .parsing import dedupe
 from .parsing import normalize_principle as valid_principle
 
@@ -65,7 +65,11 @@ def assemble(pair, personas, providers, role, seed, config=None):
     if samples < 1 or steps < 0:
         raise ValueError("Self-consistency needs at least one sample; refinement steps cannot be negative")
     a, b = candidate_views(pair)
-    evidence = {"preferred": pair.preferred, "context": task_view(pair.context), "response_a": a, "response_b": b}
+    evidence = {
+        "preferred": pair.preferred, "context": task_view(pair.context),
+        "response_a": a, "response_b": b,
+        "score_feedback": score_feedback(pair, config.get("score_metric", "task_metric")),
+    }
 
     def reason(item):
         index, persona = item

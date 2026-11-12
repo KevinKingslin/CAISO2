@@ -44,7 +44,7 @@ dicai:
     selection: silhouette
     fixed_clusters: null  # Optional fixed k; otherwise silhouette search.
   minimization:
-    enabled: false  # Official optional greedy reconstruction-preserving reduction.
+    enabled: false  # Optional greedy reduction: preserve regret on scored pairs, accuracy otherwise.
     strict: false
     sample_size: 0  # 0 uses all training preference pairs.
 attribution:

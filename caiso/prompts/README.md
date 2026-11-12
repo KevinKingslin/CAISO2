@@ -62,9 +62,9 @@ ellipses, the existing condition/criterion placeholder forms and old response-st
 prefixes remain invalid. Actual criteria and component identifiers are preserved.
 
 The source instructions retain one-quality-per-question rules and reconstruction
-feedback. Only response/story terminology, human-label wording and CAISO input
+feedback. Response/story terminology, human-label wording and CAISO input
 serialization are adapted, plus the documented reasoning, debate and abstraction
-guidance. Reasoning considers discriminating intermediate-component behavior as
+guidance and training-only task-score feedback. Reasoning considers discriminating intermediate-component behavior as
 well as the final output. Every proposed question must name the exact trajectory
 `component_id` values for the behavior it evaluates, including the producing
 component for final-output questions. Reasoning questions and dimensions,
@@ -85,6 +85,19 @@ checks. The source-adaptation audit documents the wording
 changes within the 15 source-derived DICAI requests separately from the existing
 atomicity repair prompts.
 No dataset-specific answer styles or new structured constitution schema is added.
+
+Reasoning and all debate variants receive separate `score_feedback` containing
+stored A/B task scores, their signed difference and score relation. Absolute
+scores and gaps provide outcome evidence, not confidence or component-causality
+claims. Generated principles must work without scores or reference answers.
+Unscored pairs receive null feedback. Exact score ties retain their supplied
+A/B label, participation and reconstruction gate; prompts state that equal
+scores provide no measured advantage. Blind reconstruction still receives only
+the redacted task/trajectory views and principles. Selected-score and regret
+diagnostics are computed after judging, and optional minimization preserves
+regret on fully scored datasets. See
+[`docs/PREFERENCE_COLLECTION.md`](../../docs/PREFERENCE_COLLECTION.md) for the
+metric setting, report fields, missing-score behavior and checkpoint migration.
 
 Component coverage is preserved across the complete induction set. Reasoners
 and debaters inspect each component for observable differences explaining the

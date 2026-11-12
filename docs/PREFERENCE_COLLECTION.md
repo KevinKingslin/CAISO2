@@ -22,7 +22,8 @@ unchanged/changed configuration comparison. The protocol is
 7. Label the branch with the higher objective task metric as preferred. On exact
    equality, choose A or B at random with equal probability. Keep the pair even
    when the outputs are identical. No score-margin threshold is applied.
-8. Send both actual trajectories and the preference label to DICAI.
+8. Send both actual trajectories, the preference label and separate training
+   task-score feedback to DICAI's reasoning and debate stages.
 
 Each comparison therefore costs one upstream-prefix execution plus two suffix
 executions. There is no extra full-system reference execution, four-candidate
@@ -68,8 +69,57 @@ metadata records the changed component/parameter, task scores, whether the score
 were tied, and `label_source: random_task_tie` or `training_task_metric`.
 `setup/bootstrap_comparisons.jsonl` records each collected pair and filtered
 comparison. Preferences also appear in `setup.json` and run checkpoints.
-DICAI's existing projection hides task scores, targets, gold and evaluation
-metadata from model requests. The 15 DICAI prompt templates are unchanged.
+DICAI's trajectory projection hides task scores, targets, gold and evaluation
+metadata. Reasoning and every debate variant separately receive a training-only
+`score_feedback` object read from `metadata.global_scores` in A/B order. It
+contains `metric`, `score_a`, `score_b`, `delta_a_minus_b` and `relation`
+(`A_better`, `B_better` or `tie`). Scores never reorder candidates or replace
+the supplied preference label. Pairs without stored scores receive null feedback;
+malformed or nonfinite score records fail before induction requests.
+
+`dicai.score_metric` names the recorded task metric; it does not change the
+benchmark evaluator. Experiment loading defaults to `answer_f1` for HotpotQA
+and `task_metric` otherwise. Override it in the experiment's method settings
+when supplying another metric. For example:
+
+```yaml
+method:
+  dicai:
+    score_metric: answer_f1
+```
+
+The prompts use absolute scores and their gap as outcome evidence, without
+treating a gap as confidence or proof of component causality. Principles must
+remain applicable without scores or reference answers. Exact ties still enter
+reasoning/debate and retain their existing randomly assigned A/B labels and
+label-reconstruction gate. Feedback explicitly identifies the lack of a measured
+task-metric advantage; this extension does not introduce tie filtering or a
+ternary judge.
+
+The shuffled reconstruction judge remains blind to scores, reference answers
+and labels. After inference, each scored choice records `selected_score`,
+`oracle_score` (the larger candidate score) and `regret` (oracle minus selected).
+Either choice on a score tie has zero regret. Reports retain original label
+`accuracy`, including ties, and add `non_tied_accuracy`/`non_tied_n` over scored
+non-tied pairs, `tied_pairs`, `scored_pairs`, `scored_selections`,
+`mean_selected_score`, `mean_oracle_score` and `mean_regret`. Score means use
+only scored pairs with a completed choice; missing choices have null values,
+not zero regret, and the coverage counts expose their exclusion. These are
+training reconstruction diagnostics, not held-out benchmark results.
+
+When optional `dicai.minimization.enabled` is true, fully scored comparison
+sets use mean regret instead of label accuracy. Non-strict minimization permits
+equal regret; strict minimization requires lower regret. Neither may remove a
+principle when the baseline or trial has incomplete scored selections. Sets
+with any unscored pair retain accuracy-based minimization. Existing component
+coverage restoration and the nonempty constitution requirement remain active;
+final reconstruction evaluates the list after coverage restoration.
+
+The score-feedback prompt adaptation has its own protocol/provenance version.
+Start a fresh output directory to regenerate constitutions; existing checkpoints
+retain saved constitutions. Existing pair JSON can be supplied using
+`caiso.preferences_path` without recollecting trajectories. Original DICAI source
+and reference prompts remain unchanged.
 
 Only fresh component calls consume execution cost; prefix replay increments the
 reuse counter. Each suffix completion counts as one completed system execution;
@@ -81,5 +131,7 @@ initialization error handling.
 
 `tests/test_preference_collection.py` verifies two actual configuration runs,
 shared upstream execution, random component selection, single-run metric labels,
-random exact ties including identical outputs, score redaction, parameter
+random exact ties including identical outputs, blind score redaction, parameter
 restoration, error handling and optimizer integration without paid model calls.
+`tests/test_dicai_score_feedback.py` covers score-aware reasoning/debate, blind
+selection, regret accounting, and regret-preserving minimization.

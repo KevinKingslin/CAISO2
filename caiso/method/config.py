@@ -242,6 +242,10 @@ def validate_method(config):
     dicai = config.get("dicai", {})
     if not isinstance(dicai, dict):
         raise ValueError("dicai must be a configuration mapping")
+    if "score_metric" in dicai and (
+        not isinstance(dicai["score_metric"], str) or not dicai["score_metric"].strip()
+    ):
+        raise ValueError("dicai.score_metric must be a nonempty string")
     for key, setting in dicai.items():
         if setting is None:
             raise ValueError(f"dicai.{key} cannot be null; omit it to use its default")

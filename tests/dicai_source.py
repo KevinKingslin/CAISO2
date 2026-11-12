@@ -211,4 +211,21 @@ def trajectory_adaptation(key, original):
         text = text.replace('Select the trajectory...', 'Select the trajectory where <component_id> <criterion>.')
         text = text.replace('Select the trajectory that is', 'Select the trajectory where <component_id> is')
         text = text.replace('\n[USER]\n', '\n\n' + format_rule + '\n[USER]\n', 1)
+    if key.startswith(('reasoning.', 'debate.')):
+        score_rule = (
+            'TRAINING SCORE FEEDBACK:\n'
+            'When training task feedback is supplied, use both absolute scores and their difference '
+            'to explain observable trajectory differences associated with the measured advantage. '
+            'Scores measure end-to-end benchmark performance: a higher score does not establish '
+            'that an answer is entirely correct, the score gap is not a confidence estimate, and '
+            'it does not establish which component caused the outcome. '
+            'Produce reusable component-behavior principles that can be applied without reference '
+            'answers, scores or preference labels. Never use "prefer the higher score" as a principle. '
+            'If the relation is tie, there is no measured task-metric advantage; do not claim that '
+            'the scores support the supplied A/B label. The supplied label and existing reconstruction '
+            'requirement are retained. If feedback is null, use the supplied preference and trajectory '
+            'evidence as before.'
+        )
+        text = text.replace('\n[USER]\n', '\n\n' + score_rule + '\n[USER]\n', 1)
+        text += '\n\nTRAINING TASK FEEDBACK (A/B order, training only):\n{score_feedback:json}'
     return text

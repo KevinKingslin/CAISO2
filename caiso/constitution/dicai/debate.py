@@ -6,7 +6,7 @@ from caiso.prompts import render_messages
 from .agents import DebateAgent, moderator_proxy
 from .personas import Persona
 from .atomicity import AtomicityError, enabled as atomicity_enabled, ensure_atomic
-from .preferences import candidate_views, task_view
+from .preferences import candidate_views, score_feedback, task_view
 from .reconstruction import reconstructs
 from .parsing import dedupe, explicitly_unchanged, parse_principles
 from .parsing import principle_key as principle_key
@@ -34,6 +34,7 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
     evidence = {
         "context": task_view(pair.context), "response_a": a, "response_b": b,
         "preferred": pair.preferred, "preferred_text": a if pair.preferred == "A" else b,
+        "score_feedback": score_feedback(pair, config.get("score_metric", "task_metric")),
         "min_principles": minimum, "total_cycles": rounds,
     }
 
@@ -46,7 +47,10 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
     def check(cycle, when):
         if progress:
             progress(cycle, "reconstruction " + when)
-        result = reconstructs(providers, role, pair, working, votes, temperatures.get("reconstruction", 0.0))
+        result = reconstructs(
+            providers, role, pair, working, votes, temperatures.get("reconstruction", 0.0),
+            score_metric=config.get("score_metric", "task_metric"),
+        )
         history.append({"speaker": "reconstruction", "cycle": cycle, "when": when, "result": result})
         if not working:
             return result, "RECONSTRUCTION STATUS: the working list is empty."
