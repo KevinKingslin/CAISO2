@@ -25,16 +25,17 @@ from .atomicity import PROMPT_KEYS as ATOMICITY_PROMPTS
 from .atomicity import AtomicityError, enabled as atomicity_enabled, ensure_atomic
 from .activity import InductionActivity
 from .clustering import cluster_principles
-from .coverage import coverage_targets, preserve_component_coverage
+from .coverage import coverage_targets, observed_components, preserve_component_coverage
 from .debate import debate, principle_key
 from .personas import assign_personas
+from .parsing import normalize_principle, referenced_components
 from .plotting import save_silhouette_artifacts
 from .preferences import score_feedback
 from .reasoning_assembly import assemble
 from .request_cache import RequestCache
 from .reconstruction import minimize_constitution, validate_constitution
 
-PROTOCOL = "democratic-icai-c8d5-source-trajectory-v6-score-feedback"
+PROTOCOL = "democratic-icai-c8d5-source-trajectory-v7-component-format"
 INDUCTION_METHOD_PROMPTS = ("providers.format_retry",)
 
 
@@ -64,6 +65,8 @@ class DICAI:
         score_metric = self.config.get("score_metric", "task_metric")
         for pair in pairs:
             score_feedback(pair, score_metric)  # Validate before any paid induction requests.
+            if not observed_components(pair):
+                raise ValueError(f"Pair {pair.pair_id}: DICAI induction requires recorded trajectory component IDs")
         expected_components, target_source = coverage_targets(pairs, scope, component_ids)
         method_prompts = INDUCTION_METHOD_PROMPTS + (ATOMICITY_PROMPTS if atomicity_enabled(self.config) else ())
         validate_resources({"dicai": None, "method": method_prompts})
@@ -200,6 +203,7 @@ class DICAI:
             values, transcript, catalog = (
                 record[k] for k in ("principles", "transcript", "catalog")
             )
+            values = [normalize_principle(p, observed_components(pair)) for p in values]
             settled.extend(values)
             origins.extend([pair.pair_id] * len(values))
             catalogues.append(catalog)
@@ -250,6 +254,7 @@ class DICAI:
                     temporary.replace(latest)
         cluster_seconds = monotonic() - cluster_started
         abstract_started = monotonic()
+        component_ids = sorted(set().union(*(observed_components(pair) for pair in pairs)))
         abstraction_calls = len(set(labels))
         abstractions = abstract_clusters(
             settled,
@@ -263,6 +268,7 @@ class DICAI:
             else None,
             temperature=temperatures.get("abstraction", 0.2),
             config=self.config,
+            component_ids=component_ids,
         )
         if progress and atomicity_enabled(self.config):
             progress("abstraction_atomicity", 0, len(abstractions))
@@ -270,6 +276,7 @@ class DICAI:
             abstractions, abstraction_atomicity = ensure_atomic(
                 abstractions, providers, self.role, seed + 950000,
                 config=self.config, kind="abstraction",
+                component_ids=component_ids,
                 context=[{"index": cluster + 1, "principles": [
                     p for p, label in zip(settled, labels, strict=True) if label == cluster
                 ]} for cluster in range(len(abstractions))],
@@ -291,6 +298,10 @@ class DICAI:
             )
         if progress and atomicity_enabled(self.config):
             progress("abstraction_atomicity", len(abstractions), len(abstractions))
+        # Source restrictions also cover singleton copies and medoid fallbacks.
+        abstractions = [normalize_principle(text, referenced_components(
+            [p for p, label in zip(settled, labels, strict=True) if label == cluster], component_ids
+        )) for cluster, text in enumerate(abstractions)]
         # Collapse equal abstraction text and combine support, exactly as upstream.
         rows, merged, cluster_mapping = [], {}, {}
         for cluster, text in enumerate(abstractions):
@@ -341,6 +352,7 @@ class DICAI:
             outputs, settled, origins, pairs, expected_components,
             scope=scope, target_source=target_source,
         )
+        outputs = [normalize_principle(p, component_ids) for p in outputs]
         # Reconstruction must describe the final, coverage-preserving list,
         # including when optional minimization removed a component's last rule.
         report = validate_constitution(

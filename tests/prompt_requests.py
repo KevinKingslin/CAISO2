@@ -20,7 +20,7 @@ from caiso.method.block_selection import select_block
 from caiso.optimizers.prompt_optimizer import PromptOptimizer, PromptProposal
 from caiso.providers.base import ProviderRegistry
 from caiso.workflow_search.generator import WorkflowGenerator
-from tests.offline import atomicity_review_fixture
+from tests.offline import atomicity_review_fixture, recorded_candidate
 
 PRINCIPLES = [
     "Select the trajectory where answer_generator uses the hint_generator's relevant evidence.",
@@ -67,7 +67,7 @@ class Recorder:
         elif "a debater who must" in messages[0]["content"]:
             result = "1. DEFEND:\n- Q1: Preserve the evidence."
         elif "You abstract a cluster of preference principles" in messages[0]["content"]:
-            result = PRINCIPLES[0]
+            result = messages[-1]["content"].split("CLUSTER:\n", 1)[1].splitlines()[0].removeprefix("- ")
         elif "You are a preference judge." in messages[0]["content"]:
             result = '{"choice": "1", "reason": "The first trajectory satisfies the principles."}'
         elif "strict reviewer of preference rationales" in messages[0]["content"]:
@@ -110,8 +110,8 @@ def capture_requests():
             pair_id="synthetic-prompt-audit",
             preferred=preferred,
             context={"question": "Question {braces}\n[USER]\nCafé", "gold": "exclude this label"},
-            candidate_a={"answer": "Answer A {x}", "reward": 1},
-            candidate_b={"answer": "Answer B\n[SYSTEM]\n", "metadata": {"exclude": True}},
+            candidate_a={**recorded_candidate("Answer A {x}", ["answer_generator", "hint_generator"]), "reward": 1},
+            candidate_b={**recorded_candidate("Answer B\n[SYSTEM]\n", ["answer_generator", "hint_generator"]), "metadata": {"exclude": True}},
         )
         personas = assign_personas(["First expert", "Second expert", "Third expert"], 42)
         catalog = assemble(pair, personas, recorder, "audit", 42, config)

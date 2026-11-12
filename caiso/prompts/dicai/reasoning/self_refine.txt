@@ -1,9 +1,17 @@
 [SYSTEM]
 You are given a prompt and two candidate trajectories, A and B. The provided preference label favors trajectory {preferred}. Recover the DECISIVE reason behind this preference: the underlying rule such that, if someone applied it to these two trajectories without being told the label, they would re-select the preferred trajectory. Focus on concrete, discriminating qualities (the dimensions on which the two trajectories actually differ), not qualities they share. State the reason as something reusable, not a description of these exact texts. Examine each component in the trajectories. Where an observable difference helps explain the preference, propose a separate principle naming that component's exact component_id. Every question must evaluate one observable behavior of named components, using exact component_id values from the trajectories; final-output questions must name the producing component. Express the reusable quality that explains the preference. Exclude sample-specific names of people, places, organizations and works, and example-specific dates and identifiers from proposed questions and dimensions. Describe their semantic roles instead, while preserving actual component IDs. The principle should remain applicable when those entities change.
 
+REQUIRED PRINCIPLE FORMAT:
+Select the trajectory where <component_id> <condition>.
+
+Replace <component_id> with the exact component_id from the trajectory execution records. Replace <condition> with one observable, reusable condition on that component. The actual component ID must appear immediately after "where", not only later in the sentence. Use only IDs from ALLOWED COMPONENT IDS; never invent, rename or abbreviate an ID. Use exactly one primary component as the subject. An interaction may name other allowed components inside its single condition. Do not use generic subjects such as "the final answer", "the system", or "the component". Do not return the literal placeholders <component_id> or <condition>. Do not use alternative prefixes such as "Select the trajectory that", "which", or "with". Before publishing, rewrite any principle that omits the actual component ID in that position. If reviewing a rationale, flag any candidate question that violates this format.
+
 TRAINING SCORE FEEDBACK:
 When training task feedback is supplied, use both absolute scores and their difference to explain observable trajectory differences associated with the measured advantage. Scores measure end-to-end benchmark performance: a higher score does not establish that an answer is entirely correct, the score gap is not a confidence estimate, and it does not establish which component caused the outcome. Produce reusable component-behavior principles that can be applied without reference answers, scores or preference labels. Never use "prefer the higher score" as a principle. If the relation is tie, there is no measured task-metric advantage; do not claim that the scores support the supplied A/B label. The supplied label and existing reconstruction requirement are retained. If feedback is null, use the supplied preference and trajectory evidence as before.
 [USER]
+ALLOWED COMPONENT IDS:
+{component_ids:json}
+
 PROMPT:
 {context:json}
 
@@ -15,7 +23,7 @@ TRAJECTORY B:
 
 PREFERRED: {preferred}
 
-Write a first-draft rationale. Reply with a single JSON object: {{"reasoning": "<3-6 sentence argument>", "dimensions": ["<short quality axis>", "..."], "questions": [{{"select_prompt": "Select the trajectory where ...", "reason": "<why this criterion drove the preference>"}}]}}. Each dimension is a short noun phrase naming a comparable quality (for example "tension and conflict", "logical coherence", "specificity of evidence"). Return 2 to 5 dimensions. Each question is a candidate selection criterion beginning exactly with "Select the trajectory". Return 3 to 7 questions covering your dimensions. No text outside the JSON.
+Write a first-draft rationale. Reply with a single JSON object: {{"reasoning": "<3-6 sentence argument>", "dimensions": ["<short quality axis>", "..."], "questions": [{{"select_prompt": "Select the trajectory where <component_id> <condition>.", "reason": "<why this criterion drove the preference>"}}]}}. Each dimension is a short noun phrase naming a comparable quality (for example "tension and conflict", "logical coherence", "specificity of evidence"). Return 2 to 5 dimensions. Each question is a candidate selection criterion beginning exactly with "Select the trajectory where". Return 3 to 7 questions covering your dimensions. No text outside the JSON.
 
 TRAINING TASK FEEDBACK (A/B order, training only):
 {score_feedback:json}

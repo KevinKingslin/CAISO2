@@ -5,10 +5,11 @@ from caiso.prompts import render_messages
 
 from .agents import DebateAgent, moderator_proxy
 from .personas import Persona
+from .coverage import observed_components
 from .atomicity import AtomicityError, enabled as atomicity_enabled, ensure_atomic
 from .preferences import candidate_views, score_feedback, task_view
 from .reconstruction import reconstructs
-from .parsing import dedupe, explicitly_unchanged, parse_principles
+from .parsing import dedupe, explicitly_unchanged, normalize_principle, parse_principles
 from .parsing import principle_key as principle_key
 
 
@@ -25,16 +26,20 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
     votes = config.get("reconstruction_votes", 1)
     if rounds < 1 or len(catalog) != 3:
         raise ValueError("DICAI requires three debaters and at least one round")
+    component_ids = sorted(observed_components(pair))
+    if not component_ids:
+        raise ValueError("DICAI debate requires recorded trajectory component IDs")
     moderator = moderator_proxy()
     debaters = [DebateAgent(f"Debater_{i + 1}", providers, role) for i in range(3)]
     judge = DebateAgent("Judge", providers, role)
-    working = dedupe([p for entry in catalog for p in entry.get("principles", [])])
+    working = dedupe([normalize_principle(p, component_ids) for entry in catalog for p in entry.get("principles", [])])
     history = [{"speaker": "initial_working_list", "content": render(working)}]
     a, b = candidate_views(pair)
     evidence = {
         "context": task_view(pair.context), "response_a": a, "response_b": b,
         "preferred": pair.preferred, "preferred_text": a if pair.preferred == "A" else b,
         "score_feedback": score_feedback(pair, config.get("score_metric", "task_metric")),
+        "component_ids": component_ids,
         "min_principles": minimum, "total_cycles": rounds,
     }
 
@@ -91,7 +96,7 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
         def valid_update(text):
             if working and explicitly_unchanged(text):
                 return text
-            parse_principles(text)
+            parse_principles(text, component_ids)
             return text
 
         try:
@@ -103,7 +108,7 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
                 temperature=temperatures.get("chairperson", 0.2),
                 response_context={"pair_id": pair.pair_id, "stage": "chairperson", "cycle": cycle},
             )
-            proposed = list(working) if explicitly_unchanged(chair) else parse_principles(chair)
+            proposed = list(working) if explicitly_unchanged(chair) else parse_principles(chair, component_ids)
             if published and proposed == working:
                 atomicity = {"enabled": atomicity_enabled(config), "passed": atomicity_enabled(config), "reused_verified_list": True, "calls_before_retries": 0}
             else:
@@ -112,6 +117,7 @@ def debate(pair, catalog, providers, role, seed, rounds=4, config=None, progress
                 proposed, atomicity = ensure_atomic(
                     proposed, providers, role, seed + 200000 + cycle * 100,
                     config=config, context={"pair_id": pair.pair_id},
+                    component_ids=component_ids,
                 )
         except AtomicityError as error:
             history.append({

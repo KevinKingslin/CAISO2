@@ -17,7 +17,7 @@ from caiso.core.content_filter import ContentFilteredError
 from caiso.integration.config import load_method
 from caiso.method.config import validate_method
 from caiso.providers.base import ProviderRegistry
-from tests.offline import OfflineEmbeddings, OfflineProvider
+from tests.offline import OfflineEmbeddings, OfflineProvider, recorded_candidate
 from tests.prompt_requests import PRINCIPLES, Recorder
 
 
@@ -25,8 +25,8 @@ def pair(scores=(0.2, 0.8), preferred="B", pair_id="scores"):
     return PreferencePair(
         pair_id=pair_id, preferred=preferred,
         context={"question": "Q", "gold": "REFERENCE_ONLY", "score_feedback": "HIDDEN"},
-        candidate_a={"trajectory": {"final_output": {"answer": "A"}, "reward": scores[0]}},
-        candidate_b={"trajectory": {"final_output": {"answer": "B"}, "reward": scores[1]}},
+        candidate_a={"trajectory": {**recorded_candidate("A", ["answer_generator", "hint_generator", "transform"]), "final_output": {"answer": "A"}, "reward": scores[0]}},
+        candidate_b={"trajectory": {**recorded_candidate("B", ["answer_generator", "hint_generator", "transform"]), "final_output": {"answer": "B"}, "reward": scores[1]}},
         metadata={"global_scores": list(scores), "target": "REFERENCE_ONLY"},
     )
 

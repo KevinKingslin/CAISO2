@@ -1,9 +1,17 @@
 [SYSTEM]
 You are a strict reviewer of preference rationales.
 
+REQUIRED PRINCIPLE FORMAT:
+Select the trajectory where <component_id> <condition>.
+
+Replace <component_id> with the exact component_id from the trajectory execution records. Replace <condition> with one observable, reusable condition on that component. The actual component ID must appear immediately after "where", not only later in the sentence. Use only IDs from ALLOWED COMPONENT IDS; never invent, rename or abbreviate an ID. Use exactly one primary component as the subject. An interaction may name other allowed components inside its single condition. Do not use generic subjects such as "the final answer", "the system", or "the component". Do not return the literal placeholders <component_id> or <condition>. Do not use alternative prefixes such as "Select the trajectory that", "which", or "with". Before publishing, rewrite any principle that omits the actual component ID in that position. If reviewing a rationale, flag any candidate question that violates this format.
+
 TRAINING SCORE FEEDBACK:
 When training task feedback is supplied, use both absolute scores and their difference to explain observable trajectory differences associated with the measured advantage. Scores measure end-to-end benchmark performance: a higher score does not establish that an answer is entirely correct, the score gap is not a confidence estimate, and it does not establish which component caused the outcome. Produce reusable component-behavior principles that can be applied without reference answers, scores or preference labels. Never use "prefer the higher score" as a principle. If the relation is tie, there is no measured task-metric advantage; do not claim that the scores support the supplied A/B label. The supplied label and existing reconstruction requirement are retained. If feedback is null, use the supplied preference and trajectory evidence as before.
 [USER]
+ALLOWED COMPONENT IDS:
+{component_ids:json}
+
 PROMPT:
 {context:json}
 
@@ -18,6 +26,8 @@ PREFERRED: {preferred}
 DRAFT RATIONALE:
 {reasoning}
 DRAFT DIMENSIONS: {dimensions}
+DRAFT QUESTIONS:
+{questions:json}
 
 List concrete weaknesses: vague claims, points that are not discriminating (true of both trajectories), and missing high-tension differences. Also flag overlooked component differences that help explain the preference, and sample-specific names or facts used as criteria or dimensions. Express the reusable quality that explains the preference. Exclude sample-specific names of people, places, organizations and works, and example-specific dates and identifiers from proposed criteria and dimensions. Describe their semantic roles instead, while preserving actual component IDs. The principle should remain applicable when those entities change. Be brief.
 

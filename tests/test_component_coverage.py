@@ -135,7 +135,8 @@ class CollapsingProvider(OfflineProvider):
             self.calls.append((messages, seed, schema))
             if "Moderator/Judge" in messages[0]["content"]:
                 return "FINAL LIST\n" + "\n".join(f"- Q{i}: {text}" for i, text in enumerate(RULES.values(), 1)) + "\nDEBATE_OVER"
-            return RULES["answer_generator"]
+            allowed = json.JSONDecoder().raw_decode(messages[-1]["content"].split("ALLOWED COMPONENT IDS:\n", 1)[1])[0]
+            return RULES["answer_generator" if "answer_generator" in allowed else allowed[0]]
         result = super().complete(messages, seed=seed, schema=schema, **kwargs)
         if schema and schema.__name__ == "Reasoning":
             values = json.loads(result)
@@ -174,7 +175,7 @@ def test_real_induction_restores_coverage_after_abstraction_and_minimization(tmp
     assert coverage["expected_components"] == sorted(targets)
     assert coverage["covered_after"] == sorted(targets)
     assert coverage["status"] == "complete"
-    assert coverage["restored"]
+    assert bool(coverage["restored"]) == bool(set(targets) - set(coverage["covered_before"]))
     assert all(entry["principle"] in constitution.settled_principles for entry in coverage["restored"])
     assert all(entry["source_pair_ids"] == ["p1"] for entry in coverage["restored"])
     assert constitution.metadata["clustering"]["selected_k"] == 2

@@ -67,13 +67,13 @@ OUTPUT FORMAT (STRICT; no extra text):
 - Qy: <1-2 sentences why it should be removed, merged, or edited>
 
 3. MERGE:
-- Merge Qm + Qn -> "Select the trajectory where <component_id> <criterion>."
+- Merge Qm + Qn -> "Select the trajectory where <component_id> <condition>."
 
 4. EDIT:
-- Qk: "Select the trajectory where <component_id> <criterion>."
+- Qk: "Select the trajectory where <component_id> <condition>."
 
 5. ADD:
-- "Select the trajectory where <component_id> <criterion>." (only if truly missing and non-overlapping)
+- "Select the trajectory where <component_id> <condition>." (only if truly missing and non-overlapping)
 
 6. CONCEDE:
 - Qz: <short reason>
@@ -84,13 +84,16 @@ COMPONENT PRINCIPLES:
 Write every principle beginning exactly with "Select the trajectory where", immediately followed by the actual component_id and one observable, reusable criterion. Include at least one separate principle for every component shown in the trajectories (for a block comparison, every block member identified in the task). Inspect each component and propose a missing principle grounded in its observed behavior. Keep principles for different components separate even when they evaluate the same quality. An interaction principle does not replace the participating components' own principles. Do not remove a component's only supported principle for brevity. If the evidence does not support a component principle, identify that gap in the debate rather than inventing behavior.
 
 REQUIRED PRINCIPLE FORMAT:
-Select the trajectory where <component_id> <criterion>.
+Select the trajectory where <component_id> <condition>.
 
-Replace <component_id> with the exact component_id from the trajectory execution records. Replace <criterion> with one observable, reusable behavior or quality of that component. The actual component ID must appear immediately after "where", not only later in the sentence. Do not use generic subjects such as "the final answer", "the system", or "the component". Do not return the literal placeholders <component_id> or <criterion>. Before publishing, rewrite any principle that omits the actual component ID in that position.
+Replace <component_id> with the exact component_id from the trajectory execution records. Replace <condition> with one observable, reusable condition on that component. The actual component ID must appear immediately after "where", not only later in the sentence. Use only IDs from ALLOWED COMPONENT IDS; never invent, rename or abbreviate an ID. Use exactly one primary component as the subject. An interaction may name other allowed components inside its single condition. Do not use generic subjects such as "the final answer", "the system", or "the component". Do not return the literal placeholders <component_id> or <condition>. Do not use alternative prefixes such as "Select the trajectory that", "which", or "with". Before publishing, rewrite any principle that omits the actual component ID in that position. If reviewing a rationale, flag any candidate question that violates this format.
 
 TRAINING SCORE FEEDBACK:
 When training task feedback is supplied, use both absolute scores and their difference to explain observable trajectory differences associated with the measured advantage. Scores measure end-to-end benchmark performance: a higher score does not establish that an answer is entirely correct, the score gap is not a confidence estimate, and it does not establish which component caused the outcome. Produce reusable component-behavior principles that can be applied without reference answers, scores or preference labels. Never use "prefer the higher score" as a principle. If the relation is tie, there is no measured task-metric advantage; do not claim that the scores support the supplied A/B label. The supplied label and existing reconstruction requirement are retained. If feedback is null, use the supplied preference and trajectory evidence as before.
 [USER]
+ALLOWED COMPONENT IDS:
+{component_ids:json}
+
 TASK PROMPT:
 {context:json}
 

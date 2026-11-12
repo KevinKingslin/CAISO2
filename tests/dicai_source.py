@@ -195,22 +195,32 @@ def trajectory_adaptation(key, original):
             'Keep one shared quality and return exactly one principle for this cluster.'
         )
         text = text.replace('\nCLUSTER:', '\n' + component_rule + '\n\nCLUSTER:')
-    if key.startswith('debate.') or key == 'abstraction':
-        source = 'the trajectory execution records' if key.startswith('debate.') else 'the source principles in this cluster'
+    if key.startswith(('reasoning.', 'debate.')) or key == 'abstraction':
+        source = 'the source principles in this cluster' if key == 'abstraction' else 'the trajectory execution records'
         format_rule = (
             'REQUIRED PRINCIPLE FORMAT:\n'
-            'Select the trajectory where <component_id> <criterion>.\n\n'
+            'Select the trajectory where <component_id> <condition>.\n\n'
             'Replace <component_id> with the exact component_id from ' + source + '. '
-            'Replace <criterion> with one observable, reusable behavior or quality of that component. '
+            'Replace <condition> with one observable, reusable condition on that component. '
             'The actual component ID must appear immediately after "where", not only later in the sentence. '
+            'Use only IDs from ALLOWED COMPONENT IDS; never invent, rename or abbreviate an ID. '
+            'Use exactly one primary component as the subject. An interaction may name other allowed '
+            'components inside its single condition. '
             'Do not use generic subjects such as "the final answer", "the system", or "the component". '
-            'Do not return the literal placeholders <component_id> or <criterion>. '
-            'Before publishing, rewrite any principle that omits the actual component ID in that position.'
+            'Do not return the literal placeholders <component_id> or <condition>. '
+            'Do not use alternative prefixes such as "Select the trajectory that", "which", or "with". '
+            'Before publishing, rewrite any principle that omits the actual component ID in that position. '
+            'If reviewing a rationale, flag any candidate question that violates this format.'
         )
-        text = text.replace('Select the trajectory where ...', 'Select the trajectory where <component_id> <criterion>.')
-        text = text.replace('Select the trajectory...', 'Select the trajectory where <component_id> <criterion>.')
+        text = text.replace('"Select the trajectory"', '"Select the trajectory where"')
+        text = text.replace('<criterion>', '<condition>')
+        text = text.replace('Select the trajectory where ...', 'Select the trajectory where <component_id> <condition>.')
+        text = text.replace('Select the trajectory...', 'Select the trajectory where <component_id> <condition>.')
         text = text.replace('Select the trajectory that is', 'Select the trajectory where <component_id> is')
         text = text.replace('\n[USER]\n', '\n\n' + format_rule + '\n[USER]\n', 1)
+        text = text.replace('\n[USER]\n', '\n[USER]\nALLOWED COMPONENT IDS:\n{component_ids:json}\n\n', 1)
+    if key == 'reasoning.self_refine_critique':
+        text = text.replace('DRAFT DIMENSIONS: {dimensions}', 'DRAFT DIMENSIONS: {dimensions}\nDRAFT QUESTIONS:\n{questions:json}')
     if key.startswith(('reasoning.', 'debate.')):
         score_rule = (
             'TRAINING SCORE FEEDBACK:\n'

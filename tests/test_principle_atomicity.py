@@ -16,7 +16,7 @@ from caiso.core.recovery import ModelResponseError, TransportExhausted, Transpor
 from caiso.constitution.dicai.request_cache import RequestCache
 from caiso.method.config import validate_method
 from caiso.providers.base import ProviderRegistry
-from tests.offline import OfflineEmbeddings, OfflineProvider, atomicity_review_fixture
+from tests.offline import OfflineEmbeddings, OfflineProvider, atomicity_review_fixture, recorded_candidate
 from tests.prompt_requests import PRINCIPLES, Recorder
 
 BUNDLE = "Select the trajectory where hint_generator produces detailed hints and answer_generator gives a concise answer."
@@ -191,7 +191,9 @@ class DebateRecorder(Recorder):
 
 
 def pair_and_catalog():
-    pair = PreferencePair(pair_id="atomicity-pair", preferred="A", context={}, candidate_a={"answer": "A"}, candidate_b={"answer": "B"})
+    components = ["answer_generator", "hint_generator", "transform"]
+    pair = PreferencePair(pair_id="atomicity-pair", preferred="A", context={},
+                          candidate_a=recorded_candidate("A", components), candidate_b=recorded_candidate("B", components))
     catalog = [{"persona": p.model_dump(), "reasoning": "Evidence", "principles": PRINCIPLES} for p in assign_personas(["One", "Two", "Three"], 42)]
     return pair, catalog
 

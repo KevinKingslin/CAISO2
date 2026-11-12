@@ -20,8 +20,13 @@ score-feedback adaptation exposes absolute A/B scores, their signed gap and
 score relation separately from trajectory evidence; blind reconstruction remains
 score-free. Post-inference regret drives optional minimization on fully scored
 data. Existing A/B labels and exact-tie participation are retained. See
-`docs/PREFERENCE_COLLECTION.md` for the complete behavior. Each principle
-starts with `Select the trajectory`; no particular following connector is required.
+`docs/PREFERENCE_COLLECTION.md` for the complete behavior. Each generated principle
+must follow `Select the trajectory where <component_id> <condition>`, with a real
+allowed component ID immediately after `where`. All reasoning, debate, abstraction
+and repair requests state the format. Runtime checks enforce syntax and subject
+membership through final output. Reasoning requires actual questions instead of
+dimension-only fallback rules. Induction requires component execution records;
+standalone parsing without an inventory checks syntax only.
 
 The active source is the supplied code, which includes explicit sampled
 self-consistency, iterative refinement, one-quality rules and reconstruction

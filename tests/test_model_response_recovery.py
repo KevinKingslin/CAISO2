@@ -21,7 +21,7 @@ from caiso.integration.services import MethodProvider
 from caiso.optimizers.prompt_optimizer import PromptProposal
 from caiso.providers.base import ProviderRegistry
 from caiso.providers.responses import json_object
-from tests.offline import OfflineEmbeddings
+from tests.offline import OfflineEmbeddings, recorded_candidate
 
 ONE = "Select the trajectory where info_extractor preserves evidence."
 TWO = "Select the trajectory where answer_generator answers the question."
@@ -90,7 +90,7 @@ def test_trajectory_prefix_requires_one_actual_criterion(principle):
 def test_trajectory_normalization_preserves_component_identifiers():
     assert normalize_principle(
         "- **Q2:** SELECT  THE trajectory WHERE hint_generator passes detailed hints to answer_generator."
-    ) == "Select the trajectory WHERE hint_generator passes detailed hints to answer_generator."
+    ) == "Select the trajectory where hint_generator passes detailed hints to answer_generator."
 
 
 @pytest.mark.parametrize("original", [
@@ -101,25 +101,34 @@ def test_trajectory_normalization_preserves_component_identifiers():
     "Select the trajectory whose answer_generator uses evidence from info_extractor.",
     "Select the trajectory in which answer_generator uses evidence from info_extractor.",
 ])
-def test_trajectory_relative_clauses_preserve_the_actual_criterion(original):
-    assert normalize_principle(original) == original
-    assert parse_principles(f"| Question | Principle |\n|---|---|\n| Q1 | {original} |") == [original]
+def test_only_component_subject_format_is_accepted(original):
+    if original.startswith("Select the trajectory where answer_generator "):
+        assert normalize_principle(original) == original
+    else:
+        with pytest.raises(ModelResponseError):
+            normalize_principle(original)
+        with pytest.raises(ModelResponseError):
+            parse_principles(f"| Question | Principle |\n|---|---|\n| Q1 | {original} |")
 
 
-def test_reported_seed_questions_accept_equivalent_wording_without_retries():
+def test_reported_seed_questions_retry_invalid_format():
     questions = [
         "Select the trajectory where the retrieved evidence explicitly confirms the actress's involvement.",
         "Select the trajectory that ensures the final answer is supported by accurate and verifiable information.",
     ]
-    provider = SequenceProvider([json.dumps({"reasoning": "The preferred trajectory uses supporting evidence.", "dimensions": ["evidence support"], "questions": questions})] * 3)
+    valid = [ONE, TWO]
+    def response(values):
+        return json.dumps({"reasoning": "The preferred trajectory uses supporting evidence.", "dimensions": ["evidence support"], "questions": values})
+    provider = SequenceProvider([response(questions), response(valid)])
     models = registry(provider)
     events = []
     models.recovery.on_error = events.append
     result = models.complete("test", [{"role": "user", "content": "Draft candidate questions."}], seed=7143, schema=Reasoning)
-    assert [q.select_prompt for q in result.questions] == questions
-    assert len(provider.calls) == 1
-    assert events == []
-    assert parse_principles("FINAL LIST:\n" + "\n".join(f"- Q{i}: {p}" for i, p in enumerate(questions, 1))) == questions
+    assert [q.select_prompt for q in result.questions] == valid
+    assert len(provider.calls) == 2
+    assert events
+    with pytest.raises(ModelResponseError):
+        parse_principles("FINAL LIST:\n" + "\n".join(f"- Q{i}: {p}" for i, p in enumerate(questions, 1)))
 
 
 @pytest.mark.parametrize("answer", [
@@ -210,7 +219,9 @@ def test_non_response_errors_are_not_hidden_or_retried(error):
 
 
 def pair():
-    return PreferencePair(pair_id="pair-1", preferred="A", context={"question": "Q"}, candidate_a={"answer": "A"}, candidate_b={"answer": "B"})
+    components = ["info_extractor", "answer_generator", "hint_generator", "transform"]
+    return PreferencePair(pair_id="pair-1", preferred="A", context={"question": "Q"},
+                          candidate_a=recorded_candidate("A", components), candidate_b=recorded_candidate("B", components))
 
 
 def catalog():
@@ -335,8 +346,6 @@ def test_judge_accepts_only_presentation_variations(answer):
 
 @pytest.mark.parametrize("principle", [
     "Select the trajectory where info_extractor preserves API_key values.",
-    "Select the trajectory that preserves API_key values from info_extractor.",
-    "Select the trajectory which preserves API_key values from info_extractor.",
 ])
 def test_abstraction_accepts_markdown_and_typographic_quotes(principle):
     class Provider:

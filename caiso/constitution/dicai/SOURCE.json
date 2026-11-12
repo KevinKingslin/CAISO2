@@ -38,7 +38,7 @@
     "manifest": "third_party/democratic_icai/PROMPTS.json",
     "license": "MIT",
     "request_count": 15,
-    "principle_prefix": "Select the trajectory",
+    "principle_prefix": "Select the trajectory where",
     "adaptations": [
       "Response/story terminology becomes trajectory terminology.",
       "Human-label wording becomes provided preference-label wording.",
@@ -47,15 +47,19 @@
       "Debaters discuss component behavior, interactions or final output using actual component IDs and reconstruct preferences through reusable criteria without sample-specific entities.",
       "Chairpersons preserve actual component IDs and reusable semantic-role criteria when editing or merging; reconstruction remains mandatory without overriding those requirements.",
       "Abstraction preserves one shared quality, expresses sample-specific entities through semantic roles, and names evaluated components using actual IDs from the member principles.",
-      "Debate and abstraction output examples show the component-ID and criterion placeholders explicitly and require substituting actual values from executions or member principles.",
+      "Principle output examples show the component-ID and condition placeholders and require substituting actual IDs from executions or source principles and one actual condition.",
       "Dynamic inputs use CAISO JSON execution records and renamed placeholders; raw evidence is preserved.",
-      "Reasoners and debaters inspect each component for preference-explaining differences; chairpersons retain supported component criteria; abstraction preserves exact IDs instead of generic aliases."
+      "Reasoners and debaters inspect each component for preference-explaining differences; chairpersons retain supported component criteria; abstraction preserves exact IDs instead of generic aliases.",
+      "Reasoning and all debate variants receive separate training-only A/B task scores, their signed gap and score relation; reusable criteria must not depend on scores or reference answers. Blind reconstruction inputs and preference labels, including random exact ties, are unchanged. Reconstruction reports post-inference selection regret; optional minimization preserves regret for fully scored datasets and otherwise preserves label accuracy.",
+      "All reasoning, debate and abstraction requests require Select the trajectory where <component_id> <condition>, supply allowed component IDs and prohibit generic subjects, alternate prefixes and literal placeholders. Reasoning requires actual candidate questions instead of generating dimension-only fallback rules. Runtime validation checks exact subject IDs against executed/source components through drafting, repairs, abstraction, medoids, coverage restoration and final output."
     ],
-    "protocol": "democratic-icai-c8d5-source-trajectory-v5-component-coverage",
+    "protocol": "democratic-icai-c8d5-source-trajectory-v7-component-format",
     "runtime_extensions": {
       "atomicity": "CAISO-authored semantic check/revision prompts under caiso/prompts/method/constitution_atomicity, separate from the 15 source-derived requests.",
       "configuration": "dicai.atomicity.enabled (default true), max_revisions (default 2), batch_size (default 20 principles/request)",
-      "component_coverage": "After abstraction/minimization, restore missing workflow/block component criteria from settled debate principles with observed source execution IDs; report insufficient evidence without inventing rules. See docs/CONSTITUTION_COVERAGE.md."
+      "component_coverage": "After abstraction/minimization, restore missing workflow/block component criteria from settled debate principles with observed source execution IDs; report insufficient evidence without inventing rules. See docs/CONSTITUTION_COVERAGE.md.",
+      "component_format": "Require Select the trajectory where <component_id> <condition>, with exact subject membership in executed/source component IDs through reasoning, chairpersons, repairs, abstraction, fallbacks and final output. Reasoning requires actual questions; dimension-only generic fallback rules are removed. Standalone parsing without an inventory checks syntax only.",
+      "score_feedback": "Separate training-only A/B task scores in reasoning/debate; blind reconstruction reports selected score and regret, and optional minimization preserves regret on fully scored data."
     },
     "component_principle_prompt_revision": {
       "date": "2026-11-10",
@@ -64,6 +68,13 @@
       "coverage": "Debate requests at least one separate supported principle per component and retains a component's sole supported rule. Abstraction preserves all evaluated IDs and roles in its existing single output per cluster.",
       "runtime": "Unchanged from before 33ca2a6; parser flexibility, reasoning schema/fallback, coverage restoration/reporting and stopping behavior are retained. This is prompt guidance, not a runtime guarantee.",
       "placeholder_instructions": "Replace the component placeholder with an actual ID from trajectory executions (debate) or source principles (abstraction), replace the criterion placeholder, and put the actual ID immediately after where. Never return literal placeholders."
+    },
+    "component_format_enforcement": {
+      "date": "2026-11-12",
+      "scope": "All reasoning, debate, abstraction and repair requests, plus runtime validation through final output.",
+      "format": "Select the trajectory where <component_id> <condition>.",
+      "inventory": "Execution IDs for each pair; source-referenced IDs for each cluster and cluster repair.",
+      "retry": "Existing bounded response retries; no fabricated subjects or dimension-only fallback principles."
     }
   }
 }

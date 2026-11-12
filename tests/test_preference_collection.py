@@ -270,8 +270,14 @@ def test_optimizer_collects_configuration_preferences_before_induction(tmp_path)
     from caiso.optim.optimizer import CaisoOptimizer
     from tests.offline import OfflineEmbeddings, OfflineProvider
 
+    class ConfigurationProvider(OfflineProvider):
+        def complete(self, *args, **kwargs):
+            # This fixture's optimizable node is producer, not the arithmetic
+            # fixture's transform; its generated rules must name the real node.
+            return super().complete(*args, **kwargs).replace("where transform ", "where producer ")
+
     runtime, _ = fixture()
-    provider, embeddings = OfflineProvider(None), OfflineEmbeddings(None)
+    provider, embeddings = ConfigurationProvider(None), OfflineEmbeddings(None)
     registry = ProviderRegistry({"offline": provider}, dict.fromkeys(
         ["system_constitution", "constitution_judge", "block_selection", "prompt_optimizer"], "offline",
     ))

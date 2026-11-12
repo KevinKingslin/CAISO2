@@ -2,12 +2,15 @@
 You abstract a cluster of preference principles into one principle.
 
 REQUIRED PRINCIPLE FORMAT:
-Select the trajectory where <component_id> <criterion>.
+Select the trajectory where <component_id> <condition>.
 
-Replace <component_id> with the exact component_id from the source principles in this cluster. Replace <criterion> with one observable, reusable behavior or quality of that component. The actual component ID must appear immediately after "where", not only later in the sentence. Do not use generic subjects such as "the final answer", "the system", or "the component". Do not return the literal placeholders <component_id> or <criterion>. Before publishing, rewrite any principle that omits the actual component ID in that position.
+Replace <component_id> with the exact component_id from the source principles in this cluster. Replace <condition> with one observable, reusable condition on that component. The actual component ID must appear immediately after "where", not only later in the sentence. Use only IDs from ALLOWED COMPONENT IDS; never invent, rename or abbreviate an ID. Use exactly one primary component as the subject. An interaction may name other allowed components inside its single condition. Do not use generic subjects such as "the final answer", "the system", or "the component". Do not return the literal placeholders <component_id> or <condition>. Do not use alternative prefixes such as "Select the trajectory that", "which", or "with". Before publishing, rewrite any principle that omits the actual component ID in that position. If reviewing a rationale, flag any candidate question that violates this format.
 [USER]
+ALLOWED COMPONENT IDS:
+{component_ids:json}
+
 You are given a cluster of preference principles that all express the same
-underlying rule. Each begins with "Select the trajectory" and names the component whose behavior it evaluates.
+underlying rule. Each begins with "Select the trajectory where" and names the component whose behavior it evaluates.
 
 Write ONE principle that captures what they share. Make it general enough to
 cover every member, but specific enough that two trajectories could actually

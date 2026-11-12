@@ -401,22 +401,27 @@ updated dependencies with `pip install -e .` before starting a new run.
 CAISO also enforces the existing one-quality rule with a semantic check after
 new chairperson lists and after abstraction. Compound debate principles receive
 bounded split revisions; compound abstractions are revised to one shared quality
-per cluster. The 15 source-derived DICAI prompts remain unchanged. Complete
+per cluster. Complete
 check/revision prompts are in `caiso/prompts/method/constitution_atomicity/`.
 The existing induction model is used; `dicai.atomicity.enabled` defaults to `true`
 and `max_revisions` to `2`. Reviews, repairs and verified fallbacks are recorded.
 See [configuration](configs/README.md) for the optional original-behavior ablation.
 
-Debate and abstraction prompts explicitly show
-`Select the trajectory where <component_id> <criterion>.` and require replacing
-both placeholders with an actual component ID and a reusable criterion. Debate asks for a separate
-principle per component; abstraction preserves the component references in each
-cluster. These instructions add no runtime validation or coverage failure.
+All principle-producing prompts require
+`Select the trajectory where <component_id> <condition>.` Both placeholders must
+be replaced with one exact allowed component ID as subject and one observable,
+reusable condition. Requests list allowed IDs; runtime validation checks the
+format and subject membership through reasoning, debate, repairs, abstraction,
+fallbacks and final output. Abstraction subjects must occur in their source
+cluster. Interactions name one primary subject and put other components in the
+condition. Induction requires recorded component executions; dimensions alone
+cannot generate generic fallback questions. Invalid model output uses the existing
+bounded retries. See [prompt details](caiso/prompts/README.md).
 
-Principles start with **"Select the trajectory"**. Original instructions are
+Principles start with **"Select the trajectory where"**. Original instructions are
 retained apart from response/story terminology, provided preference labels,
-structured execution evidence and the documented guidance for component criteria
-and reusable principles. Constitutions remain lists of strings. No dataset-specific
+structured execution evidence and the documented component-format and score-feedback
+extensions. Constitutions remain lists of strings. No dataset-specific
 answer-style requirements are added.
 
 Reasoning returns the original `reasoning`, `dimensions`, and `questions` fields.
@@ -426,8 +431,8 @@ existing settings control these stages. The separate CAISO seed-drafting call
 has been removed because the original rationales already supply questions.
 Debate retains the source's one-quality rules, reconstruction feedback and
 finalization gates. The blind judge uses the original JSON choice `1` / `2`
-format, adapted to trajectory evidence. Singleton clusters retain their principle
-without an abstraction call, as in the source.
+format, adapted to trajectory evidence. Singleton abstractions pass the same
+component-format checks as other clusters.
 
 The audit prompt is included as a complete template; no new auditor model or
 automatic audit stage is enabled. Dataset personas, model routes, transport

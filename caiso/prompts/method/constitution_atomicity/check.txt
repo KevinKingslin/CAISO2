@@ -9,6 +9,17 @@ Return one assessment for every supplied index, exactly once. For an atomic prin
 
 Reply only with JSON:
 {{"assessments": [{{"index": 1, "atomic": true, "qualities": ["one quality"], "reason": "Why this tests one quality."}}]}}
+REQUIRED PRINCIPLE FORMAT:
+Select the trajectory where <component_id> <condition>.
+
+Replace <component_id> with an exact allowed component ID immediately after "where". Replace <condition> with one observable, reusable condition. Use one primary component as the subject; interactions may name other allowed IDs inside the condition. Never invent, rename or abbreviate IDs, use a generic subject, emit literal placeholders, or use alternative prefixes such as "Select the trajectory that", "which", or "with". When ALLOWED COMPONENT IDS is null, preserve exact component IDs from the supplied principles and context. For cluster repairs, restrict each replacement to its indexed source cluster's allowed IDs.
+
 [USER]
+ALLOWED COMPONENT IDS:
+{component_ids:json}
+
+ALLOWED COMPONENT IDS BY SOURCE INDEX:
+{component_ids_by_index:json}
+
 PRINCIPLES:
 {principles:json}

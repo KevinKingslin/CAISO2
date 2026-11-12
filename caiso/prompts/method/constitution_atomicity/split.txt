@@ -5,10 +5,21 @@ Split each flagged compound principle into separate principles, one independentl
 
 Express the reusable quality that explains the preference. Exclude sample-specific names of people, places, organizations and works, and example-specific dates and identifiers from principles. Describe their semantic roles instead, while preserving actual component IDs. The principle should remain applicable when those entities change.
 
-Return replacements only for the flagged indices. Each replacement must contain at least two distinct principles. Each principle must start with "Select the trajectory" and state an actual criterion. Unflagged principles are preserved by the caller.
+Return replacements only for the flagged indices. Each replacement must contain at least two distinct principles. Each principle must follow the required component-subject format and state one actual condition. Unflagged principles are preserved by the caller.
 
 Reply only with a JSON object containing "replacements": an array of objects with "index" (the flagged integer) and "principles" (an array of actual replacement principle strings).
+REQUIRED PRINCIPLE FORMAT:
+Select the trajectory where <component_id> <condition>.
+
+Replace <component_id> with an exact allowed component ID immediately after "where". Replace <condition> with one observable, reusable condition. Use one primary component as the subject; interactions may name other allowed IDs inside the condition. Never invent, rename or abbreviate IDs, use a generic subject, emit literal placeholders, or use alternative prefixes such as "Select the trajectory that", "which", or "with". When ALLOWED COMPONENT IDS is null, preserve exact component IDs from the supplied principles and context. For cluster repairs, restrict each replacement to its indexed source cluster's allowed IDs.
+
 [USER]
+ALLOWED COMPONENT IDS:
+{component_ids:json}
+
+ALLOWED COMPONENT IDS BY SOURCE INDEX:
+{component_ids_by_index:json}
+
 WORKING LIST:
 {principles:json}
 

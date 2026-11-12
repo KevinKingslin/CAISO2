@@ -11,12 +11,14 @@ from caiso.constitution.dicai.debate import debate
 from caiso.constitution.dicai.personas import assign_personas
 from caiso.constitution.models import PreferencePair
 from tests.prompt_requests import PRINCIPLES, Recorder
+from tests.offline import recorded_candidate
 
 
 def pair(identifier="autogen-test"):
     return PreferencePair(
         pair_id=identifier, context={"question": identifier}, preferred="A",
-        candidate_a={"answer": "A"}, candidate_b={"answer": "B"},
+        candidate_a=recorded_candidate("A", ["answer_generator", "hint_generator"]),
+        candidate_b=recorded_candidate("B", ["answer_generator", "hint_generator"]),
     )
 
 

@@ -9,10 +9,12 @@ from collections import Counter
 from pydantic import Field, field_validator, model_validator
 
 from caiso.core.parallel import ordered_map
+from caiso.core.recovery import ModelResponseError
 from caiso.core.serialization import Record
 from caiso.prompts import render_messages
 
 from .preferences import candidate_views, score_feedback, task_view
+from .coverage import observed_components
 from .parsing import dedupe
 from .parsing import normalize_principle as valid_principle
 
@@ -37,7 +39,7 @@ class Question(Record):
 class Reasoning(Record):
     reasoning: str = Field(min_length=1)
     dimensions: list[str] = Field(default_factory=list)
-    questions: list[Question] = Field(default_factory=list)
+    questions: list[Question] = Field(min_length=1)
 
     @field_validator("reasoning")
     @classmethod
@@ -51,12 +53,6 @@ class Reasoning(Record):
     def normalize_dimensions(cls, values):
         return [value.strip().lower() for value in values if value.strip()]
 
-    @model_validator(mode="after")
-    def usable_criteria(self):
-        if not self.questions and not self.dimensions:
-            raise ValueError("Supply actual candidate questions or discriminating dimensions")
-        return self
-
 
 def assemble(pair, personas, providers, role, seed, config=None):
     config = config or {}
@@ -65,10 +61,14 @@ def assemble(pair, personas, providers, role, seed, config=None):
     if samples < 1 or steps < 0:
         raise ValueError("Self-consistency needs at least one sample; refinement steps cannot be negative")
     a, b = candidate_views(pair)
+    component_ids = sorted(observed_components(pair))
+    if not component_ids:
+        raise ValueError("DICAI reasoning requires recorded trajectory component IDs")
     evidence = {
         "preferred": pair.preferred, "context": task_view(pair.context),
         "response_a": a, "response_b": b,
         "score_feedback": score_feedback(pair, config.get("score_metric", "task_metric")),
+        "component_ids": component_ids,
     }
 
     def reason(item):
@@ -78,9 +78,17 @@ def assemble(pair, personas, providers, role, seed, config=None):
         base_seed = seed + index * 100
 
         def request(key, temperature_key, default, extra=None, structured=True):
+            def valid_reasoning(result):
+                if not result.questions:
+                    raise ModelResponseError("Return nonempty component-specific candidate questions")
+                for question in result.questions:
+                    question.select_prompt = valid_principle(question.select_prompt, component_ids)
+                return result
+
             result = providers.complete(
                 role, render_messages("dicai", "reasoning." + key, **evidence, **(extra or {})),
                 seed=base_seed + len(trace), schema=Reasoning if structured else None,
+                validate=valid_reasoning if structured else None,
                 include_schema_instruction=False,
                 response_context={"pair_id": pair.pair_id, "stage": "reasoning." + key, "strategy": stage},
                 temperature=temperatures.get(temperature_key, default),
@@ -109,7 +117,8 @@ def assemble(pair, personas, providers, role, seed, config=None):
             for _ in range(steps):
                 critique = request(
                     "self_refine_critique", "self_refine_critique", 0.3,
-                    {"reasoning": result.reasoning, "dimensions": result.dimensions}, structured=False,
+                    {"reasoning": result.reasoning, "dimensions": result.dimensions,
+                     "questions": [q.model_dump() for q in result.questions]}, structured=False,
                 )
                 result = request(
                     "self_refine_revision", "self_refine_revision", 0.4,
@@ -117,11 +126,7 @@ def assemble(pair, personas, providers, role, seed, config=None):
                 )
         else:
             raise ValueError(f"Unknown DICAI reasoning strategy: {stage}")
-        # Original seed_questions() uses the rationale's questions, or its named
-        # dimensions when the model supplied no questions. No extra model call.
-        principles = dedupe([q.select_prompt for q in result.questions] or [
-            f"Select the trajectory that demonstrates higher {d}." for d in result.dimensions
-        ])
+        principles = dedupe([valid_principle(q.select_prompt, component_ids) for q in result.questions])
         return {
             "persona": persona.model_dump(), "reasoning": result.reasoning,
             "dimensions": result.dimensions, "questions": [q.model_dump() for q in result.questions],

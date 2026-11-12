@@ -4,6 +4,14 @@ import json
 import numpy as np
 
 
+def recorded_candidate(answer, components):
+    """Small execution-record fixture with an explicit component inventory."""
+    return {"answer": answer, "executions": [
+        {"component_id": cid, "component_input": {"question": "Q"},
+         "component_output": {"answer": answer}} for cid in components
+    ]}
+
+
 def training_preferences(optimizer):
     """Real unequal-score arithmetic variants, supplied as labeled training data."""
     from caiso.constitution.models import PreferencePair
@@ -52,7 +60,7 @@ class OfflineProvider:
                     "reasoning": "The preferred trajectory applies the requested operation and preserves its input.",
                     "dimensions": ["operation correctness", "input preservation"],
                     "questions": [{"select_prompt": p, "reason": "Discriminates the requested operation."} for p in [
-                        "Select the trajectory that applies the requested arithmetic operation correctly.",
+                        "Select the trajectory where transform applies the requested arithmetic operation correctly.",
                         "Select the trajectory where transform preserves the relevant input through intermediate steps.",
                         "Select the trajectory where transform presents the result clearly.",
                     ]],
@@ -87,7 +95,9 @@ class OfflineProvider:
             def quality(value):
                 value = value.get("trajectory", value)
                 for execution in value.get("executions", []):
-                    if execution["component_id"] == "transform":
+                    if (execution["component_id"] == "transform"
+                            and "result" in execution["component_output"]
+                            and "number" in execution["component_input"]):
                         return int(execution["component_output"]["result"]) == 2 * int(
                             execution["component_input"]["number"]
                         )

@@ -6,7 +6,7 @@ from caiso.core.recovery import ModelResponseError, RetryExhausted, response_fai
 from caiso.core.serialization import Record
 from caiso.prompts import render_messages
 
-from .parsing import dedupe, normalize_principle
+from .parsing import dedupe, normalize_principle, referenced_components
 
 PROMPT_KEYS = (
     "constitution_atomicity.check",
@@ -67,14 +67,25 @@ class AtomicityError(ModelResponseError):
         self.report = report
 
 
-def ensure_atomic(principles, providers, role, seed, *, config=None, kind="debate", context=None):
+def ensure_atomic(
+    principles, providers, role, seed, *, config=None, kind="debate", context=None,
+    component_ids=None,
+):
     """Review every item; bounded repairs cannot edit unflagged principles.
 
     Debate repairs split independent qualities. Abstraction repairs retain one
     shared quality per cluster, preserving the cluster-to-principle mapping.
     Budget, service and policy exceptions always propagate.
     """
-    values = [normalize_principle(p) for p in principles]
+    allowed_by_index = {
+        row["index"]: sorted(referenced_components(row["principles"], component_ids))
+        for row in context
+    } if kind == "abstraction" and isinstance(context, list) and component_ids is not None else {}
+
+    def allowed(index):
+        return allowed_by_index.get(index, component_ids)
+
+    values = [normalize_principle(p, allowed(i)) for i, p in enumerate(principles, 1)]
     report = {"enabled": enabled(config), "passed": False, "calls_before_retries": 0, "trace": []}
     if not report["enabled"]:
         return values, report
@@ -91,7 +102,10 @@ def ensure_atomic(principles, providers, role, seed, *, config=None, kind="debat
         call_seed = seed + report["calls_before_retries"]
         report["calls_before_retries"] += 1
         result = providers.complete(
-            role, render_messages("method", key, **fields), seed=call_seed,
+            role, render_messages(
+                "method", key, component_ids=sorted(component_ids) if component_ids is not None else None,
+                component_ids_by_index=allowed_by_index, **fields,
+            ), seed=call_seed,
             schema=schema, validate=validate, include_schema_instruction=False,
             temperature=0.0,
             response_context={"stage": "atomicity." + kind, "revision": attempt},
@@ -131,6 +145,7 @@ def ensure_atomic(principles, providers, role, seed, *, config=None, kind="debat
                     if sorted(indices) != sorted(row.index for row in flagged):
                         raise ModelResponseError("Replace every flagged index exactly once; leave unflagged items untouched")
                     for row in result.replacements:
+                        row.principles = [normalize_principle(p, allowed(row.index)) for p in row.principles]
                         if kind == "debate" and len(row.principles) < 2:
                             raise ModelResponseError("Split each compound debate principle into at least two independent principles")
                         if kind == "abstraction" and len(row.principles) != 1:

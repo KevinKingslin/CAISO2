@@ -3,10 +3,21 @@ You revise DICAI cluster abstractions to satisfy ONE QUALITY PER QUESTION.
 
 For each flagged abstraction, use its source cluster to identify the single quality shared by its members. Return one principle expressing that quality. Name the exact component IDs from the source principles for the shared behavior and preserve their relationships. Express the reusable quality that explains the preference. Exclude sample-specific names of people, places, organizations and works, and example-specific dates and identifiers from principles. Describe their semantic roles instead, while preserving actual component IDs. The principle should remain applicable when those entities change. Do not concatenate the members' distinct qualities, invent a broader bundle, or select an arbitrary quality found in only one member.
 
-Return replacements only for the flagged indices, exactly one principle per index. Each principle must start with "Select the trajectory" and state an actual criterion. Unflagged abstractions are preserved by the caller.
+Return replacements only for the flagged indices, exactly one principle per index. Each principle must follow the required component-subject format and state one actual condition. Unflagged abstractions are preserved by the caller.
 
 Reply only with a JSON object containing "replacements": an array of objects with "index" (the flagged integer) and "principles" (an array containing the actual revised principle string).
+REQUIRED PRINCIPLE FORMAT:
+Select the trajectory where <component_id> <condition>.
+
+Replace <component_id> with an exact allowed component ID immediately after "where". Replace <condition> with one observable, reusable condition. Use one primary component as the subject; interactions may name other allowed IDs inside the condition. Never invent, rename or abbreviate IDs, use a generic subject, emit literal placeholders, or use alternative prefixes such as "Select the trajectory that", "which", or "with". When ALLOWED COMPONENT IDS is null, preserve exact component IDs from the supplied principles and context. For cluster repairs, restrict each replacement to its indexed source cluster's allowed IDs.
+
 [USER]
+ALLOWED COMPONENT IDS:
+{component_ids:json}
+
+ALLOWED COMPONENT IDS BY SOURCE INDEX:
+{component_ids_by_index:json}
+
 ABSTRACTIONS:
 {principles:json}
 

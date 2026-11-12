@@ -116,6 +116,12 @@ coverage restoration and the nonempty constitution requirement remain active;
 final reconstruction evaluates the list after coverage restoration.
 
 The score-feedback prompt adaptation has its own protocol/provenance version.
+The current component-format version is
+`democratic-icai-c8d5-source-trajectory-v7-component-format`. Every induction
+pair must include recorded execution component IDs; the current collector
+already supplies them. Reasoning, debate, abstraction and repairs require
+`Select the trajectory where <component_id> <condition>`. Primary subject IDs
+are validated against executed/source components, including fallback and final outputs.
 Start a fresh output directory to regenerate constitutions; existing checkpoints
 retain saved constitutions. Existing pair JSON can be supplied using
 `caiso.preferences_path` without recollecting trajectories. Original DICAI source

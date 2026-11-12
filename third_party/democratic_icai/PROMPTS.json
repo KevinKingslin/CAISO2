@@ -16,37 +16,37 @@
       "original": "third_party/democratic_icai/prompts/reasoning/cot.txt",
       "active": "caiso/prompts/dicai/reasoning/cot.txt",
       "original_sha256": "9f3fb7c82802d056cca57fed6801ed30fa4187272b546847951ba838e68bd173",
-      "active_sha256": "04b8d5b0643ad524c8253a89d7af8bce673ed6833d191b5cbe1de323029cae52"
+      "active_sha256": "be9b94ad413a3167bb5ec6d580ccea614cca1c657bc104029d636d1524e505b0"
     },
     "reasoning.self_consistency": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_consistency.txt",
       "active": "caiso/prompts/dicai/reasoning/self_consistency.txt",
       "original_sha256": "0e77b0a4285618686e4c5dbfb5dbda8a599551fadeae6ea886223088beefc205",
-      "active_sha256": "a6361f871c4b30411cdff538dc38838d165b2bb0d9a33b42432911aba7fa0197"
+      "active_sha256": "d138bef83a9af0a760516bbc6725f63016f91466b818b09d7fee36790c20abd0"
     },
     "reasoning.self_consistency_consensus": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_consistency_consensus.txt",
       "active": "caiso/prompts/dicai/reasoning/self_consistency_consensus.txt",
       "original_sha256": "718186adeab27c3709895c89018dc03e3a29a1862bd86060002061eaa2f2ed7b",
-      "active_sha256": "69397f3cdd92330144594b70c65e03b2ace9661a755b17e8e446cbc15b2a1088"
+      "active_sha256": "64300a28fce85790822abff9fd6f98a7d14016c20f9bd04e96e5089a1aadfa68"
     },
     "reasoning.self_refine": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_refine.txt",
       "active": "caiso/prompts/dicai/reasoning/self_refine.txt",
       "original_sha256": "ccc6174fef5e04eb07c74057ccef212da22e382e25db40a25f45f5f6107e6383",
-      "active_sha256": "63e6838dc011b4ba12809c20949f0ac6c989b79550b5402c0f826ac92ee5eec2"
+      "active_sha256": "26d56182715aeb4f2f7b33ab8576363c8b1b12feafeedcbe51d48861b87bada1"
     },
     "reasoning.self_refine_critique": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_refine_critique.txt",
       "active": "caiso/prompts/dicai/reasoning/self_refine_critique.txt",
       "original_sha256": "12aac165baf6ca926b3bf8cd6cbf87e63a6c7d99c6159e4fae5c1c17e00f1e7f",
-      "active_sha256": "c3d2986c77e3fac240a7cb50cee97949b814f86d96f25f0c2134f61836ed0369"
+      "active_sha256": "ea24a150bd7b77334e2b293650d14b69cf20cb0c450498accbefa53b51a41c4d"
     },
     "reasoning.self_refine_revision": {
       "original": "third_party/democratic_icai/prompts/reasoning/self_refine_revision.txt",
       "active": "caiso/prompts/dicai/reasoning/self_refine_revision.txt",
       "original_sha256": "800d98ee72219d30cd9e1b663f265194af8f2a5559dfa320eac92dc58de6e685",
-      "active_sha256": "94506320585cbf612fe0d3733b9246457e140862b6f6d39ca6de0e41a746462e"
+      "active_sha256": "f07e84339f94706f2af45ede5211b934b49bb760c3974b7277455ea6f0661f1c"
     },
     "reconstruction": {
       "original": "third_party/democratic_icai/prompts/reconstruction.txt",
@@ -58,7 +58,7 @@
       "original": "third_party/democratic_icai/prompts/abstraction.txt",
       "active": "caiso/prompts/dicai/abstraction.txt",
       "original_sha256": "a628aa82dfd3b912b43b1a2273ac84f17bb3a9f54cd774ca750f92582162df39",
-      "active_sha256": "bbad56ac9e679fe794dd7e6978c95eb69e24336b82a92f9d649eae7a3b6fdddc"
+      "active_sha256": "8affc600c2b7f7c9ef3269ac57728db1391702be5b3d7d2d839562019eb1dfc9"
     },
     "audit": {
       "original": "third_party/democratic_icai/prompts/audit.txt",
@@ -70,37 +70,37 @@
       "original": "third_party/democratic_icai/prompts/debate/debater.txt",
       "active": "caiso/prompts/dicai/debate/debater.txt",
       "original_sha256": "fd39ea8f218b3dbfe86b513a12d581357006331ff2f60b6d43af2f35a754a6fb",
-      "active_sha256": "8ce9dd64a67ae76100d32cedc64e9e0d18eb92a3cd9ca7952a0bfe761e11fa32"
+      "active_sha256": "fd24d9e441db59e866606d2931b15281dffeb47d8347ae92d821605c07f89771"
     },
     "debate.chairperson": {
       "original": "third_party/democratic_icai/prompts/debate/chairperson.txt",
       "active": "caiso/prompts/dicai/debate/chairperson.txt",
       "original_sha256": "a633bdd4ec67d4376d374a7dcc8009efa6e2659fde6adad71da5a4738c8d8b56",
-      "active_sha256": "69800087fbb4a02452ca28b5e9f12e53de344e6b62092d1f0167b15fbf181592"
+      "active_sha256": "b805aab799e4ebf574fe0d6fb725553f8c1af94318f786aff233c82a678eeec3"
     },
     "debate.debater_reconstruction_failed": {
       "original": "third_party/democratic_icai/prompts/debate/debater_reconstruction_failed.txt",
       "active": "caiso/prompts/dicai/debate/debater_reconstruction_failed.txt",
       "original_sha256": "01bebbe69bf5f1318e297f8aad9c2d512b99a6de13ee1fc06b5f1d5b904bce6d",
-      "active_sha256": "b39be3fa5f4522716085e164af12412ad07f5bebbb6dfc87b5aa54e63489518f"
+      "active_sha256": "c1ad5a94d481613f73cd504247e4ce17389bb29e0fe4428dca7dd3a661e5164c"
     },
     "debate.chairperson_reconstruction_failed": {
       "original": "third_party/democratic_icai/prompts/debate/chairperson_reconstruction_failed.txt",
       "active": "caiso/prompts/dicai/debate/chairperson_reconstruction_failed.txt",
       "original_sha256": "0ddb3ca4d4ceb6f2fbb2c698a46376f3603c19d84f326687eb80b7292f1f90e1",
-      "active_sha256": "7e1d68e03e42ea81e370cba6d32657407761ad8409640e75567e52453ebb24b6"
+      "active_sha256": "7e86be9f3765c982b25549a1a78a1b589707c908a0bb1b92589b5f373b9be48b"
     },
     "debate.debater_too_few": {
       "original": "third_party/democratic_icai/prompts/debate/debater_too_few.txt",
       "active": "caiso/prompts/dicai/debate/debater_too_few.txt",
       "original_sha256": "08518781693a1fe68047d420e0a2187ef075b789bac6ad57cc5f0c118d32055c",
-      "active_sha256": "773ee6b7c930e57cbf396bc1f9517662a50c007c10f1a7f8e1baa41506842d35"
+      "active_sha256": "3f4d1ad98e021b11aff6a554b78e81ac1e8c1fbd6efada99c533f3b0fc1c75cb"
     },
     "debate.chairperson_too_few": {
       "original": "third_party/democratic_icai/prompts/debate/chairperson_too_few.txt",
       "active": "caiso/prompts/dicai/debate/chairperson_too_few.txt",
       "original_sha256": "2cb51d3d1ab9c7b088157379afddf18bdeffa547bffa4342f976c5b181741107",
-      "active_sha256": "a35459087c71dec488b78b5b9c8e6206caf15312496d52b27c5c719846d51ab9"
+      "active_sha256": "8647e86446dd41bde97a9b3b8132779d037c12234e498ffdd3784d5bcf5c04d3"
     }
   },
   "adaptations": [
@@ -111,11 +111,12 @@
     "Debaters discuss component behavior, interactions or final output using actual component IDs and reconstruct preferences through reusable criteria without sample-specific entities.",
     "Chairpersons preserve actual component IDs and reusable semantic-role criteria when editing or merging; reconstruction remains mandatory without overriding those requirements.",
     "Abstraction preserves one shared quality, expresses sample-specific entities through semantic roles, and names evaluated components using actual IDs from the member principles.",
-    "Principle output examples omit literal component-ID placeholders and request actual IDs from executions or member principles.",
+    "Principle output examples show the component-ID and condition placeholders and require substituting actual IDs from executions or source principles and one actual condition.",
     "Dynamic inputs use CAISO JSON execution records and renamed placeholders; raw evidence is preserved.",
     "Reasoners and debaters inspect each component for preference-explaining differences; chairpersons retain supported component criteria; abstraction preserves exact IDs instead of generic aliases.",
-    "Reasoning and all debate variants receive separate training-only A/B task scores, their signed gap and score relation; reusable criteria must not depend on scores or reference answers. Blind reconstruction inputs and preference labels, including random exact ties, are unchanged. Reconstruction reports post-inference selection regret; optional minimization preserves regret for fully scored datasets and otherwise preserves label accuracy."
+    "Reasoning and all debate variants receive separate training-only A/B task scores, their signed gap and score relation; reusable criteria must not depend on scores or reference answers. Blind reconstruction inputs and preference labels, including random exact ties, are unchanged. Reconstruction reports post-inference selection regret; optional minimization preserves regret for fully scored datasets and otherwise preserves label accuracy.",
+    "All reasoning, debate and abstraction requests require Select the trajectory where <component_id> <condition>, supply allowed component IDs and prohibit generic subjects, alternate prefixes and literal placeholders. Reasoning requires actual candidate questions instead of generating dimension-only fallback rules. Runtime validation checks exact subject IDs against executed/source components through drafting, repairs, abstraction, medoids, coverage restoration and final output."
   ],
-  "principle_prefix": "Select the trajectory",
+  "principle_prefix": "Select the trajectory where",
   "audit": "Template imported; no new auditor model or automatic audit stage is enabled."
 }

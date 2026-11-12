@@ -44,10 +44,11 @@ def test_every_complete_original_request_is_extracted_from_the_source_ast():
         assert active == trajectory_adaptation(key, original), key
         assert hashlib.sha256(active.encode()).hexdigest() == MANIFEST['requests'][key]['active_sha256']
         assert 'Select the response' not in active
-        if key.startswith('debate.') or key == 'abstraction':
-            assert 'Select the trajectory where <component_id> <criterion>.' in active
+        if key.startswith(('reasoning.', 'debate.')) or key == 'abstraction':
+            assert 'Select the trajectory where <component_id> <condition>.' in active
             assert 'Replace <component_id> with the exact component_id from ' in active
-            assert 'Do not return the literal placeholders <component_id> or <criterion>.' in active
+            assert 'Do not return the literal placeholders <component_id> or <condition>.' in active
+            assert 'ALLOWED COMPONENT IDS:\n{component_ids:json}' in active
             assert 'Select the trajectory where ...' not in active
             assert 'Select the trajectory...' not in active
         else:
@@ -167,7 +168,7 @@ def test_minimum_question_gate_uses_the_source_feedback_template():
 
 def test_singleton_clusters_use_the_model_abstraction_output():
     recorder = Recorder()
-    assert abstract_clusters([PRINCIPLES[2]], [0], recorder, 'audit', 42) == [PRINCIPLES[0]]
+    assert abstract_clusters([PRINCIPLES[2]], [0], recorder, 'audit', 42) == [PRINCIPLES[2]]
     assert len(recorder.calls) == 1
     assert recorder.calls[0]['seed'] == 42
     assert PRINCIPLES[2] in recorder.calls[0]['messages'][-1]['content']

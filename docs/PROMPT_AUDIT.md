@@ -99,10 +99,10 @@ guaranteed by the runtime checks. Every cluster, including singletons, receives
 a model abstraction request. Failed abstraction repairs can still use an atomic
 medoid, so producing reusable rules during debate remains essential.
 
-Each principle starts with `Select the trajectory`. Its following grammar is
-preserved: `that`, `where`, `which`, `with` and `in which` are all valid. Empty
-criteria, bare choices, trailing ellipses and the existing condition/criterion
-placeholder forms fail format validation. The constitution remains a list of
+At that earlier stage, the parser accepted `that`, `where`, `which`, `with` and
+`in which` after `Select the trajectory`. The current component-format extension
+below replaces that behavior with a mandatory `where`, an exact allowed component
+subject and a nonempty condition. The constitution remains a list of
 strings; no component-scope JSON schema or task-specific answer style is
 introduced.
 
@@ -168,7 +168,7 @@ source-based trajectory adaptation, not a claim to reproduce every setting or
 published score of DICAI. Report the adapted prompts and resolved experiment
 settings in research.
 
-The current protocol identifier is `democratic-icai-c8d5-source-trajectory-v6-score-feedback`.
+The current protocol identifier is `democratic-icai-c8d5-source-trajectory-v7-component-format`.
 Source, prompt and schema fingerprints invalidate earlier induction caches.
 Start a new optimization run: old checkpoints retain constitutions generated
 under their previous protocol. Successful requests within a matching induction
@@ -256,6 +256,25 @@ This semantic guard is a documented CAISO extension to the source DICAI runtime,
 not an original DICAI stage. Report the setting for research comparisons.
 
 ## Preserved history and runtime safeguards
+
+The component-format extension requires `Select the trajectory where
+<component_id> <condition>` across all reasoning, debate, abstraction and repair
+requests. The component ID is an actual allowed subject immediately after
+`where`; interactions may refer to other components within their condition.
+Requests receive explicit ID inventories. Self-refinement critique receives draft
+questions as well as the rationale/dimensions. Reasoning requires actual questions
+and no longer manufactures generic principles from dimensions alone.
+
+Validation checks syntax and exact subject membership during reasoning,
+chairperson updates and repairs. Abstraction and its repairs restrict subjects
+to the indexed source cluster. Seed lists, cached settled rules, singleton
+outputs, medoid fallbacks, coverage restoration and the final constitution are
+also checked. Markdown/whitespace and prefix case are normalized; alternative
+connectors, unknown subjects, empty conditions and placeholders are rejected.
+Existing bounded retries, valid-list/medoid retention, score feedback and
+random-tie label/reconstruction behavior remain active. Every induction pair
+must have execution IDs; standalone parsing without an inventory validates
+syntax only. This is a CAISO extension, not parity with the original runtime.
 
 The current score-feedback adaptation updates the six reasoning requests and
 all six debate variants. Each receives a separate training-only object with

@@ -21,8 +21,8 @@ instruction suffixes are assembled at runtime.
   full instructions intentionally so each file contains the entire request.
 - `dicai/reconstruction.txt`: blind, shuffled trajectory judging, with original
   JSON `choice` (`"1"` / `"2"`) and `reason` output.
-- `dicai/abstraction.txt`: original cluster abstraction; singleton clusters skip
-  the model call and retain their principle.
+- `dicai/abstraction.txt`: cluster abstraction, including singleton clusters;
+  every output must retain a valid subject from its source cluster.
 - `dicai/audit.txt`: original external-auditor request, preserved as a template.
   Importing it does not enable a new audit stage or configure an auditor model.
 - `method/<stage>/prompt.txt`: complete CAISO block-selection, prompt-search and
@@ -39,27 +39,39 @@ instruction suffixes are assembled at runtime.
 The debate and abstraction prompts display the exact output template:
 
 ```text
-Select the trajectory where <component_id> <criterion>.
+Select the trajectory where <component_id> <condition>.
 ```
 
 They explicitly instruct the model to replace `<component_id>` with an actual
 ID from the trajectory executions (debate) or source principles (abstraction),
-and `<criterion>` with one observable, reusable behavior. The returned principle
+and `<condition>` with one observable, reusable condition. The returned principle
 must contain the actual ID immediately after `where`, with neither placeholder
 left in the output. Debate asks for at least one separate principle for each component shown in the
 trajectories (each identified block member for a block comparison), and preserve
 a component's last supported principle when editing or merging. Abstraction
 prompts preserve exact evaluated component IDs and their roles. They still
 return one principle per cluster, including when a cluster spans components.
-These are prompt instructions: parsing, reasoning, clustering, abstraction
-outputs, coverage reporting and stopping behavior are unchanged. Prompt compliance
-and one separate final principle per component are not runtime guarantees.
+All principle-producing requests now require this format, including reasoning
+JSON questions and semantic repair requests. Self-refinement critique receives
+the actual draft questions and flags format violations. Each request lists its
+allowed component IDs. Runtime validation canonicalizes Markdown, whitespace
+and prefix capitalization, then requires exactly **`Select the trajectory where`**,
+one exact allowed component ID as subject, and a nonempty condition. Alternative
+connectors (`that`, `which`, `with`, etc.), unknown subjects, generic subjects,
+empty conditions, literal placeholders and trailing ellipses are rejected.
+Interactions have one primary subject; other component IDs appear in the
+condition. This does not guarantee semantic correctness or one rule per component.
 
-All generated principles begin with **`Select the trajectory`**. Parsing preserves
-valid conditions such as `that`, `where`, `which`, `with` and `in which`; no exact
-following connector is required. Empty criteria, bare A/B choices, trailing
-ellipses, the existing condition/criterion placeholder forms and old response-style
-prefixes remain invalid. Actual criteria and component identifiers are preserved.
+Reasoning requires nonempty `questions`; dimensions alone no longer generate
+generic fallback principles. The existing response retries carry validation
+feedback. Production induction requires component execution records on every
+pair and validates subjects against their IDs before accepting reasoning and
+chairperson output. Abstraction and abstraction repair restrict subjects to
+IDs referenced by that source cluster. Repairs remain bounded; valid previous
+lists and medoids are retained under the existing error policy. Validation also
+covers seed lists, cached settled rules, singleton outputs, medoid fallbacks,
+coverage-restored rules and the final constitution. Standalone parser/repair APIs
+without an ID inventory enforce syntax only; induction always supplies an inventory.
 
 The source instructions retain one-quality-per-question rules and reconstruction
 feedback. Response/story terminology, human-label wording and CAISO input
@@ -79,9 +91,8 @@ with explicit instructions to substitute an actual ID before returning the rule.
 Split repair preserves the quality and logical conditions rather than requiring
 instance-specific wording. These remain prompt instructions rather than an
 entity-removal gate. Entity
-removal and model compliance are not guaranteed: singleton clusters still copy
-their settled principles and fallback medoids remain subject only to existing
-checks. The source-adaptation audit documents the wording
+removal and semantic model compliance are not guaranteed. Singleton outputs and
+fallback medoids pass the same subject-format checks. The source-adaptation audit documents the wording
 changes within the 15 source-derived DICAI requests separately from the existing
 atomicity repair prompts.
 No dataset-specific answer styles or new structured constitution schema is added.
