@@ -32,6 +32,23 @@ the fixed validation set remains the separate acceptance gate. A positive
 `constitution_weight` opts into mixed ranking with local constitution feedback;
 `enabled: false` restores constitution-only scoring.
 
+Constitution-enabled candidate scoring makes at least five judge calls for each
+candidate/baseline comparison on each training sample:
+
+```yaml
+block_optimization:
+  constitution_judge_votes: 5
+```
+
+Values below five are rejected. Distinct vote seeds reuse the same recorded
+candidate/baseline outputs; the existing judge randomizes presentation order.
+The score averages candidate wins per sample, then averages across samples.
+Identical outputs remain neutral at 0.5 after judging. Policy-filtered comparisons
+are skipped without replacement and partial votes do not enter the score.
+Choices and seeds are retained in candidate evaluation metadata. With the usual
+20 training samples, one candidate comparison makes 100 judge calls when all
+votes complete. Task-only mode still makes no candidate constitution-judge calls.
+
 Reward-model/PPO settings in those files are unused by CAISO. Its existing DPO
 settings remain in the shared method file.
 

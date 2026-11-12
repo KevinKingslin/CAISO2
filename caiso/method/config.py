@@ -26,6 +26,14 @@ def task_scoring_settings(config):
     return enabled, *weights
 
 
+def constitution_judge_votes(config):
+    """Require at least five judgments for each local candidate/sample comparison."""
+    votes = config.get("constitution_judge_votes", 5)
+    if isinstance(votes, bool) or not isinstance(votes, int) or votes < 5:
+        raise ValueError("block_optimization.constitution_judge_votes must be an integer of at least 5")
+    return votes
+
+
 def weight_preference_settings(config):
     """A separate, bounded configuration-pair collection for each weight component."""
     dpo = config.get("dpo", {})
@@ -100,6 +108,7 @@ def validate_method(config):
     if not isinstance(config.get("block_optimization", {}), dict):
         raise ValueError("block_optimization must be a configuration mapping")
     task_scoring_settings(config.get("block_optimization", {}))
+    constitution_judge_votes(config.get("block_optimization", {}))
     weight_preference_settings(config.get("block_optimization", {}))
     if not isinstance(config.get("block_optimization", {}).get("screening", {}), dict):
         raise ValueError("block_optimization.screening must be a configuration mapping")

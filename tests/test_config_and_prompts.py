@@ -40,6 +40,7 @@ def test_shared_method_copy_does_not_change_any_values():
     assert load_method({})["block_constitution"]["enabled"] is False
     assert load_method({})["block_optimization"]["reevaluate_current"] is True
     assert load_method({})["block_optimization"]["include_current_configuration"] is True
+    assert load_method({})["block_optimization"]["constitution_judge_votes"] == 5
     assert load_method({})["block_selection"]["use_history"] is True
     assert load_method({})["leiden"]["max_comm_size"] == 2
     assert "use_history" not in load_method({})

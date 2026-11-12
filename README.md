@@ -328,6 +328,14 @@ acceptance continues to use the separate, fixed validation set.
 Set a positive `constitution_weight` to opt into weighted task/constitution
 ranking; in that mode prompt feedback uses the local constitution score.
 Set `task_scoring.enabled: false` to use constitution-only scoring.
+When constitution scoring is enabled, every candidate/baseline comparison uses
+`block_optimization.constitution_judge_votes: 5` judge calls per training sample.
+The setting accepts integers of at least five. Votes reuse the same executions,
+so five votes do not require five system runs. Candidate wins are averaged within
+each sample and then across samples; identical outputs retain a neutral 0.5
+score after the votes. A content-filter rejection skips that comparison without
+resampling or scoring its partial votes. Per-sample choices and seeds are saved
+in candidate evaluation records. Task-only scoring skips constitution judging.
 Task scoring runs the full system for candidate feedback and can consume more
 evaluation budget than local block scoring. Scores for identical candidate states
 are reused within a proposal call.

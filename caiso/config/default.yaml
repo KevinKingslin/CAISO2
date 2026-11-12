@@ -71,6 +71,7 @@ block_optimization:
   include_current_configuration: true  # false: only changed values for optimizable block members are eligible.
   reevaluate_current: true  # false: reuse the saved current validation score; candidates are always evaluated.
   max_joint_candidates: 16
+  constitution_judge_votes: 5  # Minimum five votes per candidate/sample when constitution scoring is enabled.
   validation_repeats: 2  # Fresh executions; repeat IDs do not imply deterministic task generations.
   reuse_component_executions: true  # Share training observations within a proposal only.
   screening:

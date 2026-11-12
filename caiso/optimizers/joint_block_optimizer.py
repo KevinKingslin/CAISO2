@@ -8,7 +8,7 @@ from caiso.core.content_filter import ContentFilteredError, record_skip
 from caiso.core.recovery import ModelResponseError
 from caiso.core.serialization import digest, plain
 from caiso.evaluation.evaluator import evaluate
-from caiso.method.config import task_scoring_settings
+from caiso.method.config import constitution_judge_votes, task_scoring_settings
 
 from .base import CandidateScore, OptimizationContext, filter_current_configuration
 from .hyperparameter_optimizer import HyperparameterOptimizer
@@ -52,6 +52,7 @@ class JointBlockOptimizer:
         self.on_candidate = on_candidate
         self.task_scoring, self.constitution_weight, self.task_weight = task_scoring_settings(config)
         self.constitution_scoring = not self.task_scoring or self.constitution_weight > 0
+        self.judge_votes = constitution_judge_votes(config)
         self.prompt_archive = {}
         self.last_search_report = {}
 
@@ -134,28 +135,49 @@ class JointBlockOptimizer:
         if baseline_outputs is None:
             baseline_outputs = [run_block(state, ref) for ref in references]
         outputs = [run_block(candidate, ref) for ref in references]
-        votes = []
+        votes, sample_records = [], []
         for i, (output, baseline) in enumerate(zip(outputs, baseline_outputs, strict=True)):
+            record = {"input_id": references[i].input_id, "choices": [], "seeds": [], "score": None}
+            sample_records.append(record)
             if output is None or baseline is None:
+                record["status"] = "skipped_execution"
                 continue
             try:
-                votes.append(
-                    0.5
-                    if output == baseline
-                    else float(self.judge.choose(constitution, output, baseline, seed + i) == "A")
-                )
+                # Repeat only the judgment, using the same recorded executions.
+                # Each sample contributes one mean, irrespective of vote count.
+                for vote in range(self.judge_votes):
+                    vote_seed = seed + i * self.judge_votes + vote
+                    record["seeds"].append(vote_seed)
+                    choice = self.judge.choose(constitution, output, baseline, vote_seed)
+                    if choice not in {"A", "B"}:
+                        raise ModelResponseError("Constitution judge must choose A or B")
+                    record["choices"].append(choice)
+                record["identical_outputs"] = output == baseline
+                record["score"] = (0.5 if output == baseline else
+                                   record["choices"].count("A") / self.judge_votes)
+                record["status"] = "completed"
+                votes.append(record["score"])
             except ContentFilteredError as error:
+                # Do not resample policy rejections or score an incomplete panel.
+                record["status"] = "skipped_content_filter"
                 record_skip(
                     self.runtime.providers,
                     error,
                     "candidate_constitution_judge",
                     example_id=references[i].input_id,
+                    seed=vote_seed,
                 )
         constitution_score = sum(votes) / len(votes) if votes else 0.0
         scored = CandidateScore(
             configurations=updates,
             constitution_score=constitution_score,
             score=constitution_score,
+            evaluation={"constitution_judging": {
+                "votes_per_sample": self.judge_votes,
+                "requested_samples": len(references), "scored_samples": len(votes),
+                "completed_judge_votes": sum(len(record["choices"]) for record in sample_records),
+                "samples": sample_records,
+            }},
         )
         return self.add_task_score(scored, state, examples, seed) if include_task_score else scored
 
